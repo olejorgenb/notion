@@ -128,13 +128,15 @@ local callbacks = {}
 
 -- Just print out stderr for now.
 local function flush_stderr(partial_data)
-    local result = ""
-    while partial_data do
-        result = result .. partial_data
-        -- Yield until we get more input.  popen_bgread will call resume on us.
-        partial_data = coroutine.yield()
-    end
-    print(result, "\n")
+   local result = ""
+   while partial_data do
+      result = result .. partial_data
+      -- Yield until we get more input.  popen_bgread will call resume on us.
+      partial_data = coroutine.yield()
+   end
+   if result ~= "" then
+      io.stderr:write(result)
+   end
 end
 
 -- Execute a program.  This will continuously retrieve output from the program.
@@ -209,7 +211,7 @@ end
 -- Start all
 for key in pairs(statusbar_external) do
     timers[key] = ioncore.create_timer()
-	callbacks[key] = loadstring("start_execute("..key..")")
+    callbacks[key] = loadstring("start_execute("..key..")")
     start_execute(key)
 end
 
