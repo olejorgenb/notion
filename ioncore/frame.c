@@ -381,6 +381,87 @@ static bool frame_initialise_titles(WFrame *frame)
 }
 
 
+static bool frame_handle_drop(WFrame *frame, int x, int y, WRegion *dropped)
+{
+    /* x, y is absolute (rootwin) coordinates of mouse */
+
+    int x_rel=-1, y_rel=-1;
+    int tab_n=-1;
+    int tab_n_center=-1;
+    int frame_x, frame_y;
+    WRectangle bar_geom;
+    WMPlexAttachParams param=MPLEXATTACHPARAMS_INIT;
+    WRegionAttachData data;
+    bool already_managing_dropped=FALSE;
+
+    already_managing_dropped=(region_manager(dropped)==frame);
+
+    /* IMPROVEMENT: - visual cue */
+
+    region_rootpos((WRegion*)frame, &frame_x, &frame_y);
+
+
+    /* frame_bar_geom returns coordinates relative to the frame */
+    frame_bar_geom(frame, &bar_geom);
+
+    x_rel=x-frame_x;
+    y_rel=y-frame_y;
+
+    /* Borders act like tabs at top of the parent region */
+    if(REGION_GEOM(frame).y==0){
+        bar_geom.h+=bar_geom.y;
+        bar_geom.y=0;
+    }
+
+    /* dropped on the frame bar? */
+    if(frame->barmode!=FRAME_BAR_NONE &&
+       rectangle_contains(&bar_geom, x_rel, y_rel)){
+        tab_n=frame_tab_at_x(frame, x_rel);
+        if(tab_n==-1){
+            return FALSE;
+        }
+
+        if(already_managing_dropped &&
+           mplex_mx_nth((WMPlex*)frame, tab_n)==dropped){
+            /* Ignore the drag if it's very short.
+             * ie. inside the dragged tab */
+            return FALSE;
+        }
+
+        tab_n_center=frame_nth_tab_x(frame, tab_n)+
+                     frame_nth_tab_w(frame, tab_n)/2;
+
+        if(x_rel<=tab_n_center){
+            param.index=tab_n;
+        }else{
+            param.index=tab_n+1;
+        }
+
+        if(already_managing_dropped){
+            if(param.index>mplex_get_index((WMPlex*)frame, dropped)){
+                param.index-=1;
+            }
+            mplex_set_index((WMPlex*)frame, dropped, param.index);
+            return TRUE;
+        }else{
+            param.flags=MPLEX_ATTACH_SWITCHTO | MPLEX_ATTACH_INDEX;
+            data.type=REGION_ATTACH_REPARENT;
+            data.u.reg=dropped;
+
+            return (NULL!=mplex_do_attach((WMPlex*)frame, &param, &data));
+        }
+
+    }else if(!already_managing_dropped){
+        /* TODO: call mplex_handle_drop? (need dynfuncallsuper)*/
+         return (NULL!=mplex_attach_simple((WMPlex*)frame, dropped,
+                                           MPLEX_ATTACH_SWITCHTO));
+    }else{
+        return FALSE;
+    }
+}
+
+
+
 /*}}}*/
 
 
@@ -949,7 +1030,6 @@ WRegion *frame_load(WWindow *par, const WFitParams *fp, ExtlTab tab)
 
 /*}}}*/
 
-
 /*{{{ Dynfuntab and class info */
 
 
@@ -994,6 +1074,9 @@ static DynFunTab frame_dynfuntab[]={
      
     {(DynFun*)region_rescue_clientwins,
      (DynFun*)frame_rescue_clientwins},
+
+    {(DynFun*)region_handle_drop,
+     (DynFun*)frame_handle_drop},
     
     END_DYNFUNTAB
 };
