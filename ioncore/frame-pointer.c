@@ -31,6 +31,8 @@
 #include "llist.h"
 
 
+/* p_tab_x/y is the absolute coordinates of the upper left tab being
+   dragged/clicked */
 static int p_tab_x=0, p_tab_y=0, p_tabnum=-1;
 static WInfoWin *tabdrag_infowin=NULL;
 
@@ -311,13 +313,13 @@ static void p_tabdrag_end(WFrame *frame, XButtonEvent *ev)
     
     dropped_on=fnd(ev->root, ev->x_root, ev->y_root);
 
-    if(dropped_on==NULL || dropped_on==(WRegion*)frame || 
+    if(dropped_on==NULL || /*dropped_on==(WRegion*)frame || */
        dropped_on==sub || !drop_ok(dropped_on, sub)){
         frame_draw_bar(frame, TRUE);
         return;
     }
     
-    if(region_handle_drop(dropped_on, p_tab_x, p_tab_y, sub))
+    if(region_handle_drop(dropped_on, ev->x_root, ev->y_root, sub))
         region_goto(dropped_on);
     else
         frame_draw_bar(frame, TRUE);
