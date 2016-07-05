@@ -22,5 +22,6 @@ extern bool ioncore_current_key(uint *kcb, uint *state, bool *sub);
 extern void region_free_submapstat(WRegion *reg);
 
 extern WHook *ioncore_submap_ungrab_hook;
+extern WHook *ioncore_submap_hook;
 
 #endif /* ION_IONCORE_KEY_H */

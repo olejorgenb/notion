@@ -15,6 +15,10 @@
 #include <libextl/extl.h>
 
 extern bool bindmap_defbindings(WBindmap *bindmap, ExtlTab tab, bool submap);
+
+
+extern char *get_mods(uint state);
+extern char *get_key(char *mods, uint ksb);
 extern ExtlTab bindmap_getbindings(WBindmap *bindmap);
 
 extern bool ioncore_parse_keybut(const char *str, 

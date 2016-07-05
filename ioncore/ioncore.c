@@ -295,6 +295,7 @@ static bool init_hooks()
     INIT_HOOK_(clientwin_unmapped_hook);
     INIT_HOOK_(clientwin_property_change_hook);
     INIT_HOOK_(ioncore_submap_ungrab_hook);
+    INIT_HOOK_(ioncore_submap_hook);
     
     INIT_HOOK_(region_notify_hook);
     ADD_HOOK_(region_notify_hook, ioncore_screen_activity_notify);

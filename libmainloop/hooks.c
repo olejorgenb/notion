@@ -288,13 +288,22 @@ static bool marshall_o(WHookDummy *fn, void *param)
     fn((Obj*)param);
     return TRUE;
 }
-    
 
 static bool marshall_extl_o(ExtlFn fn, void *param)
 {
     return extl_call(fn, "o", NULL, (Obj*)param);
 }
 
+static bool marshall_t(WHookDummy *fn, void *param)
+{
+    fn(*((ExtlTab*)param));
+    return TRUE;
+}
+   
+static bool marshall_extl_t(ExtlFn fn, void *param)
+{
+    return extl_call(fn, "t", NULL, *((ExtlTab*)param));
+}
 
 static bool marshall_p(WHookDummy *fn, void *param)
 {
@@ -387,6 +396,12 @@ void hook_call_v(const WHook *hk)
 void hook_call_o(const WHook *hk, Obj *o)
 {
     hook_call(hk, o, marshall_o, marshall_extl_o);
+}
+
+
+void hook_call_t(const WHook *hk, ExtlTab t)
+{
+    hook_call(hk, &t, marshall_t, marshall_extl_t);
 }
 
 

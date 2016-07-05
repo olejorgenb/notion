@@ -21,7 +21,8 @@ typedef enum{
     FONT,
     RANDR,
     FOCUS,
-    VALGRIND /* Useful while debugging valgrind warnings */
+    VALGRIND, /* Useful while debugging valgrind warnings */
+    KEYS
 } LogCategory;
 
 

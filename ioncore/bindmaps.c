@@ -9,6 +9,7 @@
 #include <X11/XKBlib.h>
 #include <libtu/rb.h>
 #include <libextl/extl.h>
+#include "log.h"
 #include "common.h"
 #include "conf-bindings.h"
 #include "binding.h"
@@ -179,6 +180,35 @@ bool ioncore_do_defbindings(const char *name, ExtlTab tab)
     return bindmap_defbindings(bm, tab, FALSE);
 }
 
+
+EXTL_SAFE
+EXTL_EXPORT
+ExtlTab ioncore_do_getbindings_reg(WRegion *reg)
+{
+    ExtlTab tab;
+    Rb_node node;
+
+    WRegBindingInfo *rbind;
+
+    tab=extl_create_table();
+    
+    for(rbind=(WRegBindingInfo*)reg->bindings; rbind!=NULL; rbind=rbind->next){
+        LOG(INFO, GENERAL, "HOHO");
+        if(rbind->owner!=NULL)
+            continue;
+        ExtlTab bmtab=bindmap_getbindings((WBindmap*)rbind->bindmap);
+        const char *bindmap_name="";
+        rb_traverse(node, known_bindmaps){
+            if(node->v.val==rbind->bindmap){
+                bindmap_name=(const char*)node->k.key;
+                break;
+            }
+        }
+        extl_table_sets_t(tab, bindmap_name, bmtab);
+        extl_unref_table(bmtab);
+    }
+    return tab;
+}
 
 EXTL_SAFE
 EXTL_EXPORT

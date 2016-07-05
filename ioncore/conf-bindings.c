@@ -266,6 +266,7 @@ static bool do_entry(WBindmap *bindmap, ExtlTab tab,
         goto fail;
     }
 
+    // Why is not kpress_wait part of action_map?
     if(strcmp(action_str, "kpress_wait")==0){
         action=BINDING_KEYPRESS;
         wr=TRUE;
@@ -349,7 +350,7 @@ bool bindmap_defbindings(WBindmap *bindmap, ExtlTab tab, bool submap)
 /*{{{ bindmap_getbindings */
 
 
-static char *get_mods(uint state)
+char *get_mods(uint state)
 {
     char *ret=NULL;
     int i;
@@ -373,7 +374,7 @@ static char *get_mods(uint state)
 }
 
 
-static char *get_key(char *mods, uint ksb)
+char *get_key(char *mods, uint ksb)
 {
     const char *s=XKeysymToString(ksb);
     
@@ -381,7 +382,9 @@ static char *get_key(char *mods, uint ksb)
         warn(TR("Unable to convert keysym to string."));
         return NULL;
     }
-    
+
+
+
     return scat(mods, s);
 }
 

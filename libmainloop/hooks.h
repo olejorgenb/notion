@@ -52,6 +52,7 @@ extern void hook_call(const WHook *hk, void *p,
                       WHookMarshall *m, WHookMarshallExtl *em);
 extern void hook_call_v(const WHook *hk);
 extern void hook_call_o(const WHook *hk, Obj *o);
+extern void hook_call_t(const WHook *hk, ExtlTab t);
 extern void hook_call_p(const WHook *hk, void *p, WHookMarshallExtl *em);
 
 extern bool hook_call_alt(const WHook *hk, void *p,

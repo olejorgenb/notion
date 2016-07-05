@@ -16,7 +16,7 @@
 
 
 DECLSTRUCT(WSubmapState){
-    uint key, state;
+    uint key, state; /* XKeyEvent properties */
     WSubmapState *next;
     /* ExtlFn leave; */
     /* Watch leave_reg; */

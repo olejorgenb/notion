@@ -7,6 +7,7 @@
  */
 
 #include <string.h>
+#include "log.h"
 #include "common.h"
 #include "event.h"
 #include "binding.h"
@@ -525,6 +526,18 @@ WBinding *bindmap_lookup_binding_area(WBindmap *bindmap,
     return binding;
 }
 
+/*
+ * The keybinding system ignores certain modifiers. Call this to ensure the
+ * state is consistent with the binding specs.
+ */
+int ioncore_normalize_modstate(int state)
+{
+#ifdef CF_HACK_IGNORE_EVIL_LOCKS
+    state&=~evilignoremask;
+#endif
+    state&=KNOWN_MODIFIERS_MASK;
+    return state;
+}
     
 /*
  * A dirty hack to deal with (==ignore) evil locking modifier keys.

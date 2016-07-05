@@ -6,12 +6,15 @@
  * See the included file LICENSE for details.
  */
 
+#include <X11/XKBlib.h>
 #include <ctype.h>
 
 #include <libtu/objp.h>
 #include <libextl/extl.h>
 #include <libmainloop/defer.h>
 
+#include "conf-bindings.h"
+#include "log.h"
 #include "common.h"
 #include "key.h"
 #include "binding.h"
@@ -139,11 +142,17 @@ void region_free_submapstat(WRegion *reg)
 
 
 WHook *ioncore_submap_ungrab_hook=NULL;
+WHook *ioncore_submap_hook=NULL;
 
 
 static void call_submap_ungrab_hook()
 {
     hook_call_v(ioncore_submap_ungrab_hook); 
+}
+
+static void call_submap_hook(ExtlTab t)
+{
+    hook_call_t(ioncore_submap_hook, t); 
 }
 
 
@@ -266,17 +275,51 @@ static WBinding *lookup_binding(WRegion *oreg,
 }
 
 
-static void do_call_binding(WBinding *binding, WRegion *reg, WRegion *subreg)
+static void do_call_binding(WBinding *binding, WRegion *reg, WRegion *subreg, ExtlTab key_chain)
 {
     WRegion *mgd=region_managed_within(reg, subreg);
 
     /* TODO: having to pass both mgd and subreg for some handlers
      * to work is ugly and complex.
      */
-    extl_call(binding->func, "ooo", NULL, reg, mgd, subreg);
+    extl_call(binding->func, "ooot", NULL, reg, mgd, subreg, key_chain);
+}
+
+#define KNOWN_MODIFIERS_MASK (ShiftMask|LockMask|ControlMask|Mod1Mask|  \
+                              Mod2Mask|Mod3Mask|Mod4Mask|Mod5Mask)
+
+ExtlTab key_chain_extl(WSubmapState *s)
+{
+    ExtlTab key_chain;
+    key_chain=extl_create_table();
+    int i=1;
+    for(; s!=NULL; s=s->next){
+        char *mods=get_mods(ioncore_normalize_modstate(s->state));
+
+        if(mods==NULL)
+            break;
+
+        /* LOG(INFO, GENERAL, "mod=%d, %d", s->state, s->state & KNOWN_MODIFIERS_MASK & ~LockMask); */
+        /* LOG(INFO, GENERAL, "mods=%s", mods); */
+        KeySym ksb = XkbKeycodeToKeysym(ioncore_g.dpy, s->key, 0, 0);
+        KeySym dummy;
+        XConvertCase(ksb, &dummy, &ksb);
+        char *key=get_key(mods, ksb);
+
+        free(mods);
+
+        if(key==NULL)
+            break;
+
+        extl_table_seti_s(key_chain, i, key);
+        free(key);
+        i++;
+    }
+    return key_chain;
 }
 
 
+// Return grab action
 static int do_key(WRegion *oreg, XKeyEvent *ev)
 {
     WBinding *binding=NULL;
@@ -285,9 +328,12 @@ static int do_key(WRegion *oreg, XKeyEvent *ev)
     int ret=GRAB_NONE;
     
     if(grabbed){
+        LOG(INFO, KEYS, "grabbed key %d, %p", ev->keycode, (void*)(oreg->submapstat));
         binding=lookup_binding(oreg, BINDING_KEYPRESS, ev->state, ev->keycode,
                                &binding_owner, &subreg);
     }else{
+        // This code path is mostly WMessage and WEdln instances
+        LOG(INFO, KEYS, "nongrabbed key %d, %p", ev->keycode, (void*)(oreg->submapstat));
         binding=region_lookup_keybinding(oreg, BINDING_KEYPRESS, 
                                          ev->state, ev->keycode, 
                                          oreg->submapstat, 
@@ -300,6 +346,7 @@ static int do_key(WRegion *oreg, XKeyEvent *ev)
         
         if(binding->submap!=NULL){
             WSubmapState *s=add_sub(oreg, ev->keycode, ev->state);
+            ExtlTab key_chain;
             if(s!=NULL){
                 /*WRegion *own2, *subreg2;
                 
@@ -316,7 +363,12 @@ static int do_key(WRegion *oreg, XKeyEvent *ev)
                                      &binding_owner, &subreg);
                 
                 ret=(grabbed ? GRAB_SUBMAP : GRAB_NONE_SUBMAP);
+
+                key_chain=key_chain_extl(oreg->submapstat);
+                call_submap_hook(key_chain);
+                extl_unref_table(key_chain);
             }
+
         }else{
             call=binding;
             
@@ -331,8 +383,9 @@ static int do_key(WRegion *oreg, XKeyEvent *ev)
             current_kcb=ev->keycode;
             current_state=ev->state;
             current_submap=subs;
-            
-            do_call_binding(call, binding_owner, subreg);
+
+            do_call_binding(call, binding_owner, subreg, extl_table_none());
+
             
             current_kcb=0;
         }
@@ -357,7 +410,7 @@ static bool submapgrab_handler(WRegion* reg, XEvent *xev)
                                    &binding_owner, &subreg);
             
             if(binding!=NULL)
-                do_call_binding(binding, binding_owner, subreg);
+                do_call_binding(binding, binding_owner, subreg, extl_table_none());
         }
         return FALSE;
     }
