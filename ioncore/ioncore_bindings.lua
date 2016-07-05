@@ -247,4 +247,13 @@ function ioncore.getbindings(maybe_context)
     end
 end
 
+function ioncore.getbindings_reg(reg)
+    local bindings=ioncore.do_getbindings_reg(reg)
+    for k, v in pairs(bindings) do
+        bindings_get_cmds(v)
+    end
+    return bindings
+end
+
+
 

@@ -193,7 +193,6 @@ ExtlTab ioncore_do_getbindings_reg(WRegion *reg)
     tab=extl_create_table();
     
     for(rbind=(WRegBindingInfo*)reg->bindings; rbind!=NULL; rbind=rbind->next){
-        LOG(INFO, GENERAL, "HOHO");
         if(rbind->owner!=NULL)
             continue;
         ExtlTab bmtab=bindmap_getbindings((WBindmap*)rbind->bindmap);

@@ -288,7 +288,11 @@ static void do_call_binding(WBinding *binding, WRegion *reg, WRegion *subreg, Ex
 #define KNOWN_MODIFIERS_MASK (ShiftMask|LockMask|ControlMask|Mod1Mask|  \
                               Mod2Mask|Mod3Mask|Mod4Mask|Mod5Mask)
 
-ExtlTab key_chain_extl(WSubmapState *s)
+WSubmapState * submapstate_extl_to_c(ExtlTab t) {
+    return NULL;
+}
+
+ExtlTab submapstate_c_to_extl(WSubmapState *s)
 {
     ExtlTab key_chain;
     key_chain=extl_create_table();
@@ -328,12 +332,12 @@ static int do_key(WRegion *oreg, XKeyEvent *ev)
     int ret=GRAB_NONE;
     
     if(grabbed){
-        LOG(INFO, KEYS, "grabbed key %d, %p", ev->keycode, (void*)(oreg->submapstat));
+        /* LOG(INFO, KEYS, "grabbed key %d, %p", ev->keycode, (void*)(oreg->submapstat)); */
         binding=lookup_binding(oreg, BINDING_KEYPRESS, ev->state, ev->keycode,
                                &binding_owner, &subreg);
     }else{
         // This code path is mostly WMessage and WEdln instances
-        LOG(INFO, KEYS, "nongrabbed key %d, %p", ev->keycode, (void*)(oreg->submapstat));
+        /* LOG(INFO, KEYS, "nongrabbed key %d, %p", ev->keycode, (void*)(oreg->submapstat)); */
         binding=region_lookup_keybinding(oreg, BINDING_KEYPRESS, 
                                          ev->state, ev->keycode, 
                                          oreg->submapstat, 
@@ -364,7 +368,8 @@ static int do_key(WRegion *oreg, XKeyEvent *ev)
                 
                 ret=(grabbed ? GRAB_SUBMAP : GRAB_NONE_SUBMAP);
 
-                key_chain=key_chain_extl(oreg->submapstat);
+                key_chain=submapstate_c_to_extl(oreg->submapstat);
+                extl_table_sets_o(key_chain, "reg", (Obj*)binding_owner);
                 call_submap_hook(key_chain);
                 extl_unref_table(key_chain);
             }
