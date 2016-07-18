@@ -148,6 +148,8 @@ void binding_deinit(WBinding *binding)
         binding->submap=NULL;
     }
 
+    FREE(binding->doc);
+
     binding->func=extl_unref_fn(binding->func);
 }
 

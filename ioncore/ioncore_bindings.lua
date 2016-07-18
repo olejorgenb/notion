@@ -207,8 +207,17 @@ end
 function ioncore.defbindings(context, bindings)
     local function filterdoc(b)
         local t={}
+        local doc
         for k, v in ipairs(b) do
             local v2=v
+
+            if v.action=="doc" then
+                doc = v.text
+            else
+                v.doc = doc
+                doc = nil
+            end
+
             if v2.submap then
                 v2=table.copy(v)
                 v2.submap=filterdoc(v2.submap)

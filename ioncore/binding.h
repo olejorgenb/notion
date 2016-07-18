@@ -50,6 +50,7 @@ DECLSTRUCT(WBinding){
     bool wait;
     WBindmap *submap;
     ExtlFn func;
+    char *doc;
 };
 
 

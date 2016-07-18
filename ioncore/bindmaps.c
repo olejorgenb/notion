@@ -244,6 +244,7 @@ WBindmap *ioncore_create_cycle_bindmap(uint kcb, uint state,
     b.area=0;
     b.wait=FALSE;
     b.submap=NULL;
+    b.doc=NULL;
     b.func=extl_ref_fn(cycle);
     
     if(!bindmap_add_binding(bindmap, &b)){
