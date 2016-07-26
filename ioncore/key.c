@@ -369,7 +369,11 @@ static int do_key(WRegion *oreg, XKeyEvent *ev)
                 ret=(grabbed ? GRAB_SUBMAP : GRAB_NONE_SUBMAP);
 
                 key_chain=submapstate_c_to_extl(oreg->submapstat);
-                extl_table_sets_o(key_chain, "reg", (Obj*)binding_owner);
+
+                WRegion *active=oreg;
+                while(active->active_sub!=NULL)
+                    active=active->active_sub;
+                extl_table_sets_o(key_chain, "reg", (Obj*)active);
                 call_submap_hook(key_chain);
                 extl_unref_table(key_chain);
             }

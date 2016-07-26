@@ -17,6 +17,7 @@
 
 #include <libtu/map.h>
 
+#include "log.h"
 #include "common.h"
 #include "binding.h"
 #include <libextl/readconfig.h>
@@ -236,6 +237,7 @@ static bool do_submap(WBindmap *bindmap, const char *str,
     if(bindmap_add_binding(bindmap, &binding))
         return bindmap_defbindings(binding.submap, subtab, TRUE);
 
+    LOG(INFO, GENERAL, "deinit binding");
     binding_deinit(&binding);
     
     warn(TR("Unable to add submap for binding %s."), str);
