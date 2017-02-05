@@ -75,6 +75,8 @@ void frame_update_attr(WFrame *frame, int i, WRegion *reg)
 
     spec=&frame->titles[i].attr;
 
+    frame->titles[i].icon = reg ? region_icon(reg) : NULL;
+
     selected=(reg==FRAME_CURRENT(frame));
     tagged=(reg!=NULL && reg->flags&REGION_TAGGED);
     dragged=(i==frame->tab_dragged_idx);
@@ -270,7 +272,15 @@ void frame_recalc_bar(WFrame *frame, bool complete)
         free_title(frame, i);
         textw=frame->titles[i].iw;
         if(textw>0){
-            title=region_make_label(sub, textw, frame->bar_brush);
+            int icon_w=0;
+            if(frame->show_icon){
+                const cairo_surface_t *icon=region_icon(sub);
+                if(icon) {
+                    icon_w=cairo_image_surface_get_width(icon)+3;
+                }
+            }
+
+            title=region_make_label(sub, textw-icon_w, frame->bar_brush);
             frame->titles[i].text=title;
         }
         i++;
@@ -350,6 +360,8 @@ void frame_brushes_updated(WFrame *frame)
         free(s);
     }
 
+    grbrush_get_extra(frame->bar_brush, "show_icon", 'b', &frame->show_icon);
+
     frame->barmode=barmode;
 
     if(barmode==FRAME_BAR_NONE || frame->bar_brush==NULL){
@@ -361,7 +373,9 @@ void frame_brushes_updated(WFrame *frame)
         grbrush_get_border_widths(frame->bar_brush, &bdw);
         grbrush_get_font_extents(frame->bar_brush, &fnte);
 
-        frame->bar_h=bdw.top+bdw.bottom+fnte.max_height;
+        int inner_h=frame->show_icon ? MAXOF(fnte.max_height,16) : fnte.max_height;
+
+        frame->bar_h=bdw.top+bdw.bottom+inner_h;
     }
 
     /* tabs and bar width calculation stuff */

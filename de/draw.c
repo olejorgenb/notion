@@ -13,6 +13,7 @@
 #include <ioncore/common.h>
 #include <ioncore/gr.h>
 #include <ioncore/gr-util.h>
+#include <libtu/minmax.h>
 #include "brush.h"
 #include "font.h"
 #include "private.h"
@@ -445,28 +446,47 @@ void debrush_do_draw_box(DEBrush *brush, const WRectangle *geom,
     debrush_do_draw_border(brush, *geom, cg);
 }
 
+static uint get_tx(DEBrush *brush,
+                   const WRectangle *geom,
+                   const char *text,
+                   const GrBorderWidths *bdw,
+                   uint extra
+                   )
+{
+    uint len=0;
+    uint tx, tw=extra;
 
-static void debrush_do_draw_textbox(DEBrush *brush,
-                                    const WRectangle *geom,
-                                    const char *text,
-                                    DEColourGroup *cg,
-                                    bool needfill,
-                                    const GrStyleSpec *a1,
-                                    const GrStyleSpec *a2,
-                                    int index)
+    if(text)
+        len=strlen(text);
+
+    if(brush->d->textalign!=DEALIGN_LEFT){
+        if(text)
+            tw+=grbrush_get_text_width((GrBrush*)brush, text, len);
+
+        if(brush->d->textalign==DEALIGN_CENTER)
+            tx=geom->x+bdw->left+(geom->w-bdw->left-bdw->right-tw)/2;
+        else
+            tx=geom->x+geom->w-bdw->right-tw;
+    }else{
+        tx=geom->x+bdw->left;
+    }
+
+    return tx;
+}
+
+
+/* Draws the text within a box denoted by goem, aligned according to the
+   brush */
+static void debrush_draw_text(DEBrush *brush,
+                              const WRectangle *geom,
+                              const char *text,
+                              DEColourGroup *cg,
+                              const GrBorderWidths *bdw,
+                              const GrFontExtents *fnte
+                              )
 {
     uint len;
-    GrBorderWidths bdw;
-    GrFontExtents fnte;
-    uint tx, ty, tw;
-
-    grbrush_get_border_widths(&(brush->grbrush), &bdw);
-    grbrush_get_font_extents(&(brush->grbrush), &fnte);
-
-    if(brush->extras_fn!=NULL)
-        brush->extras_fn(brush, geom, cg, &bdw, &fnte, a1, a2, TRUE, index);
-
-    debrush_do_draw_box(brush, geom, cg, needfill);
+    uint tx, ty;
 
     do{ /*...while(0)*/
         if(text==NULL)
@@ -477,21 +497,36 @@ static void debrush_do_draw_textbox(DEBrush *brush,
         if(len==0)
             break;
 
-        if(brush->d->textalign!=DEALIGN_LEFT){
-            tw=grbrush_get_text_width((GrBrush*)brush, text, len);
+        tx=get_tx(brush, geom, text, bdw, 0);
 
-            if(brush->d->textalign==DEALIGN_CENTER)
-                tx=geom->x+bdw.left+(geom->w-bdw.left-bdw.right-tw)/2;
-            else
-                tx=geom->x+geom->w-bdw.right-tw;
-        }else{
-            tx=geom->x+bdw.left;
-        }
-
-        ty=get_ty(geom, &bdw, &fnte);
+        ty=get_ty(geom, bdw, fnte);
 
         debrush_do_draw_string(brush, tx, ty, text, len, FALSE, cg);
+
     }while(0);
+}
+
+static void debrush_do_draw_textbox(DEBrush *brush,
+                                    const WRectangle *geom,
+                                    const char *text,
+                                    DEColourGroup *cg,
+                                    bool needfill,
+                                    const GrStyleSpec *a1,
+                                    const GrStyleSpec *a2,
+                                    int index)
+{
+    GrBorderWidths bdw;
+    GrFontExtents fnte;
+
+    grbrush_get_border_widths(&(brush->grbrush), &bdw);
+    grbrush_get_font_extents(&(brush->grbrush), &fnte);
+
+    if(brush->extras_fn!=NULL)
+        brush->extras_fn(brush, geom, cg, &bdw, &fnte, a1, a2, TRUE, index);
+
+    debrush_do_draw_box(brush, geom, cg, needfill);
+
+    debrush_draw_text(brush, geom, text, cg, &bdw, &fnte);
 
     if(brush->extras_fn!=NULL)
         brush->extras_fn(brush, geom, cg, &bdw, &fnte, a1, a2, FALSE, index);
@@ -510,6 +545,59 @@ void debrush_draw_textbox(DEBrush *brush, const WRectangle *geom,
     }
 }
 
+void debrush_draw_iconbox(DEBrush *brush,
+                          cairo_t *cr,
+                          const WRectangle *geom,
+                          const GrTextElem *elem,
+                          DEColourGroup *cg,
+                          bool needfill,
+                          const GrStyleSpec *a1,
+                          const GrStyleSpec *a2,
+                          int index)
+{
+
+    GrBorderWidths bdw;
+    GrFontExtents fnte;
+
+    grbrush_get_border_widths(&(brush->grbrush), &bdw);
+    grbrush_get_font_extents(&(brush->grbrush), &fnte);
+
+    if(brush->extras_fn!=NULL)
+        brush->extras_fn(brush, geom, cg, &bdw, &fnte, a1, a2, TRUE, index);
+
+    debrush_do_draw_box(brush, geom, cg, needfill);
+
+    uint tx, ty, len;
+    uint icon_width=elem->icon?16+3:0; /* including small right padding */
+    const char *text=elem->text;
+
+    bool icon_align_left=TRUE;
+    debrush_get_extra(brush, "icon_align_left", 'b', &icon_align_left);
+
+    len=text?strlen(text):0;
+
+    tx=get_tx(brush, geom, text, &bdw, icon_align_left?0:icon_width);
+    ty=get_ty(geom, &bdw, &fnte);
+
+    if(elem->icon){
+        uint icon_x=icon_align_left ? geom->x+bdw.left : tx;
+        cairo_set_source_surface(cr, elem->icon, icon_x, geom->y+bdw.top);
+        /* cairo_set_source_surface(cr, elem->icon, geom->x+bdw.left+1, geom->y+bdw.top); */
+        /* cairo_rectangle(cr, geom->x, geom->y, 16, 16); */
+        /* cairo_fill(cr); */
+        cairo_paint(cr);
+        if(icon_align_left)
+            tx=MAXOF(icon_x+icon_width, tx);
+        else
+            tx+=icon_width;
+    }
+
+    debrush_do_draw_string(brush, tx, ty, text, len, FALSE, cg);
+
+    if(brush->extras_fn!=NULL)
+        brush->extras_fn(brush, geom, cg, &bdw, &fnte, a1, a2, FALSE, index);
+}
+
 
 void debrush_draw_textboxes(DEBrush *brush, const WRectangle *geom,
                             int n, const GrTextElem *elem,
@@ -520,18 +608,34 @@ void debrush_draw_textboxes(DEBrush *brush, const WRectangle *geom,
     DEColourGroup *cg;
     GrBorderWidths bdw;
     int i;
+    bool show_icon=FALSE;
+    cairo_surface_t *xsurf=NULL;
+    cairo_t *cr=NULL;
+
+    debrush_get_extra(brush, "show_icon", 'b', &show_icon);
 
     common_attrib=debrush_get_current_attr(brush);
 
     grbrush_get_border_widths(&(brush->grbrush), &bdw);
+
+    if(show_icon){
+        /* Seems like under-reporting the window dimensions to cairo is ok */
+        xsurf=cairo_xlib_surface_create(ioncore_g.dpy, brush->win, DefaultVisual(ioncore_g.dpy, 0), geom->x+geom->w, geom->h);
+        cr=cairo_create(xsurf);
+    }
 
     for(i=0; ; i++){
         g.w=bdw.left+elem[i].iw+bdw.right;
         cg=debrush_get_colour_group2(brush, common_attrib, &elem[i].attr);
 
         if(cg!=NULL){
-            debrush_do_draw_textbox(brush, &g, elem[i].text, cg, needfill,
-                                    common_attrib, &elem[i].attr, i);
+            if(show_icon){
+                debrush_draw_iconbox(brush, cr, &g, &elem[i], cg, needfill,
+                                     common_attrib, &elem[i].attr, i);
+            }else{
+                debrush_do_draw_textbox(brush, &g, elem[i].text, cg, needfill,
+                                        common_attrib, &elem[i].attr, i);
+            }
         }
 
         if(i==n-1)
@@ -544,6 +648,11 @@ void debrush_draw_textboxes(DEBrush *brush, const WRectangle *geom,
         }
         g.x+=bdw.spacing;
     }
+
+    if(xsurf)
+        cairo_surface_destroy(xsurf);
+    if(cr)
+        cairo_destroy(cr);
 }
 
 

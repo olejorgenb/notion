@@ -99,6 +99,7 @@ bool frame_init(WFrame *frame, WWindow *parent, const WFitParams *fp,
     frame->tr_mode=GR_TRANSPARENCY_DEFAULT;
     frame->brush=NULL;
     frame->bar_brush=NULL;
+    frame->show_icon=FALSE;
     frame->mode=mode;
     frame_tabs_width_recalc_init(frame);
     
@@ -325,12 +326,16 @@ static void frame_update_attrs(WFrame *frame)
 static void frame_free_titles(WFrame *frame)
 {
     int i;
+    GrTextElem title;
     
     if(frame->titles!=NULL){
         for(i=0; i<frame->titles_n; i++){
-            if(frame->titles[i].text)
-                free(frame->titles[i].text);
-            gr_stylespec_unalloc(&frame->titles[i].attr);
+            title=frame->titles[i];
+            if(title.icon)
+                cairo_surface_destroy(title.icon);
+            if(title.text)
+                free(title.text);
+            gr_stylespec_unalloc(&title.attr);
         }
         free(frame->titles);
         frame->titles=NULL;
@@ -342,7 +347,8 @@ static void frame_free_titles(WFrame *frame)
 static void do_init_title(WFrame *frame, int i, WRegion *sub)
 {
     frame->titles[i].text=NULL;
-    
+    frame->titles[i].icon=NULL;
+
     gr_stylespec_init(&frame->titles[i].attr);
     
     frame_update_attr(frame, i, sub);
