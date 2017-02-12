@@ -56,8 +56,6 @@ function setup()
     rightbuffer:rqgeom({w = slack})
 end
 
-setup()
-
 -- dir == 1 | -1
 function switch_workspace(dir)
   local screen = ioncore.current():screen_of()
@@ -84,7 +82,6 @@ function viewport_origin() -- in screen corrdig
     return -screen:geom().x
 end
 
--- table_to_string(screen:geom())
 -- screen_to_viewport(viewport_to_screen(100))
 
 function screen_to_viewport(sx)
@@ -95,16 +92,11 @@ function viewport_to_screen(x)
     return viewport_origin() + x
 end
 
-
 function maximize_frame(frame)
+    frame:rqgeom({w=viewport_w})
     local g = frame:geom()
-    moveScreen(g.x)
+    right(g.x - viewport_origin())
 end
-
--- maximize_frame(current_frame())
-
-setup()
-
 
 defbindings("WScreen", {
               kpress(META.."Left", "left(viewport_w/2)")
