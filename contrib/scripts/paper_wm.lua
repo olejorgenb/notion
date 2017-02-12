@@ -1,91 +1,84 @@
 
+display_w=1366
 
---- Mulig vei:
--- Bytt slik at mod_tiling "tar plass fra" de ytterste tilingene når en split blir større
+screen = ioncore.current():screen_of()
 
+function switch_workspace(dir)
+  local screen = ioncore.current():screen_of()
 
----
+  local current_ws = screen:current()
+  local i = screen:get_index(current_ws)
+  debug.print_line("i: "..i)
 
-f=ioncore.current():parent()
+  function current_frame(ws)
+    return ws:current():current()
+  end
 
-table_to_string(f:rqgeom{w=400})
+  local a = current_frame(screen:current()):geom()
 
--- f.__typename
+  -- dir -1 / +1
+  local target_ws = screen:mx_nth(i+dir)
+  debug.print_line("target_ws: "..target_ws:name())
 
+  local b = current_frame(target_ws):geom()
 
--- t = f:manager()
+  local dx = b.x - a.x
 
--- table_to_string(t:rqgeom{x=-50})
+  debug.print_line(dx)
 
-w=current_workspace()
-
-
-s=w:parent()
-s:name()
-
---- RESET POSITION
-function reset()
-  slack=800 s:rqgeom{x=-slack, w=1440+slack*2}
+  screen:rqgeom({x=screen:geom().x-dx})
+  current_frame(target_ws):goto_()
 end
 
--- WHERE?
-function where()
-  table_to_string(s:geom())
+function setup()
+    screen = ioncore.current():screen_of()
+    w=current_workspace()
+    y_slack = -80
+    slack=3*display_w screen:rqgeom{x=-slack, w=display_w+slack*2, y=-y_slack, h=768+y_slack*2}
+    tiling = w:current()
+    tiling:farthest("left"):rqgeom({w=slack})
+    tiling:farthest("right"):rqgeom({w=slack})
 end
 
 -- MOVE CONTROLS
-function screenLeft()
-  s:rqgeom{x=s:geom().x-40} -- LEFT
+function screenLeft(amount)
+    screen:rqgeom{x=screen:geom().x-amount} -- LEFT
 end
 
-function screenRight()
-  s:rqgeom{x=s:geom().x+40} -- RIGHT
+function screenRight(amount)
+    screen:rqgeom{x=screen:geom().x+amount} -- RIGHT
 end
 
-function geomTranslate(g, x, y)
-  return { x=g.x + x,
-           y=g.y + y,
-
-           w=g.w, g=g.h}
+function moveScreen(x)
+    local y = 0
+    local screen = ioncore.current():screen_of()
+    screen:rqgeom({x=x})
+    -- screen:rqgeom(geomTranslate(screen:geom(), x, y))
 end
 
-function moveScreen(x, y)
-  s:rqgeom(geomTranslate(s:geom(), x, y))
+function left(amount)
+    screenRight(amount)
+end
+function right(amount)
+    screenLeft(amount)
 end
 
-
-function left()
-  screenRight()
+function current_tiling()
+    return current_workspace():current()
 end
-function right()
-  screenLeft()
-end
-
-function up()
-  moveScreen(0, snap_size)
-end
-
-function down()
-  moveScreen(0, -snap_size)
-end
-
-function controlWidget()
-  reset()
-
-  left()
-  right()
-
-  where()
-end
-
-reset()
-
-
-snap_size=40
 
 defbindings("WScreen", {
-              kpress(META.."Left",  left)
-              , kpress(META.."Right", right)
-              , kpress(META.."Up", up)
-              , kpress(META.."Down", down)
+              kpress(META.."Left", "left(display_w/2)")
+              , kpress(META.."Right", "right(display_w/2)")
+              , kpress(META.."Shift+Left", "left(display_w)")
+              , kpress(META.."Shift+Right", "right(display_w)")
+
+              , kpress(META.."Home", "moveScreen(-current_tiling():farthest('left'):geom().w)")
+              , kpress(META.."Page_Up", "left(display_w)")
+              , kpress(META.."Page_Down", "right(display_w)")
+
+              , kpress(META.."Up", "switch_workspace(1)")
+              , kpress(META.."Down", "switch_workspace(-1)")
+
+              , mdrag(META.."Button1", "WFrame.p_move(_)")
 })
