@@ -35,6 +35,10 @@ function right(amount)
     screen_left(amount)
 end
 
+function unsetup()
+    screen:rqgeom({x=0, y=0, w=viewport_w, h=viewport_h})
+end
+
 function setup()
     screen = ioncore.current():screen_of()
     ws=current_workspace()
