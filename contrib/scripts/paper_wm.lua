@@ -115,7 +115,7 @@ end
 
 function right_snap(frame)
   local g = frame:geom()
-  move_viewport(g.x + viewport_w)
+  move_viewport(g.x + g.w - viewport_w)
 end
 
 
