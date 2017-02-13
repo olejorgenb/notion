@@ -130,6 +130,27 @@ function right_snap(frame)
     move_viewport(frame, g.x + g.w - viewport_w + 10)
 end
 
+-- Find the nth tiling frame where 0 is the left buffer
+function WGroupWS.nth_page(ws, n)
+    local tiling = current_tiling(ws)
+    local next = tiling:farthest("left")
+    for i = 1, n do
+        -- todo: catch bound errors
+        next = tiling:nextto(next, "right")
+    end
+    return next
+end
+
+function WGroupWS.first_page(ws)
+    return ws:nth_page(1)
+end
+
+function WGroupWS.last_page(ws)
+    local tiling = current_tiling(ws)
+    local rbuffer = tiling:farthest("right")
+    return tiling:nextto(rbuffer, "left")
+end
+
 function next_page(frame)
     local next = workspace_of(frame):current():nextto(frame, 'right')
     left_snap(next)
