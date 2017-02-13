@@ -151,6 +151,15 @@ function WGroupWS.last_page(ws)
     return tiling:nextto(rbuffer, "left")
 end
 
+-- Create new page/frame after last_page
+function WGroupWS.new_page(ws)
+    local tiling = ws:current()
+    local rbuffer = tiling:farthest("right")
+
+    local new = WTiling.split_at(tiling, rbuffer, 'left', false)
+    new:rqgeom({w=viewport_w/2})
+end
+
 function next_page(frame)
     local next = workspace_of(frame):current():nextto(frame, 'right')
     left_snap(next)
