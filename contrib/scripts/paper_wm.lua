@@ -108,15 +108,18 @@ function maximize_frame(frame)
     right(g.x - viewport_origin())
 end
 
+-- Align left viewport edge with frame's left edge
 function left_snap(frame)
     local g = frame:geom()
     move_viewport(g.x)
 end
 
+-- Align right viewport edge with frame's right edge
 function right_snap(frame)
-  local g = frame:geom()
-  move_viewport(g.x + g.w - viewport_w)
+    local g = frame:geom()
+    move_viewport(g.x + g.w - viewport_w)
 end
+
 
 
 defbindings("WScreen", {
