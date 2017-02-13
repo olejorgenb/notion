@@ -120,7 +120,17 @@ function right_snap(frame)
     move_viewport(g.x + g.w - viewport_w)
 end
 
+function next_page(frame)
+    local next = workspace_of(frame):current():nextto(frame, 'right')
+    left_snap(next)
+   next:goto_()
+end
 
+function prev_page(frame)
+    local prev = workspace_of(frame):current():nextto(frame, 'left')
+    left_snap(prev)
+    prev:goto_()
+end
 
 defbindings("WScreen", {
               kpress(META.."Left", "left(viewport_w/2)")
@@ -129,11 +139,14 @@ defbindings("WScreen", {
               , kpress(META.."Shift+Right", "right(viewport_w)")
 
               , kpress(META.."Home", "move_screen(-current_tiling():farthest('left'):geom().w)")
-              , kpress(META.."Page_Up", "left(viewport_w)")
-              , kpress(META.."Page_Down", "right(viewport_w)")
 
               , kpress(META.."Up", "switch_workspace(1)")
               , kpress(META.."Down", "switch_workspace(-1)")
 
               , mdrag(META.."Button1", "WFrame.p_move(_)")
+})
+
+defbindings("WFrame", {
+                  kpress(META.."Page_Down", "next_page(_)")
+                , kpress(META.."Page_Up", "prev_page(_)")
 })
