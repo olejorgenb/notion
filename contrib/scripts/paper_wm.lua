@@ -28,7 +28,7 @@ end
 
 function move_screen(x)
     local y = 0
-    local screen = ioncore.find_screen_id(screen_id):screen_of()
+    local screen = ioncore.find_screen_id(screen_id)
     screen:rqgeom({x=x})
     -- screen:rqgeom(geomTranslate(screen:geom(), x, y))
 end
@@ -50,7 +50,7 @@ function unsetup()
 end
 
 function setup()
-    screen = ioncore.find_screen_id(screen_id):screen_of()
+    screen = ioncore.find_screen_id(screen_id)
     ws=screen:current()
 
     y_slack = -30
@@ -73,7 +73,7 @@ end
 
 -- dir == 1 | -1
 function switch_workspace(dir)
-  local screen = ioncore.find_screen_id(screen_id):screen_of()
+  local screen = ioncore.find_screen_id(screen_id)
 
   local cur_ws = screen:current()
   local i = screen:get_index(cur_ws)
