@@ -1,9 +1,13 @@
-
-viewport_w=1366
-viewport_h=768
-
 screen_id = 0
 screen = ioncore.find_screen_id(screen_id)
+
+outputs = mod_xrandr.get_outputs(screen)
+-- Assumes that screen geoms are unique
+for _,v in pairs(outputs) do
+    viewport_geom = v
+end
+viewport_w=viewport_geom.w
+viewport_h=viewport_geom.h
 
 function current_tiling()
     return current_workspace():current()
