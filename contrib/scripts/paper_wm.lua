@@ -30,8 +30,7 @@ end
 
 -- Align the viewport origin with sx
 function move_viewport(sx)
-  local x = screen_to_viewport(sx)
-  move_screen(x)
+  screen_left(screen_to_viewport(sx))
 end
 
 function left(amount)
