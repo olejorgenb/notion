@@ -28,6 +28,12 @@ function move_screen(x)
     -- screen:rqgeom(geomTranslate(screen:geom(), x, y))
 end
 
+-- Align the viewport origin with sx
+function move_viewport(sx)
+  local x = scscreen_to_viewport(sx)
+  move_screen(x)
+end
+
 function left(amount)
     screen_right(amount)
 end
