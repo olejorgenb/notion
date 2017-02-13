@@ -109,6 +109,17 @@ function maximize_frame(frame)
     right(g.x - viewport_origin())
 end
 
+function left_snap(frame)
+    local g = frame:geom()
+    move_viewport(g.x)
+end
+
+function right_snap(frame)
+  local g = frame:geom()
+  move_viewport(g.x + viewport_w)
+end
+
+
 defbindings("WScreen", {
               kpress(META.."Left", "left(viewport_w/2)")
               , kpress(META.."Right", "right(viewport_w/2)")
