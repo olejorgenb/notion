@@ -18,31 +18,29 @@ function current_frame(ws)
     return ws:current():current()
 end
 
-function screen_left(amount)
+function WScreen.screen_left(screen, amount)
     screen:rqgeom{x=screen:geom().x-amount} -- LEFT
 end
 
-function screen_right(amount)
+function WScreen.screen_right(screen, amount)
     screen:rqgeom{x=screen:geom().x+amount} -- RIGHT
 end
 
-function move_screen(x)
+function WScreen.move_screen(screen, x)
     local y = 0
-    local screen = ioncore.find_screen_id(screen_id)
     screen:rqgeom({x=x})
-    -- screen:rqgeom(geomTranslate(screen:geom(), x, y))
 end
 
 -- Align the viewport origin with sx
-function move_viewport(sx)
-  screen_left(screen_to_viewport(sx))
+function move_viewport(reg, sx)
+    reg:screen_of():screen_left(screen_to_viewport(sx))
 end
 
-function left(amount)
-    screen_right(amount)
+function left(reg, amount)
+    reg:screen_of():screen_right(amount)
 end
-function right(amount)
-    screen_left(amount)
+function right(reg, amount)
+    reg:screen_of():screen_left(amount)
 end
 
 function unsetup()
@@ -110,19 +108,19 @@ end
 function maximize_frame(frame)
     frame:rqgeom({w=viewport_w})
     local g = frame:geom()
-    right(g.x - viewport_origin())
+    right(frame, g.x - viewport_origin())
 end
 
 -- Align left viewport edge with frame's left edge
 function left_snap(frame)
     local g = frame:geom()
-    move_viewport(g.x)
+    move_viewport(frame, g.x - 10)
 end
 
 -- Align right viewport edge with frame's right edge
 function right_snap(frame)
     local g = frame:geom()
-    move_viewport(g.x + g.w - viewport_w)
+    move_viewport(frame, g.x + g.w - viewport_w + 10)
 end
 
 function next_page(frame)
@@ -138,12 +136,12 @@ function prev_page(frame)
 end
 
 defbindings("WScreen", {
-              kpress(META.."Left", "left(viewport_w/2)")
-              , kpress(META.."Right", "right(viewport_w/2)")
-              , kpress(META.."Shift+Left", "left(viewport_w)")
-              , kpress(META.."Shift+Right", "right(viewport_w)")
+              kpress(META.."Left", "left(_, viewport_w/2)")
+              , kpress(META.."Right", "right(_, viewport_w/2)")
+              , kpress(META.."Shift+Left", "left(_, viewport_w)")
+              , kpress(META.."Shift+Right", "right(_, viewport_w)")
 
-              , kpress(META.."Home", "move_screen(-current_tiling():farthest('left'):geom().w)")
+              , kpress(META.."Home", "_:move_screen(-current_tiling():farthest('left'):geom().w)")
 
               , kpress(META.."Up", "switch_workspace(1)")
               , kpress(META.."Down", "switch_workspace(-1)")
