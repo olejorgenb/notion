@@ -46,7 +46,8 @@ function setup()
     y_slack = -30
     slack = 3*viewport_w
 
-    screen:rqgeom{x = -slack, w = viewport_w+slack*2, y = -y_slack, h = viewport_h + y_slack*2}
+    g = screen:geom()
+    screen:rqgeom{x = g.x - slack, y = g.y - y_slack, w = viewport_w+slack*2, h = viewport_h + y_slack*2}
 
     tiling = ws:current()
 
