@@ -2,7 +2,7 @@
 viewport_w=1366
 viewport_h=768
 
-screen = ioncore.current():screen_of()
+screen = ioncore.find_screen_id(0)
 
 function current_tiling()
     return current_workspace():current()
@@ -23,7 +23,7 @@ end
 
 function move_screen(x)
     local y = 0
-    local screen = ioncore.current():screen_of()
+    local screen = ioncore.find_screen_id(0):screen_of()
     screen:rqgeom({x=x})
     -- screen:rqgeom(geomTranslate(screen:geom(), x, y))
 end
@@ -40,7 +40,7 @@ function unsetup()
 end
 
 function setup()
-    screen = ioncore.current():screen_of()
+    screen = ioncore.find_screen_id(0):screen_of()
     ws=current_workspace()
 
     y_slack = -30
@@ -62,7 +62,7 @@ end
 
 -- dir == 1 | -1
 function switch_workspace(dir)
-  local screen = ioncore.current():screen_of()
+  local screen = ioncore.find_screen_id(0):screen_of()
 
   local cur_ws = screen:current()
   local i = screen:get_index(cur_ws)
