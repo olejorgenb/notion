@@ -9,8 +9,15 @@ end
 viewport_w=viewport_geom.w
 viewport_h=viewport_geom.h
 
-function current_tiling()
-    return current_workspace():current()
+-- Utility functions
+function current_workspace(screen)
+    screen = screen or ioncore.current():screen_of()
+    return screen:current()
+end
+
+function current_tiling(ws)
+    ws = ws or current_workspace()
+    return ws:current()
 end
 
 function current_frame(ws)
