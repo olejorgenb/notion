@@ -41,7 +41,7 @@ end
 
 function setup()
     screen = ioncore.find_screen_id(0):screen_of()
-    ws=current_workspace()
+    ws=screen:current()
 
     y_slack = -30
     slack = 3*viewport_w
