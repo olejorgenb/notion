@@ -201,7 +201,9 @@ end
 function WGroupWS.last_page(ws)
     local tiling = current_tiling(ws)
     local rbuffer = tiling:farthest("right")
-    return tiling:nextto(rbuffer, "left")
+    local last = tiling:nextto(rbuffer, "left")
+    right_snap(last):goto_focus()
+    return last
 end
 
 -- Create new page/frame after last_page
