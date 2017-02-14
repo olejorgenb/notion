@@ -173,12 +173,14 @@ end
 function left_snap(frame)
     local g = frame:geom()
     move_viewport(frame, g.x)
+    return frame
 end
 
 -- Align right viewport edge with frame's right edge
 function right_snap(frame)
     local g = frame:geom()
     move_viewport(frame, g.x + g.w - viewport_w)
+    return frame
 end
 
 -- Find the nth tiling frame (1-indexed)
