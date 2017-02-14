@@ -29,6 +29,22 @@ function current_frame(ws)
     return ws:current():current()
 end
 
+--- Moves up in the manager tree until the first WFrame is found
+function frame_of(reg)
+    while reg and reg.__typename ~= "WFrame" do
+        reg = reg:manager()
+    end
+    return reg
+end
+
+function find_current(mng, classname)
+    while mng.current and mng.__typename ~= classname do
+        mng = mng:current()
+    end
+    return mng
+end
+
+
 function WScreen.screen_left(screen, amount)
     screen:rqgeom{x=screen:geom().x-amount} -- LEFT
 end
@@ -243,6 +259,35 @@ function WFrame.prev_page(frame)
     end
     prev:goto_()
 end
+
+if not WRegion.old_goto then
+    WRegion.old_goto = WRegion.goto_focus
+end
+function WRegion.paper_goto(reg)
+
+    local target_frame = nil
+    if reg.__typename == "WGroupWS" then
+        target_frame = find_current(reg, "WFrame")
+    else
+        target_frame = frame_of(reg)
+    end
+
+    local g = target_frame:geom()
+    local x = screen_to_viewport(g.x)
+
+    if x < 0 then
+        left_snap(target_frame)
+    elseif x + g.w > viewport_w then
+        right_snap(target_frame)
+    end
+
+    target_frame:old_goto()
+end
+
+WRegion.goto_focus = WRegion.paper_goto
+WRegion.goto_ = WRegion.goto_focus
+
+
 
 defbindings("WScreen", {
               kpress(META.."Left", "left(_, viewport_w/2)")
