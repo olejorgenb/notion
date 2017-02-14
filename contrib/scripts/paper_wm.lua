@@ -166,7 +166,10 @@ function WFrame.next_page(frame)
     if next == tiling:farthest("right") then
         return
     end
-    left_snap(next)
+    local x = screen_to_viewport(next:geom().x)
+    if x >= viewport_w - 10 then
+        right_snap(next)
+    end
     next:goto_()
 end
 
@@ -176,7 +179,10 @@ function WFrame.prev_page(frame)
     if prev == tiling:farthest("right") then
         return
     end
-    left_snap(prev)
+    local x = screen_to_viewport(prev:geom().x)
+    if x <= 10 then
+        left_snap(prev)
+    end
     prev:goto_()
 end
 
