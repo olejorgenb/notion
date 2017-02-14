@@ -2,12 +2,16 @@ screen_id = 0
 screen = ioncore.find_screen_id(screen_id)
 
 outputs = mod_xrandr.get_outputs(screen)
+-- outputs = mod_xrandr.get_all_outputs()
+
 -- Assumes that screen geoms are unique
 for _,v in pairs(outputs) do
-    viewport_geom = v
+    display_geom = v
 end
-viewport_w=viewport_geom.w
-viewport_h=viewport_geom.h
+
+overlap = 10
+viewport_h = display_geom.h
+viewport_w = display_geom.w - overlap*2
 
 -- Utility functions
 function current_workspace(screen)
@@ -144,7 +148,7 @@ function switch_workspace(dir)
 end
 
 function viewport_origin() -- in screen corrdig
-    return -screen:geom().x
+    return -screen:geom().x + overlap
 end
 
 -- screen_to_viewport(viewport_to_screen(100))
@@ -166,13 +170,13 @@ end
 -- Align left viewport edge with frame's left edge
 function left_snap(frame)
     local g = frame:geom()
-    move_viewport(frame, g.x - 10)
+    move_viewport(frame, g.x)
 end
 
 -- Align right viewport edge with frame's right edge
 function right_snap(frame)
     local g = frame:geom()
-    move_viewport(frame, g.x + g.w - viewport_w + 10)
+    move_viewport(frame, g.x + g.w - viewport_w)
 end
 
 -- Find the nth tiling frame where 0 is the left buffer
