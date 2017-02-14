@@ -54,33 +54,71 @@ function unsetup()
     screen:rqgeom({x=0, y=0, w=viewport_w, h=viewport_h})
 end
 
+
+function ensure_buffer(tiling, dir)
+    function has_prefix(String,Start)
+        return string.sub(String,1,string.len(Start))==Start
+    end
+
+    local buffer_maybe = tiling:farthest(dir)
+    local buffer = nil
+    local buffer_name = "*"..dir.."*"
+    if has_prefix(buffer_maybe:name(), buffer_name) then
+        buffer = buffer_maybe
+    else
+        local dirmost = tiling:farthest(dir)
+        buffer = tiling:split_at(dirmost, dir)
+        buffer:set_name(buffer_name)
+    end
+    buffer:set_mode("tiled-alt")
+    return buffer
+end
+
 function setup()
     screen = ioncore.find_screen_id(screen_id)
     ws=screen:current()
 
     y_slack = -30
-    x_slack = 3*viewport_w
+    x_slack = 6*viewport_w
 
     screen:rqgeom{ x = -x_slack,
                    y = -y_slack,
-                   w = viewport_w + x_slack*2,
+                   w = viewport_w + x_slack,
                    h = viewport_h + y_slack*2 }
 
     tiling = ws:current()
 
-    leftbuffer=tiling:farthest("left")
-    rightbuffer=tiling:farthest("right")
-
-    leftbuffer:set_name("leftbuffer")
-    rightbuffer:set_name("rightbuffer")
-
-    leftbuffer:set_mode("tiled-alt")
-    rightbuffer:set_mode("tiled-alt")
-
-    leftbuffer:rqgeom({w = x_slack})
-    rightbuffer:rqgeom({w = x_slack})
+    adapt_workspace(ws, x_slack)
 
     left_snap(ws:first_page())
+end
+
+function unadapt_workspace(ws)
+    local tiling = ws:current()
+    if tiling.__typename ~= "WTiling" then
+        debug.print_line("Can only unadapt tiling workspaces atm. " .. tiling.__typename)
+        return
+    end
+
+    -- local lbuffer = tiling:farthest("left")
+    local rbuffer = tiling:farthest("right")
+    -- lbuffer:rqclose()
+    rbuffer:rqclose()
+end
+
+function adapt_workspace(ws)
+    --- Makes 'ws' usable in a paper_wm
+    local tiling = ws:current()
+    if tiling.__typename ~= "WTiling" then
+        debug.print_line("Can only adapt tiling workspaces atm. " .. tiling.__typename)
+        return
+    end
+    -- local left_buffer = ensure_buffer(tiling, "left")
+    local right_buffer = ensure_buffer(tiling, "right")
+    -- left_buffer:rqgeom({w = slack})
+
+    local screen = ws:screen_of()
+    right_buffer:rqgeom({w = screen:geom().w - viewport_w })
 end
 
 -- dir == 1 | -1
