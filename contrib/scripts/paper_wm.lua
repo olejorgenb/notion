@@ -197,4 +197,6 @@ defbindings("WScreen", {
 defbindings("WFrame", {
                   kpress(META.."Page_Down", "_:next_page()")
                 , kpress(META.."Page_Up", "_:prev_page()")
+                , kpress(META.."period", "_:next_page()")
+                , kpress(META.."comma", "_:prev_page()")
 })
