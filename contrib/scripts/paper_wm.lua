@@ -216,7 +216,8 @@ function WFrame.next_page(frame)
         return
     end
     local x = screen_to_viewport(next:geom().x)
-    if x >= viewport_w - 10 then
+    local w = next:geom().w
+    if x + w >= viewport_w then
         right_snap(next)
     end
     next:goto_()
@@ -229,7 +230,7 @@ function WFrame.prev_page(frame)
         return
     end
     local x = screen_to_viewport(prev:geom().x)
-    if x <= 10 then
+    if x <= 0 then
         left_snap(prev)
     end
     prev:goto_()
