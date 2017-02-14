@@ -257,6 +257,11 @@ defbindings("WScreen", {
               , kpress(META.."Tab", "ioncore.goto_previous()")
 })
 
+defbindings("WGroupWS", {
+              kpress(META.."Home", "_:first_page()")
+              , kpress(META.."End", "_:last_page()")
+})
+
 defbindings("WFrame", {
                   kpress(META.."Page_Down", "_:next_page()")
                 , kpress(META.."Page_Up", "_:prev_page()")
