@@ -193,7 +193,9 @@ function WGroupWS.nth_page(ws, n)
 end
 
 function WGroupWS.first_page(ws)
-    return ws:nth_page(1)
+    local first = ws:nth_page(1)
+    left_snap(first):goto_()
+    return first
 end
 
 function WGroupWS.last_page(ws)
