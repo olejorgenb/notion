@@ -281,7 +281,7 @@ function WRegion.paper_goto(reg)
         right_snap(target_frame)
     end
 
-    target_frame:old_goto()
+    reg:old_goto()
 end
 
 WRegion.goto_focus = WRegion.paper_goto
