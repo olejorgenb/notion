@@ -160,13 +160,13 @@ function WGroupWS.new_page(ws)
     new:rqgeom({w=viewport_w/2})
 end
 
-function next_page(frame)
+function WFrame.next_page(frame)
     local next = workspace_of(frame):current():nextto(frame, 'right')
     left_snap(next)
    next:goto_()
 end
 
-function prev_page(frame)
+function WFrame.prev_page(frame)
     local prev = workspace_of(frame):current():nextto(frame, 'left')
     left_snap(prev)
     prev:goto_()
@@ -187,6 +187,6 @@ defbindings("WScreen", {
 })
 
 defbindings("WFrame", {
-                  kpress(META.."Page_Down", "next_page(_)")
-                , kpress(META.."Page_Up", "prev_page(_)")
+                  kpress(META.."Page_Down", "_:next_page()")
+                , kpress(META.."Page_Up", "_:prev_page()")
 })
