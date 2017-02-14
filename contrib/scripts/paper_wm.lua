@@ -85,8 +85,10 @@ function setup()
     y_slack = -30
     x_slack = 6*viewport_w
 
-    screen:rqgeom{ x = -x_slack,
-                   y = -y_slack,
+    local screen_g = screen:geom()
+    -- This isn't idempotent because of 
+    screen:rqgeom{ x = screen_g.x,
+                   y = screen_g.y-y_slack,
                    w = viewport_w + x_slack,
                    h = viewport_h + y_slack*2 }
 
