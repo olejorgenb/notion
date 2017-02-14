@@ -59,10 +59,12 @@ function setup()
     ws=screen:current()
 
     y_slack = -30
-    slack = 3*viewport_w
+    x_slack = 3*viewport_w
 
-    g = screen:geom()
-    screen:rqgeom{x = g.x - slack, y = g.y - y_slack, w = viewport_w+slack*2, h = viewport_h + y_slack*2}
+    screen:rqgeom{ x = -x_slack,
+                   y = -y_slack,
+                   w = viewport_w + x_slack*2,
+                   h = viewport_h + y_slack*2 }
 
     tiling = ws:current()
 
@@ -72,8 +74,13 @@ function setup()
     leftbuffer:set_name("leftbuffer")
     rightbuffer:set_name("rightbuffer")
 
-    leftbuffer:rqgeom({w = slack})
-    rightbuffer:rqgeom({w = slack})
+    leftbuffer:set_mode("tiled-alt")
+    rightbuffer:set_mode("tiled-alt")
+
+    leftbuffer:rqgeom({w = x_slack})
+    rightbuffer:rqgeom({w = x_slack})
+
+    left_snap(ws:first_page())
 end
 
 -- dir == 1 | -1
