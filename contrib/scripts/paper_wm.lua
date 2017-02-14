@@ -161,13 +161,21 @@ function WGroupWS.new_page(ws)
 end
 
 function WFrame.next_page(frame)
-    local next = workspace_of(frame):current():nextto(frame, 'right')
+    local tiling = frame:manager()
+    local next = tiling:nextto(frame, 'right')
+    if next == tiling:farthest("right") then
+        return
+    end
     left_snap(next)
-   next:goto_()
+    next:goto_()
 end
 
 function WFrame.prev_page(frame)
-    local prev = workspace_of(frame):current():nextto(frame, 'left')
+    local tiling = frame:manager()
+    local prev = tiling:nextto(frame, 'left')
+    if prev == tiling:farthest("right") then
+        return
+    end
     left_snap(prev)
     prev:goto_()
 end
