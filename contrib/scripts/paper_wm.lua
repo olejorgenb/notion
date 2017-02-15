@@ -76,8 +76,9 @@ function right(reg, amount)
     reg:screen_of():screen_left(amount)
 end
 
-function unsetup()
-    local display_g = mod_xinerama.query_screens()[screen:id() + 1]
+function unsetup(screen_id)
+    local screen = ioncore.find_screen_id(screen_id)
+    local display_g = mod_xinerama.query_screens()[screen_id() + 1]
     screen:rqgeom({x=0, y=0, w=display_g.w, h=display_g.h})
 end
 
@@ -104,7 +105,7 @@ function ensure_buffer(tiling, dir, buffer_w)
     return buffer, buffer ~= buffer_maybe
 end
 
-function setup(adapt_workspaces)
+function setup(screen_id, adapt_workspaces)
     screen = ioncore.find_screen_id(screen_id)
     view_g = screen:viewport_geom()
 
