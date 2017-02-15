@@ -311,6 +311,16 @@ defbindings("WScreen", {
 defbindings("WGroupWS", {
               kpress(META.."Home", "_:first_page()")
               , kpress(META.."End", "_:last_page()")
+              , kpress(META.."1", "_:nth_page(1):goto_focus()")
+              , kpress(META.."2", "_:nth_page(2):goto_focus()")
+              , kpress(META.."3", "_:nth_page(3):goto_focus()")
+              , kpress(META.."4", "_:nth_page(4):goto_focus()")
+              , kpress(META.."5", "_:nth_page(5):goto_focus()")
+              , kpress(META.."6", "_:nth_page(6):goto_focus()")
+              , kpress(META.."7", "_:nth_page(7):goto_focus()")
+              , kpress(META.."8", "_:nth_page(8):goto_focus()")
+              , kpress(META.."9", "_:nth_page(9):goto_focus()")
+              , kpress(META.."0", "_:last_page()")
 })
 
 defbindings("WFrame", {
