@@ -9,9 +9,24 @@ for _,v in pairs(outputs) do
     display_geom = v
 end
 
-overlap = 10
-viewport_h = display_geom.h
-viewport_w = display_geom.w - overlap*2
+overlap = {x = 10, y = 5}
+
+mod_xinerama.query_screens()
+display_geoms = mod_xinerama.query_screens()
+viewport_geoms = {}
+for i, g in ipairs(display_geoms) do
+    local view_g = {
+        x = g.x + overlap.x
+      , y = g.y + overlap.y
+      , w = g.w - 2*overlap.x
+      , h = g.h - 2*overlap.y
+    }
+    viewport_geoms[i] = view_g
+end
+
+function WScreen.viewport_geom(screen)
+    return viewport_geoms[screen:id()+1]
+end
 
 -- Utility functions
 function current_workspace(screen)
@@ -71,7 +86,8 @@ function right(reg, amount)
 end
 
 function unsetup()
-    screen:rqgeom({x=0, y=0, w=viewport_w, h=viewport_h})
+    local display_g = mod_xinerama.query_screens()[screen:id() + 1]
+    screen:rqgeom({x=0, y=0, w=display_g.w, h=display_g.h})
 end
 
 
@@ -97,16 +113,16 @@ end
 function setup()
     screen = ioncore.find_screen_id(screen_id)
     ws=screen:current()
+    view_g = screen:viewport_geom()
 
-    y_slack = -30
-    x_slack = 6*viewport_w
+    x_slack = 6*view_g.w
 
     local screen_g = screen:geom()
     -- This isn't idempotent because of 
-    screen:rqgeom{ x = screen_g.x,
-                   y = screen_g.y-y_slack,
-                   w = viewport_w + x_slack,
-                   h = viewport_h + y_slack*2 }
+    screen:rqgeom{ x = view_g.x,
+                   y = view_g.y,
+                   w = view_g.w + x_slack,
+                   h = view_g.h }
 
     tiling = ws:current()
 
@@ -140,7 +156,8 @@ function adapt_workspace(ws)
     -- left_buffer:rqgeom({w = slack})
 
     local screen = ws:screen_of()
-    right_buffer:rqgeom({w = screen:geom().w - viewport_w })
+    local view_g = screen:viewport_geom()
+    right_buffer:rqgeom({w = screen:geom().w - view_g.w })
 end
 
 -- dir == 1 | -1
@@ -166,7 +183,7 @@ function switch_workspace(dir)
 end
 
 function viewport_origin() -- in screen corrdig
-    return -screen:geom().x + overlap
+    return -screen:geom().x + overlap.x
 end
 
 -- screen_to_viewport(viewport_to_screen(100))
@@ -180,7 +197,8 @@ function viewport_to_screen(x)
 end
 
 function maximize_frame(frame)
-    frame:rqgeom({w=viewport_w})
+    local view_g = frame:screen_of():viewport_geom()
+    frame:rqgeom({w=view_g.w})
     local g = frame:geom()
     right(frame, g.x - viewport_origin())
 end
@@ -195,7 +213,8 @@ end
 -- Align right viewport edge with frame's right edge
 function right_snap(frame)
     local g = frame:geom()
-    move_viewport(frame, g.x + g.w - viewport_w)
+    local view_g = frame:screen_of():viewport_geom()
+    move_viewport(frame, g.x + g.w - view_g.w)
     return frame
 end
 
@@ -232,9 +251,10 @@ end
 function WGroupWS.new_page(ws)
     local tiling = ws:current()
     local rbuffer = tiling:farthest("right")
-
     local new = WTiling.split_at(tiling, rbuffer, 'left', false)
-    new:rqgeom({w=viewport_w/2})
+    local view_g = ws:screen_of():viewport_geom()
+    new:rqgeom({w=view_g.w/2})
+    return new
 end
 
 function WFrame.next_page(frame)
@@ -245,7 +265,8 @@ function WFrame.next_page(frame)
     end
     local x = screen_to_viewport(next:geom().x)
     local w = next:geom().w
-    if x + w >= viewport_w then
+    local view_g = frame:screen_of():viewport_geom()
+    if x + w >= view_g.w then
         right_snap(next)
     end
     next:goto_()
@@ -279,9 +300,10 @@ function WRegion.paper_goto(reg)
     local g = target_frame:geom()
     local x = screen_to_viewport(g.x)
 
+    local view_g = reg:screen_of():viewport_geom()
     if x < 0 then
         left_snap(target_frame)
-    elseif x + g.w > viewport_w then
+    elseif x + g.w > view_g.w then
         right_snap(target_frame)
     end
 
@@ -294,12 +316,10 @@ WRegion.goto_ = WRegion.goto_focus
 
 
 defbindings("WScreen", {
-              kpress(META.."Left", "left(_, viewport_w/2)")
-              , kpress(META.."Right", "right(_, viewport_w/2)")
-              , kpress(META.."Shift+Left", "left(_, viewport_w)")
-              , kpress(META.."Shift+Right", "right(_, viewport_w)")
-
-              , kpress(META.."Home", "_:move_screen(-current_tiling():farthest('left'):geom().w)")
+              kpress(META.."Left", "left(_, _:viewport_geom().w/2)")
+              , kpress(META.."Right", "right(_, _:viewport_geom().w/2)")
+              , kpress(META.."Shift+Left", "left(_, _:viewport_geom().w)")
+              , kpress(META.."Shift+Right", "right(_, _:viewport_geom().w)")
 
               , kpress(META.."Up", "switch_workspace(1)")
               , kpress(META.."Down", "switch_workspace(-1)")
