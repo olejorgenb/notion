@@ -91,7 +91,8 @@ function unsetup()
 end
 
 
-function ensure_buffer(tiling, dir)
+-- return true if a new buffer was created
+function ensure_buffer(tiling, dir, buffer_w)
     function has_prefix(String,Start)
         return string.sub(String,1,string.len(Start))==Start
     end
@@ -105,14 +106,15 @@ function ensure_buffer(tiling, dir)
         local dirmost = tiling:farthest(dir)
         buffer = tiling:split_at(dirmost, dir)
         buffer:set_name(buffer_name)
+        buffer:rqgeom({w = buffer_w})
     end
     buffer:set_mode("tiled-alt")
-    return buffer
+
+    return buffer, buffer ~= buffer_maybe
 end
 
-function setup()
+function setup(adapt_workspaces)
     screen = ioncore.find_screen_id(screen_id)
-    ws=screen:current()
     view_g = screen:viewport_geom()
 
     x_slack = 6*view_g.w
@@ -124,11 +126,14 @@ function setup()
                    w = view_g.w + x_slack,
                    h = view_g.h }
 
-    tiling = ws:current()
-
-    adapt_workspace(ws, x_slack)
-
-    left_snap(ws:first_page())
+    if adapt_workspaces then
+        local wss = {}
+        screen:managed_i(function(ws, i) table.insert(wss, ws) return true end)
+        for i, ws in ipairs(wss) do
+            -- managed_i operates in protected mode
+            adapt_workspace(ws, x_slack)
+        end
+    end
 end
 
 function unadapt_workspace(ws)
@@ -138,26 +143,25 @@ function unadapt_workspace(ws)
         return
     end
 
-    -- local lbuffer = tiling:farthest("left")
     local rbuffer = tiling:farthest("right")
-    -- lbuffer:rqclose()
     rbuffer:rqclose()
 end
 
 function adapt_workspace(ws)
     --- Makes 'ws' usable in a paper_wm
     local tiling = ws:current()
-    if tiling.__typename ~= "WTiling" then
-        debug.print_line("Can only adapt tiling workspaces atm. " .. tiling.__typename)
-        return
+    if not tiling or tiling.__typename ~= "WTiling" then
+        debug.print_line("Can only adapt tiling workspaces atm. "
+                             .. ((tiling and tiling.__typename) or "nil"))
+        return false
     end
-    -- local left_buffer = ensure_buffer(tiling, "left")
-    local right_buffer = ensure_buffer(tiling, "right")
-    -- left_buffer:rqgeom({w = slack})
-
     local screen = ws:screen_of()
     local view_g = screen:viewport_geom()
-    right_buffer:rqgeom({w = screen:geom().w - view_g.w })
+    local b, new_b = ensure_buffer(tiling, "right", screen:geom().w - view_g.w)
+    if new_b then
+        left_snap(ws:first_page())
+    end
+    return true
 end
 
 -- dir == 1 | -1
