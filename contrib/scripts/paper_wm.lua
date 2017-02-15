@@ -202,12 +202,16 @@ end
 -- Find the nth tiling frame (1-indexed)
 function WGroupWS.nth_page(ws, n)
     local tiling = current_tiling(ws)
-    local next = tiling:farthest("left")
-    for i = 1, n-1 do
-        -- todo: catch bound errors
-        next = tiling:nextto(next, "right")
+    local current = tiling:farthest("left")
+    local stop = tiling:farthest("right")
+    local next = tiling:nextto(current, "right")
+
+    while n > 1 and next ~= stop do
+        current = next
+        next = tiling:nextto(current, "right")
+        n = n-1
     end
-    return next
+    return current
 end
 
 function WGroupWS.first_page(ws)
