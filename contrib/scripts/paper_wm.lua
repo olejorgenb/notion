@@ -1,13 +1,3 @@
-screen_id = 0
-screen = ioncore.find_screen_id(screen_id)
-
-outputs = mod_xrandr.get_outputs(screen)
--- outputs = mod_xrandr.get_all_outputs()
-
--- Assumes that screen geoms are unique
-for _,v in pairs(outputs) do
-    display_geom = v
-end
 
 overlap = {x = 10, y = 5}
 
@@ -75,7 +65,8 @@ end
 
 -- Align the viewport origin with sx
 function move_viewport(reg, sx)
-    reg:screen_of():screen_left(screen_to_viewport(sx))
+    local screen = reg:screen_of()
+    screen:screen_left(screen:screen_to_viewport(sx))
 end
 
 function left(reg, amount)
@@ -186,25 +177,27 @@ function switch_workspace(dir)
   target_frame:goto_()
 end
 
-function viewport_origin() -- in screen corrdig
+-- in screen coordinates
+function WScreen.viewport_origin(screen)
     return -screen:geom().x + overlap.x
 end
 
 -- screen_to_viewport(viewport_to_screen(100))
 
-function screen_to_viewport(sx)
-    return sx - viewport_origin()
+function WScreen.screen_to_viewport(screen, sx)
+    return sx - screen:viewport_origin()
 end
 
-function viewport_to_screen(x)
-    return viewport_origin() + x
+function WScreen.viewport_to_screen(screen, x)
+    return screen:viewport_origin() + x
 end
 
 function maximize_frame(frame)
-    local view_g = frame:screen_of():viewport_geom()
+    local screen = frame:screen_of()
+    local view_g = screen:viewport_geom()
     frame:rqgeom({w=view_g.w})
     local g = frame:geom()
-    right(frame, g.x - viewport_origin())
+    right(frame, g.x - screen:viewport_origin())
 end
 
 -- Align left viewport edge with frame's left edge
@@ -267,7 +260,8 @@ function WFrame.next_page(frame)
     if next == tiling:farthest("right") then
         return
     end
-    local x = screen_to_viewport(next:geom().x)
+    local screen = frame:screen_of()
+    local x = screen:screen_to_viewport(next:geom().x)
     local w = next:geom().w
     local view_g = frame:screen_of():viewport_geom()
     if x + w >= view_g.w then
@@ -282,7 +276,8 @@ function WFrame.prev_page(frame)
     if prev == tiling:farthest("right") then
         return
     end
-    local x = screen_to_viewport(prev:geom().x)
+    local screen = frame:screen_of()
+    local x = screen:screen_to_viewport(prev:geom().x)
     if x <= 0 then
         left_snap(prev)
     end
@@ -301,10 +296,11 @@ function WRegion.paper_goto(reg)
         target_frame = frame_of(reg)
     end
 
+    local screen = reg:screen_of()
     local g = target_frame:geom()
-    local x = screen_to_viewport(g.x)
+    local x = screen:screen_to_viewport(g.x)
 
-    local view_g = reg:screen_of():viewport_geom()
+    local view_g = screen:viewport_geom()
     if x < 0 then
         left_snap(target_frame)
     elseif x + g.w > view_g.w then
