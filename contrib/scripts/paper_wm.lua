@@ -49,6 +49,13 @@ function find_current(mng, classname)
     return mng
 end
 
+function string.has_prefix(str, prefix)
+    return string.sub(str, 1, string.len(prefix)) == prefix
+end
+
+function is_buffer_frame(reg)
+    return reg:name():has_prefix("*right*")
+end
 
 function WScreen.screen_left(screen, amount)
     screen:rqgeom{x=screen:geom().x-amount} -- LEFT
@@ -85,14 +92,10 @@ end
 
 -- return true if a new buffer was created
 function ensure_buffer(tiling, dir, buffer_w)
-    function has_prefix(String,Start)
-        return string.sub(String,1,string.len(Start))==Start
-    end
-
     local buffer_maybe = tiling:farthest(dir)
     local buffer = nil
     local buffer_name = "*"..dir.."*"
-    if has_prefix(buffer_maybe:name(), buffer_name) then
+    if buffer_maybe:name():has_prefix(buffer_name) then
         buffer = buffer_maybe
     else
         local dirmost = tiling:farthest(dir)
@@ -285,11 +288,13 @@ function WFrame.prev_page(frame)
     prev:goto_()
 end
 
-if not WRegion.old_goto then
-    WRegion.old_goto = WRegion.goto_focus
-end
-function WRegion.paper_goto(reg)
-
+-- Move the viewport (if needed) such that the frame /associated/ with `reg`
+-- is inside the viewport.
+-- A frame is /associated/ with `reg` by being the current frame of `reg` or
+-- by being the closest parenting frame.
+--
+-- Designed as a support function for `goto_focus`.
+function WRegion.ensure_in_viewport(reg)
     local target_frame = nil
     if reg.__typename == "WGroupWS" then
         target_frame = find_current(reg, "WFrame")
@@ -298,6 +303,12 @@ function WRegion.paper_goto(reg)
     end
 
     local screen = reg:screen_of()
+
+    if not target_frame then
+        debug.print_line("Could not find a target frame")
+        return
+    end
+
     local g = target_frame:geom()
     local x = screen:screen_to_viewport(g.x)
 
@@ -307,13 +318,42 @@ function WRegion.paper_goto(reg)
     elseif x + g.w > view_g.w then
         right_snap(target_frame)
     end
+end
 
-    reg:old_goto()
+if not WRegion.original_goto then
+    WRegion.original_goto = WRegion.goto_focus
+end
+
+-- A viewport aware `WRegion.goto_focus`
+function WRegion.paper_goto(reg)
+    debug.print_line("paper_goto: "..reg:name())
+
+    reg:ensure_in_viewport()
+
+    reg:original_goto()
 end
 
 WRegion.goto_focus = WRegion.paper_goto
 WRegion.goto_ = WRegion.goto_focus
 
+
+-- Make the viewport follow the focused window. Note that using the mouse with
+-- this activated is a bit jarring.
+function notify_hook_move_viewport(reg, what)
+    if what == "activated" and not is_buffer_frame(reg) then
+        ioncore.defer(function() reg:ensure_in_viewport() end)
+    end
+end
+
+-- Temporary wrapper to make it more convenient to change the actual hook with
+-- out removing and adding it again
+function notify_hook_move_viewport_indirection(reg, what)
+    notify_hook_move_viewport(reg, what)
+end
+
+-- notify_hook = ioncore.get_hook("region_notify_hook")
+-- notify_hook:add(notify_hook_move_viewport_indirection)
+-- notify_hook:remove(notify_hook_move_viewport_indirection)
 
 
 defbindings("WScreen", {
