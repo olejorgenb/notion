@@ -349,4 +349,6 @@ defbindings("WFrame", {
                 , kpress(META.."Page_Up", "_:prev_page()")
                 , kpress(META.."period", "_:next_page()")
                 , kpress(META.."comma", "_:prev_page()")
+                , kpress(META.."Shift+period", "left_snap(_)")
+                , kpress(META.."Shift+comma", "right_snap(_)")
 })
