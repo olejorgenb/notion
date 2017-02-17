@@ -423,14 +423,12 @@ defbindings("WFrame", {
                 , kpress(META.."Page_Up", "_:prev_page()")
                 , kpress(META.."period", "_:next_page()")
                 , kpress(META.."comma", "_:prev_page()")
-                , kpress(META.."Shift+period", "left_snap(_)")
-                , kpress(META.."Shift+comma", "right_snap(_)")
+                , kpress(META.."Shift+period", "left_snap(_):paper_goto()")
+                , kpress(META.."Shift+comma", "right_snap(_):paper_goto()")
                 --- Resizing
                 , kpress(META.."backslash", "_:resize_right_delta(30)")
                 , kpress(META.."plus", "_:resize_right_delta(-30)")
                 , kpress(META.."H", "_:paper_maximize()")
-                , kpress(META.."Shift+period", "left_snap(_):paper_goto()")
-                , kpress(META.."Shift+comma", "right_snap(_):paper_goto()")
                 , kpress(META.."Tab", "mod_menu.grabmenu(_, _sub, 'focuslist', {sizepolicy = 'center', big=true })")
                 , submap(META.."space", {
                            kpress("Tab", "mod_menu.grabmenu(_, _sub, 'workspacefocuslist', { sizepolicy = 'center', big=true})")
