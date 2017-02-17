@@ -269,6 +269,7 @@ function WGroupWS.insert_page(ws)
     local new = WTiling.split_at(tiling, frame, 'right', false)
     frame:resize_right(frame_g.w)
     frame:paper_goto()
+    return new
 end
 
 -- Delete frame from tiling, preserving all other page widths
@@ -443,7 +444,9 @@ defbindings("WGroupWS", {
               , kpress(META.."8", "_:nth_page(8):goto_focus()")
               , kpress(META.."9", "_:nth_page(9):goto_focus()")
               , kpress(META.."0", "_:last_page()")
-              , kpress(META.."N", "_:new_page():paper_goto()")
+              -- Page creation/deletion
+              , kpress(META.."N", "_:insert_page():paper_goto()")
+              , kpress(META.."Shift+N", "_:new_page():paper_goto()")
 })
 
 
@@ -462,4 +465,6 @@ defbindings("WFrame", {
                 , submap(META.."space", {
                            kpress("Tab", "mod_menu.grabmenu(_, _sub, 'workspacefocuslist', { sizepolicy = 'center', big=true})")
                         })
+                -- Page creation/deletion
+                , kpress(META.."D", "_:delete_page()")
 })
