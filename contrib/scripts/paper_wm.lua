@@ -386,12 +386,16 @@ defbindings("WGroupWS", {
 })
 
 
+
 -- EXPERIMENTAL:
-function WFrame.resize_right(frame, delta)
-    frame  = current_frame()
+function WFrame.resize_right_delta(frame, delta)
+    local new_w = frame:geom().w + delta
+    frame:resize_right(new_w)
+end
+
+function WFrame.resize_right(frame, new_w)
     local tiling = frame:manager()
     local node = tiling:node_of(frame)
-    local new_w = frame:geom().w + delta
     if new_w > 5 then
         node:resize_right(new_w)
     end
@@ -420,7 +424,7 @@ defbindings("WFrame", {
                 , kpress(META.."Shift+period", "left_snap(_)")
                 , kpress(META.."Shift+comma", "right_snap(_)")
                 --- Resizing
-                , kpress(META.."backslash", "WFrame:resize_right(30)")
-                , kpress(META.."plus", "WFrame:resize_right(-30)")
-                , kpress(META.."H", "WFrame:paper_maximize()")
+                , kpress(META.."backslash", "_:resize_right_delta(30)")
+                , kpress(META.."plus", "_:resize_right_delta(-30)")
+                , kpress(META.."H", "_:paper_maximize()")
 })
