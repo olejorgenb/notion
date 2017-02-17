@@ -429,4 +429,6 @@ defbindings("WFrame", {
                 , kpress(META.."backslash", "_:resize_right_delta(30)")
                 , kpress(META.."plus", "_:resize_right_delta(-30)")
                 , kpress(META.."H", "_:paper_maximize()")
+                , kpress(META.."Shift+period", "left_snap(_):paper_goto()")
+                , kpress(META.."Shift+comma", "right_snap(_):paper_goto()")
 })
