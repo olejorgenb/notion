@@ -284,8 +284,10 @@ function WFrame.delete_page(frame)
 
     frame:rqclose()
     -- fix up widths
-    left:resize_right(left_g.w)
-    right:resize_right(right_g.w)
+    ioncore.defer(function ()
+            left:resize_right(left_g.w)
+            right:resize_right(right_g.w)
+    end)
 end
 
 function WFrame.next_page(frame)
