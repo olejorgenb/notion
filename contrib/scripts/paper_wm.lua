@@ -356,6 +356,38 @@ end
 -- notify_hook:remove(notify_hook_move_viewport_indirection)
 
 
+-- EXPERIMENTAL:
+function WFrame.resize_right_delta(frame, delta)
+    local new_w = frame:geom().w + delta
+    frame:resize_right(new_w)
+end
+
+function WFrame.resize_right(frame, new_w)
+    local tiling = frame:manager()
+    local node = tiling:node_of(frame)
+    if new_w > 5 then
+        node:resize_right(new_w)
+    end
+end
+
+function WFrame.paper_maximize(frame)
+    -- IMPROVEMENT: Remember unmaximized size (need aux. weak table)
+    local screen = frame:screen_of()
+    local view_g = screen:viewport_geom()
+    frame:resize_right(view_g.w)
+    local g = frame:geom()
+    right(frame, g.x - screen:viewport_origin())
+end
+
+-- Expand the frame utilizing all space occupied by partially visible
+-- frames
+function WFrame.paper_expand_free(frame)
+    -- TOOD:
+end
+
+-- IDEA: slurp / barf for pages (assoc lisp editing mode)
+
+
 defbindings("WScreen", {
               kpress(META.."Left", "left(_, _:viewport_geom().w/2)")
               , kpress(META.."Right", "right(_, _:viewport_geom().w/2)")
@@ -384,36 +416,6 @@ defbindings("WGroupWS", {
               , kpress(META.."0", "_:last_page()")
               , kpress(META.."N", "_:new_page():paper_goto()")
 })
-
-
-
--- EXPERIMENTAL:
-function WFrame.resize_right_delta(frame, delta)
-    local new_w = frame:geom().w + delta
-    frame:resize_right(new_w)
-end
-
-function WFrame.resize_right(frame, new_w)
-    local tiling = frame:manager()
-    local node = tiling:node_of(frame)
-    if new_w > 5 then
-        node:resize_right(new_w)
-    end
-end
-
-function WFrame.paper_maximize(frame)
-    local screen = frame:screen_of()
-    local view_g = screen:viewport_geom()
-    frame:resize_right(view_g.w)
-    local g = frame:geom()
-    right(frame, g.x - screen:viewport_origin())
-end
-
--- Expand the frame utilizing all space occupied by partially visible
--- frames
-function WFrame.paper_expand_free(frame)
-    -- TOOD:
-end
 
 
 defbindings("WFrame", {
