@@ -1,0 +1,65 @@
+* Model
+** Space
+An infinite stream of ordered pages to the right
+*** state
+- a environment of its own
+- a default application to use for new pages
+** A page is a view into an object
+which basically means an application
+** Every space has a name
+** A space knows how to duplicate itself
+** A page has a left and right edge
+Pages doesn't overlap (normally)
+** A page can have a name
+** A viewport is a view into some space
+** Changing the view doesn't change the space
+
+
+
+* Actions
+** TODO new page 
+
+Insert a blank frame to the right preserving widths as much as possible.
+
+A, B etc. are pages
+
+|AB| is the display/viewport
+
+^ points to focus
+
+ AB|CD|E
+     ^
+ABC|DN|E
+     ^
+Running a program opens a new page when it needs to be managed.
+** DONE focus next/previous page
+   CLOSED: [2017-02-15 Wed 12:48]
+meta+left/right or meta+pageup/pagedown
+
+
+
+Move the least amount posssible to reveal the next page fully
+Focus the next page
+*** cycle vs. creation to the right
+If there's no more pages, create a blank page
+** DONE First/last page
+   CLOSED: [2017-02-15 Wed 12:48]
+** TODO mru stack
+- filtered mru to the current space
+- don't add to mru while meta is pressed to enable looking
+
+** TODO select pages
+** TODO lock page
+
+eg. 
+A|LB|C
+   ^
+next_page
+AB|LC|
+    ^
+eg.
+ABC|LD|
+     ^
+goto A
+|LA|BCD
+  ^
