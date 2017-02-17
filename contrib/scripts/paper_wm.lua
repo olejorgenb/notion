@@ -430,7 +430,6 @@ defbindings("WScreen", {
               , kpress(META.."Down", "switch_workspace(-1)")
 
               , mdrag(META.."Button1", "WFrame.p_move(_)")
-              , kpress(META.."Tab", "ioncore.goto_previous()")
 })
 
 defbindings("WGroupWS", {
