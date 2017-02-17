@@ -275,12 +275,12 @@ end
 -- Delete frame from tiling, preserving all other page widths
 -- frame = current_frame()
 function WFrame.delete_page(frame)
-    tiling = frame:manager()
-    left = tiling:nextto(frame, "left")
-    right = tiling:nextto(frame, "right")
+    local tiling = frame:manager()
+    local left = tiling:nextto(frame, "left")
+    local right = tiling:nextto(frame, "right")
     -- remember geometry
-    left_g = left:geom()
-    right_g = right:geom()
+    local left_g = left:geom()
+    local right_g = right:geom()
 
     frame:rqclose()
     -- fix up widths
