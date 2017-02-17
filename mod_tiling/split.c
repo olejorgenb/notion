@@ -1443,6 +1443,79 @@ void splittree_rqgeom(WSplit *sub, int flags, const WRectangle *geom_,
     }
 }
 
+void split_move_subtree_right(WSplit *node, int w_delta)
+{
+    if(node==NULL)
+        return;
+
+    node->geom.x+=w_delta;
+
+    WSplitSplit *split=OBJ_CAST(node, WSplitSplit);
+    WSplitRegion *split_reg=OBJ_CAST(node, WSplitRegion);
+
+    if(split!=NULL){
+        split_move_subtree_right(split->tl, w_delta);
+        split_move_subtree_right(split->br, w_delta);
+    }else if(split_reg!=NULL){
+        region_fit(split_reg->reg, &node->geom, REGION_FIT_EXACT);
+    }
+}
+
+void split_move_up_right(WSplit *node, int w_delta)
+{
+    if(node->parent==NULL) {
+        return;
+    }
+
+    node->geom.w+=w_delta;
+
+    WSplitSplit *parent=OBJ_CAST(node->parent, WSplitSplit);
+
+    if(parent==NULL){
+        fprintf(stderr, "parent not a splitsplit?!\n");
+        return;
+    }
+
+    if(parent->tl == node){
+        /* We're the left node -> move the right subtree */
+        split_move_subtree_right(parent->br, w_delta);
+    }
+    split_move_up_right(parent, w_delta);
+}
+
+
+/*EXTL_DOC
+ * EXPERIMENTAL:
+ * Attempt to resize or move the split pushing all splits except the
+ * last
+ */
+EXTL_EXPORT_MEMBER
+void split_resize_right(WSplit *node, int new_width)
+{
+    /* Nice an easy at first - simply increase the with of `node` fixing
+       `node.x`, displacing all splits to the right */
+    /* Assume a WSplitRegion */
+    /* Assume no vertical splits */
+
+
+    WSplitRegion *splitreg=OBJ_CAST(node, WSplitRegion);
+    if(splitreg==NULL){
+        fprintf(stderr, "rqgeom_push requested for non-split-region\n");
+        return;
+    }
+
+    int w_delta = new_width - splitreg->reg->geom.w;
+
+    WSplit *root=split_find_root(node);
+    split_update_bounds(root, TRUE);
+
+    split_move_up_right(node, w_delta);
+
+    region_fit(splitreg->reg, &node->geom, REGION_FIT_EXACT);
+
+    split_update_bounds(root, TRUE);
+}
+
 
 /*EXTL_DOC
  * Attempt to resize and/or move the split tree starting at \var{node}.

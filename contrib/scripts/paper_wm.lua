@@ -382,7 +382,35 @@ defbindings("WGroupWS", {
               , kpress(META.."8", "_:nth_page(8):goto_focus()")
               , kpress(META.."9", "_:nth_page(9):goto_focus()")
               , kpress(META.."0", "_:last_page()")
+              , kpress(META.."N", "_:new_page():paper_goto()")
 })
+
+
+-- EXPERIMENTAL:
+function WFrame.resize_right(frame, delta)
+    frame  = current_frame()
+    local tiling = frame:manager()
+    local node = tiling:node_of(frame)
+    local new_w = frame:geom().w + delta
+    if new_w > 5 then
+        node:resize_right(new_w)
+    end
+end
+
+function WFrame.paper_maximize(frame)
+    local screen = frame:screen_of()
+    local view_g = screen:viewport_geom()
+    frame:resize_right(view_g.w)
+    local g = frame:geom()
+    right(frame, g.x - screen:viewport_origin())
+end
+
+-- Expand the frame utilizing all space occupied by partially visible
+-- frames
+function WFrame.paper_expand_free(frame)
+    -- TOOD:
+end
+
 
 defbindings("WFrame", {
                   kpress(META.."Page_Down", "_:next_page()")
@@ -391,4 +419,8 @@ defbindings("WFrame", {
                 , kpress(META.."comma", "_:prev_page()")
                 , kpress(META.."Shift+period", "left_snap(_)")
                 , kpress(META.."Shift+comma", "right_snap(_)")
+                --- Resizing
+                , kpress(META.."backslash", "WFrame:resize_right(30)")
+                , kpress(META.."plus", "WFrame:resize_right(-30)")
+                , kpress(META.."H", "WFrame:paper_maximize()")
 })
