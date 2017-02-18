@@ -205,14 +205,14 @@ function maximize_frame(frame)
 end
 
 -- Align left viewport edge with frame's left edge
-function left_snap(frame)
+function WFrame.snap_left(frame)
     local g = frame:geom()
     move_viewport(frame, g.x)
     return frame
 end
 
 -- Align right viewport edge with frame's right edge
-function right_snap(frame)
+function WFrame.snap_right(frame)
     local g = frame:geom()
     local view_g = frame:screen_of():viewport_geom()
     move_viewport(frame, g.x + g.w - view_g.w)
@@ -236,7 +236,7 @@ end
 
 function WGroupWS.first_page(ws)
     local first = ws:nth_page(1)
-    left_snap(first):goto_()
+    first:snap_left():goto_()
     return first
 end
 
@@ -244,7 +244,7 @@ function WGroupWS.last_page(ws)
     local tiling = current_tiling(ws)
     local rbuffer = tiling:farthest("right")
     local last = tiling:nextto(rbuffer, "left")
-    right_snap(last):goto_focus()
+    last:snap_right():goto_focus()
     return last
 end
 
@@ -301,7 +301,7 @@ function WFrame.next_page(frame)
     local w = next:geom().w
     local view_g = frame:screen_of():viewport_geom()
     if x + w >= view_g.w then
-        right_snap(next)
+        next:snap_right()
     end
     next:goto_()
 end
@@ -315,7 +315,7 @@ function WFrame.prev_page(frame)
     local screen = frame:screen_of()
     local x = screen:screen_to_viewport(prev:geom().x)
     if x <= 0 then
-        left_snap(prev)
+        prev:snap_left()
     end
     prev:goto_()
 end
@@ -346,9 +346,9 @@ function WRegion.ensure_in_viewport(reg)
 
     local view_g = screen:viewport_geom()
     if x < 0 then
-        left_snap(target_frame)
+        target_frame:snap_left()
     elseif x + g.w > view_g.w then
-        right_snap(target_frame)
+        target_frame:snap_right()
     end
 end
 
@@ -456,8 +456,8 @@ defbindings("WFrame", {
                 , kpress(META.."Page_Up", "_:prev_page()")
                 , kpress(META.."period", "_:next_page()")
                 , kpress(META.."comma", "_:prev_page()")
-                , kpress(META.."Shift+period", "left_snap(_):paper_goto()")
-                , kpress(META.."Shift+comma", "right_snap(_):paper_goto()")
+                , kpress(META.."Shift+period", "_:snap_left():paper_goto()")
+                , kpress(META.."Shift+comma", "_:snap_right():paper_goto()")
                 --- Resizing
                 , kpress(META.."backslash", "_:resize_right_delta(30)")
                 , kpress(META.."plus", "_:resize_right_delta(-30)")
