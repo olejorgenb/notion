@@ -258,15 +258,16 @@ function WGroupWS.new_page(ws)
     return new
 end
 
--- Insert a blank page to the right of current frame
-function WGroupWS.insert_page(ws)
+-- Insert a blank page to the right/left of the current frame
+function WGroupWS.insert_page(ws, direction)
+    direction = direction or "right"
     local tiling = ws:current()
     local frame = tiling:current()
     local frame_g = frame:geom()
     local view_g = ws:screen_of():viewport_geom()
 
     frame:resize_right(view_g.w)
-    local new = WTiling.split_at(tiling, frame, 'right', false)
+    local new = WTiling.split_at(tiling, frame, direction, false)
     frame:resize_right(frame_g.w)
     frame:paper_goto()
     return new
