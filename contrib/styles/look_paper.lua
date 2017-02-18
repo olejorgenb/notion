@@ -97,6 +97,19 @@ de.defstyle("tab", {
         shadow_colour = decoration.inactive.foreground.selected,
         foreground_colour = decoration.inactive.foreground.selected
     }),
+
+    -- urgent hint style
+    de.substyle("*-*-*-unselected-activity", {
+                    shadow_colour = "#901010",
+                    background_colour = decoration.inactive.background,
+                    foreground_colour = "#901010",
+    }),
+
+    de.substyle("*-*-*-selected-activity", {
+                    shadow_colour = "#b03030",
+                    background_colour = decoration.inactive.background,
+                    foreground_colour = "#b03030",
+    }),
 })
 
 de.defstyle("tab-frame-floating", {
