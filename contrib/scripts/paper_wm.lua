@@ -473,4 +473,5 @@ defbindings("WFrame", {
                 , kpress(META.."H", "_:paper_maximize()")
                 --- Page creation/deletion
                 , kpress(META.."D", "_:delete_page()")
+                , mclick("Button1@tab", "_:ensure_in_viewport() _:p_switch_tab()")
 })
