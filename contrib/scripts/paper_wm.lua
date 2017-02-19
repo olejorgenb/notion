@@ -14,13 +14,13 @@ for i, g in ipairs(display_geoms) do
     viewport_geoms[i] = view_g
 end
 
-function WScreen.viewport_geom(screen)
-    return viewport_geoms[screen:id()+1]
+function WMPlex.viewport_geom(screen)
+    return viewport_geoms[screen:screen_of():id()+1]
 end
 
 -- Utility functions
 function current_workspace(screen)
-    screen = screen or ioncore.current():screen_of()
+    screen = screen or ioncore.current():workspace_holder_of()
     return screen:current()
 end
 
@@ -42,6 +42,15 @@ function frame_of(reg)
     return reg
 end
 
+
+-- Find the frame that holds the current workspace
+-- this is like screen_of
+function WRegion.workspace_holder_of(reg)
+    -- TODO: make it proper
+    local workspace = workspace_of(reg)
+    return workspace:parent()
+end
+
 function find_current(mng, classname)
     while mng.current and mng.__typename ~= classname do
         mng = mng:current()
@@ -57,30 +66,30 @@ function is_buffer_frame(reg)
     return reg:name():has_prefix("*right*")
 end
 
-function WScreen.screen_left(screen, amount)
+function WMPlex.screen_left(screen, amount)
     screen:rqgeom{x=screen:geom().x-amount} -- LEFT
 end
 
-function WScreen.screen_right(screen, amount)
+function WMPlex.screen_right(screen, amount)
     screen:rqgeom{x=screen:geom().x+amount} -- RIGHT
 end
 
-function WScreen.move_screen(screen, x)
+function WMPlex.move_screen(screen, x)
     local y = 0
     screen:rqgeom({x=x})
 end
 
 -- Align the viewport origin with sx
 function move_viewport(reg, sx)
-    local screen = reg:screen_of()
+    local screen = reg:workspace_holder_of()
     screen:screen_left(screen:screen_to_viewport(sx))
 end
 
 function left(reg, amount)
-    reg:screen_of():screen_right(amount)
+    reg:workspace_holder_of():screen_right(amount)
 end
 function right(reg, amount)
-    reg:screen_of():screen_left(amount)
+    reg:workspace_holder_of():screen_left(amount)
 end
 
 function unsetup(screen_id)
@@ -150,7 +159,7 @@ function adapt_workspace(ws)
                              .. ((tiling and tiling.__typename) or "nil"))
         return false
     end
-    local screen = ws:screen_of()
+    local screen = ws:workspace_holder_of()
     local view_g = screen:viewport_geom()
     local b, new_b = ensure_buffer(tiling, "right", screen:geom().w - view_g.w)
     if new_b then
@@ -182,22 +191,22 @@ function switch_workspace(dir)
 end
 
 -- in screen coordinates
-function WScreen.viewport_origin(screen)
+function WMPlex.viewport_origin(screen)
     return -screen:geom().x + overlap.x
 end
 
 -- screen_to_viewport(viewport_to_screen(100))
 
-function WScreen.screen_to_viewport(screen, sx)
+function WMPlex.screen_to_viewport(screen, sx)
     return sx - screen:viewport_origin()
 end
 
-function WScreen.viewport_to_screen(screen, x)
+function WMPlex.viewport_to_screen(screen, x)
     return screen:viewport_origin() + x
 end
 
 function maximize_frame(frame)
-    local screen = frame:screen_of()
+    local screen = frame:workspace_holder_of()
     local view_g = screen:viewport_geom()
     frame:rqgeom({w=view_g.w})
     local g = frame:geom()
@@ -214,7 +223,7 @@ end
 -- Align right viewport edge with frame's right edge
 function WFrame.snap_right(frame)
     local g = frame:geom()
-    local view_g = frame:screen_of():viewport_geom()
+    local view_g = frame:workspace_holder_of():viewport_geom()
     move_viewport(frame, g.x + g.w - view_g.w)
     return frame
 end
@@ -253,7 +262,7 @@ function WGroupWS.new_page(ws)
     local tiling = ws:current()
     local rbuffer = tiling:farthest("right")
     local new = WTiling.split_at(tiling, rbuffer, 'left', false)
-    local view_g = ws:screen_of():viewport_geom()
+    local view_g = ws:workspace_holder_of():viewport_geom()
     new:rqgeom({w=view_g.w/2})
     return new
 end
@@ -264,7 +273,7 @@ function WGroupWS.insert_page(ws, direction)
     local tiling = ws:current()
     local frame = tiling:current()
     local frame_g = frame:geom()
-    local view_g = ws:screen_of():viewport_geom()
+    local view_g = ws:workspace_holder_of():viewport_geom()
 
     frame:resize_right(view_g.w)
     local new = WTiling.split_at(tiling, frame, direction, false)
@@ -297,10 +306,10 @@ function WFrame.next_page(frame)
     if next == tiling:farthest("right") then
         return
     end
-    local screen = frame:screen_of()
+    local screen = frame:workspace_holder_of()
     local x = screen:screen_to_viewport(next:geom().x)
     local w = next:geom().w
-    local view_g = frame:screen_of():viewport_geom()
+    local view_g = frame:workspace_holder_of():viewport_geom()
     if x + w >= view_g.w then
         next:snap_right()
     end
@@ -313,7 +322,7 @@ function WFrame.prev_page(frame)
     if prev == tiling:farthest("right") then
         return
     end
-    local screen = frame:screen_of()
+    local screen = frame:workspace_holder_of()
     local x = screen:screen_to_viewport(prev:geom().x)
     if x <= 0 then
         prev:snap_left()
@@ -335,7 +344,7 @@ function WRegion.ensure_in_viewport(reg)
         target_frame = frame_of(reg)
     end
 
-    local screen = reg:screen_of()
+    local screen = reg:workspace_holder_of()
 
     if not target_frame then
         debug.print_line("Could not find a target frame")
@@ -405,7 +414,7 @@ end
 
 function WFrame.paper_maximize(frame)
     -- IMPROVEMENT: Remember unmaximized size (need aux. weak table)
-    local screen = frame:screen_of()
+    local screen = frame:workspace_holder_of()
     local view_g = screen:viewport_geom()
     frame:resize_right(view_g.w)
     local g = frame:geom()
