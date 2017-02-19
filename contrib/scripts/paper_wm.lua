@@ -426,6 +426,12 @@ defbindings("WScreen", {
               , kpress(META.."Down", "switch_workspace(-1)")
 
               , mdrag(META.."Button1", "WFrame.p_move(_)")
+
+              --- MRU lists/menus
+              , kpress(META.."Tab", "mod_menu.grabmenu(_, _sub, 'focuslist', {sizepolicy = 'center', big=true })")
+              , submap(META.."space", {
+                           kpress("Tab", "mod_menu.grabmenu(_, _sub, 'workspacefocuslist', { sizepolicy = 'center', big=true})")
+                      })
 })
 
 defbindings("WGroupWS", {
@@ -441,7 +447,7 @@ defbindings("WGroupWS", {
               , kpress(META.."8", "_:nth_page(8):goto_focus()")
               , kpress(META.."9", "_:nth_page(9):goto_focus()")
               , kpress(META.."0", "_:last_page()")
-              -- Page creation/deletion
+              --- Page creation/deletion
               , kpress(META.."N", "_:insert_page():paper_goto()")
               , kpress(META.."Shift+N", "_:new_page():paper_goto()")
 })
@@ -458,10 +464,6 @@ defbindings("WFrame", {
                 , kpress(META.."backslash", "_:resize_right_delta(30)")
                 , kpress(META.."plus", "_:resize_right_delta(-30)")
                 , kpress(META.."H", "_:paper_maximize()")
-                , kpress(META.."Tab", "mod_menu.grabmenu(_, _sub, 'focuslist', {sizepolicy = 'center', big=true })")
-                , submap(META.."space", {
-                           kpress("Tab", "mod_menu.grabmenu(_, _sub, 'workspacefocuslist', { sizepolicy = 'center', big=true})")
-                        })
-                -- Page creation/deletion
+                --- Page creation/deletion
                 , kpress(META.."D", "_:delete_page()")
 })
