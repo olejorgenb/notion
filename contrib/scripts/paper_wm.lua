@@ -432,8 +432,6 @@ defbindings("WScreen", {
               , kpress(META.."Up", "switch_workspace(1)")
               , kpress(META.."Down", "switch_workspace(-1)")
 
-              , mdrag(META.."Button1", "WFrame.p_move(_)")
-
               --- MRU lists/menus
               , kpress(META.."Tab", "mod_menu.grabmenu(_, _sub, 'focuslist', {sizepolicy = 'center', big=true })")
               , submap(META.."space", {
@@ -457,8 +455,9 @@ defbindings("WGroupWS", {
               --- Page creation/deletion
               , kpress(META.."N", "_:insert_page():paper_goto()")
               , kpress(META.."Shift+N", "_:new_page():paper_goto()")
-})
 
+              -- , mdrag(META.."Button1", "WRegion.p_move(_)") -- comment in to move the whole workspace with the mouse
+})
 
 defbindings("WFrame", {
                   kpress(META.."Page_Down", "_:next_page()")
