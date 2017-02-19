@@ -1,5 +1,5 @@
 
-overlap = {x = 10, y = 5}
+overlap = {x = 10, y = 0}
 
 mod_xinerama.query_screens()
 display_geoms = mod_xinerama.query_screens()
