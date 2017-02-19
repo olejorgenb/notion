@@ -92,13 +92,6 @@ function right(reg, amount)
     reg:workspace_holder_of():screen_left(amount)
 end
 
-function unsetup(screen_id)
-    local screen = ioncore.find_screen_id(screen_id)
-    local display_g = mod_xinerama.query_screens()[screen_id() + 1]
-    screen:rqgeom({x=0, y=0, w=display_g.w, h=display_g.h})
-end
-
-
 -- return true if a new buffer was created
 function ensure_buffer(tiling, dir, buffer_w)
     local buffer_maybe = tiling:farthest(dir)
@@ -115,29 +108,6 @@ function ensure_buffer(tiling, dir, buffer_w)
     buffer:set_mode("tiled-alt")
 
     return buffer, buffer ~= buffer_maybe
-end
-
-function setup(screen_id, adapt_workspaces)
-    screen = ioncore.find_screen_id(screen_id)
-    view_g = screen:viewport_geom()
-
-    x_slack = 6*view_g.w
-
-    local screen_g = screen:geom()
-    -- This isn't idempotent because of 
-    screen:rqgeom{ x = view_g.x,
-                   y = view_g.y,
-                   w = view_g.w + x_slack,
-                   h = view_g.h }
-
-    if adapt_workspaces then
-        local wss = {}
-        screen:managed_i(function(ws, i) table.insert(wss, ws) return true end)
-        for i, ws in ipairs(wss) do
-            -- managed_i operates in protected mode
-            adapt_workspace(ws, x_slack)
-        end
-    end
 end
 
 function unadapt_workspace(ws)
