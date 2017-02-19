@@ -424,12 +424,7 @@ end
 
 
 defbindings("WScreen", {
-              kpress(META.."Left", "left(_, _:viewport_geom().w/2)")
-              , kpress(META.."Right", "right(_, _:viewport_geom().w/2)")
-              , kpress(META.."Shift+Left", "left(_, _:viewport_geom().w)")
-              , kpress(META.."Shift+Right", "right(_, _:viewport_geom().w)")
-
-              , kpress(META.."Up", "switch_workspace(1)")
+                kpress(META.."Up", "switch_workspace(1)")
               , kpress(META.."Down", "switch_workspace(-1)")
 
               --- MRU lists/menus
@@ -437,6 +432,12 @@ defbindings("WScreen", {
               , submap(META.."space", {
                            kpress("Tab", "mod_menu.grabmenu(_, _sub, 'workspacefocuslist', { sizepolicy = 'center', big=true})")
                       })
+})
+
+defbindings("WFrame.toplevel", {
+                  kpress(META.."Left", "left(_, _:viewport_geom().w/2)")
+                , kpress(META.."Right", "right(_, _:viewport_geom().w/2)")
+
 })
 
 defbindings("WGroupWS", {
