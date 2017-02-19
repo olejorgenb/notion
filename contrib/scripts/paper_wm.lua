@@ -44,11 +44,14 @@ end
 
 
 -- Find the frame that holds the current workspace
--- this is like screen_of
+-- returns nil if the parent of reg's workspace isn't a frame
 function WRegion.workspace_holder_of(reg)
-    -- TODO: make it proper
     local workspace = workspace_of(reg)
-    return workspace:parent()
+    local parent = workspace and workspace:parent()
+    if parent and parent.__typename == "WFrame" then
+        return parent
+    end
+    return nil
 end
 
 function find_current(mng, classname)
@@ -307,14 +310,18 @@ end
 --
 -- Designed as a support function for `goto_focus`.
 function WRegion.ensure_in_viewport(reg)
+
+    local screen = reg:workspace_holder_of()
+    if screen == nil then
+        return
+    end
+
     local target_frame = nil
     if reg.__typename == "WGroupWS" then
         target_frame = find_current(reg, "WFrame")
     else
         target_frame = frame_of(reg)
     end
-
-    local screen = reg:workspace_holder_of()
 
     if not target_frame then
         debug.print_line("Could not find a target frame")
