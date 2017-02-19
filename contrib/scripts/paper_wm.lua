@@ -430,6 +430,22 @@ end
 -- IDEA: slurp / barf for pages (assoc lisp editing mode)
 
 
+function WScreen.create_workspace(screen, name, geom)
+    local rootws = ioncore.lookup_region("*rootws*")
+    if not rootws then
+        rootws = ioncore.create_ws(screen, {name="*rootws*", sizepolicy="full"}, "empty")
+    end
+    local geom = geom or screen:geom()
+    geom.w = 20000
+    local wsholder = rootws:attach_new({name="*workspaceholder*", type="WFrame", geom=geom})
+    wsholder:set_mode("tiled-alt")
+    local workspace = ioncore.create_ws(wsholder, {name=name, sizepolicy="full"}, "default")
+    adapt_workspace(workspace)
+
+    return workspace
+end
+
+
 defbindings("WScreen", {
               kpress(META.."Left", "left(_, _:viewport_geom().w/2)")
               , kpress(META.."Right", "right(_, _:viewport_geom().w/2)")
