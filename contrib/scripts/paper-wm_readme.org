@@ -63,3 +63,14 @@ ABC|LD|
 goto A
 |LA|BCD
   ^
+
+* Issues
+** Urgent hint infowin is not shown for urgent regions in paper-workspaces
+   This is because the hint is only shown when the urgent region is unmapped. In the /workspaces-float-in-viewport/ model all regions is mapped at all time.
+
+   Note that it would'be been a problem (but slightly) different for the /faked-view-port-move-screen/ model too. The urgent infowin would not have shown when the region was out of view in this case.
+
+   Note that the infowin show for urgent regions in scratchpads.
+
+   A workaround is to exploit a almost-certainly-a-bug: setting ~activity_notification_on_all_screens~ force the infowin to be shown. (see ~screen_managed_activity~)
+
