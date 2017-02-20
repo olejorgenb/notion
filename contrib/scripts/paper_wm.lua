@@ -106,6 +106,7 @@ end
 function WMPlex.animate_move_right(ws_holder, delta, duration, curve)
     local duration = duration or 250
     local time = 0
+    local travelled = 0
     local t_delta = 10
 
     -- linear curve
@@ -116,12 +117,14 @@ function WMPlex.animate_move_right(ws_holder, delta, duration, curve)
 
     local rest = 0
     function animate ()
-        if time >= duration then
-            return
-        end
         local raw_step = curve(time, t_delta) + rest
         local step = math.floor(raw_step)
         rest = raw_step - step
+        if math.abs(travelled + step) > math.abs(delta) then
+            ws_holder:screen_right(delta - travelled)
+            return
+        end
+        travelled = travelled + step
         ws_holder:screen_right(step)
         time = time + t_delta
 
