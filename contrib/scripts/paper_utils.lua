@@ -47,4 +47,47 @@ end
 
 ---- Paper WM specific
 
--- paper = {}
+paper = paper or {}
+
+-- Create a mini workspace (aka "paper strip"?) and tile it vertically with `ws` (below)
+-- Can be useful for testing
+function paper.setup_ministrip(ws, name, height)
+    if ws:aux("ministrip") then
+        debug.print_line(ws:name().." already have a strip")
+        return
+    end
+
+    local name = name or "mini-strip"
+    local height = height or 100
+    local screen = ws:screen_of()
+    local viewport_h = screen:viewport_geom().h
+    local strip = screen:create_workspace(name,
+                                          {   x = 0
+                                            , y = viewport_h - height
+                                            , h = height })
+    local wsp = ws:workspace_holder_of()
+    local wsgeom = wsp:geom()
+    wsp:rqgeom({   y = 0
+                 , h = viewport_h - height - 1 })
+    ws:aux().ministrip = strip
+    return strip
+end
+
+function paper.unsetup_ministrip(ws)
+    local strip = ws:aux().ministrip
+    if not strip then
+        return
+    end
+    strip:parent():rqclose()
+
+    local vp_g = ws:screen_of():viewport_geom()
+    ws:workspace_holder_of():rqgeom({ y = vp_g.y, h = vp_g.h })
+    ws:aux().ministrip = nil
+end
+
+function paper.setup_workarounds()
+    ioncore.set {
+        activity_notification_on_all_screens = true -- See paper-wm_readme.org "issues" section
+    }
+end
+
