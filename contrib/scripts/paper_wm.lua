@@ -136,7 +136,7 @@ function adapt_workspace(ws)
     local view_g = screen:viewport_geom()
     local b, new_b = ensure_buffer(tiling, "right", screen:geom().w - view_g.w)
     if new_b then
-        left_snap(ws:first_page())
+        ws:first_page():snap_left()
     end
     return true
 end
