@@ -402,6 +402,7 @@ function WFrame.paper_maximize(frame)
         frame:resize_right(view_g.w)
         right(frame, g.x - ws_holder:viewport_origin())
     end
+    return frame
 end
 
 -- Expand the frame utilizing all space occupied by partially visible
@@ -476,7 +477,7 @@ defbindings("WFrame", {
                 --- Resizing
                 , kpress(META.."backslash", "_:resize_right_delta(30)")
                 , kpress(META.."plus", "_:resize_right_delta(-30)")
-                , kpress(META.."H", "_:paper_maximize()")
+                , kpress(META.."H", "_:paper_maximize():goto_focus()")
                 --- Page creation/deletion
                 , kpress(META.."D", "_:delete_page()")
                 , mclick("Button1@tab", "_:ensure_in_viewport() _:p_switch_tab()")
