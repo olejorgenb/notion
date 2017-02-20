@@ -19,9 +19,9 @@ function WMPlex.viewport_geom(screen)
 end
 
 -- Utility functions
-function current_workspace(screen)
-    screen = screen or ioncore.current():workspace_holder_of()
-    return screen:current()
+function current_workspace(ws_holder)
+    ws_holder = ws_holder or ioncore.current():workspace_holder_of()
+    return ws_holder:current()
 end
 
 function current_tiling(ws)
@@ -69,23 +69,23 @@ function is_buffer_frame(reg)
     return reg:name():has_prefix("*right*")
 end
 
-function WMPlex.screen_left(screen, amount)
-    screen:rqgeom{x=screen:geom().x-amount} -- LEFT
+function WMPlex.screen_left(ws_holder, amount)
+    ws_holder:rqgeom{x=ws_holder:geom().x-amount} -- LEFT
 end
 
-function WMPlex.screen_right(screen, amount)
-    screen:rqgeom{x=screen:geom().x+amount} -- RIGHT
+function WMPlex.screen_right(ws_holder, amount)
+    ws_holder:rqgeom{x=ws_holder:geom().x+amount} -- RIGHT
 end
 
-function WMPlex.move_screen(screen, x)
+function WMPlex.move_screen(ws_holder, x)
     local y = 0
-    screen:rqgeom({x=x})
+    ws_holder:rqgeom({x=x})
 end
 
 -- Align the viewport origin with sx
 function move_viewport(reg, sx)
-    local screen = reg:workspace_holder_of()
-    screen:screen_left(screen:screen_to_viewport(sx))
+    local ws_holder = reg:workspace_holder_of()
+    ws_holder:screen_left(ws_holder:screen_to_viewport(sx))
 end
 
 function left(reg, amount)
@@ -132,9 +132,9 @@ function adapt_workspace(ws)
                              .. ((tiling and tiling.__typename) or "nil"))
         return false
     end
-    local screen = ws:workspace_holder_of()
-    local view_g = screen:viewport_geom()
-    local b, new_b = ensure_buffer(tiling, "right", screen:geom().w - view_g.w)
+    local ws_holder = ws:workspace_holder_of()
+    local view_g = ws_holder:viewport_geom()
+    local b, new_b = ensure_buffer(tiling, "right", ws_holder:geom().w - view_g.w)
     if new_b then
         ws:first_page():snap_left()
     end
@@ -163,27 +163,27 @@ function switch_workspace(dir)
   target_frame:goto_()
 end
 
--- in screen coordinates
-function WMPlex.viewport_origin(screen)
-    return -screen:geom().x + overlap.x
+-- in ws_holder coordinates
+function WMPlex.viewport_origin(ws_holder)
+    return -ws_holder:geom().x + overlap.x
 end
 
 -- screen_to_viewport(viewport_to_screen(100))
 
-function WMPlex.screen_to_viewport(screen, sx)
-    return sx - screen:viewport_origin()
+function WMPlex.screen_to_viewport(ws_holder, sx)
+    return sx - ws_holder:viewport_origin()
 end
 
-function WMPlex.viewport_to_screen(screen, x)
-    return screen:viewport_origin() + x
+function WMPlex.viewport_to_screen(ws_holder, x)
+    return ws_holder:viewport_origin() + x
 end
 
 function maximize_frame(frame)
-    local screen = frame:workspace_holder_of()
-    local view_g = screen:viewport_geom()
+    local ws_holder = frame:workspace_holder_of()
+    local view_g = ws_holder:viewport_geom()
     frame:rqgeom({w=view_g.w})
     local g = frame:geom()
-    right(frame, g.x - screen:viewport_origin())
+    right(frame, g.x - ws_holder:viewport_origin())
 end
 
 -- Align left viewport edge with frame's left edge
@@ -279,8 +279,8 @@ function WFrame.next_page(frame)
     if next == tiling:farthest("right") then
         return
     end
-    local screen = frame:workspace_holder_of()
-    local x = screen:screen_to_viewport(next:geom().x)
+    local ws_holder = frame:workspace_holder_of()
+    local x = ws_holder:screen_to_viewport(next:geom().x)
     local w = next:geom().w
     local view_g = frame:workspace_holder_of():viewport_geom()
     if x + w >= view_g.w then
@@ -295,8 +295,8 @@ function WFrame.prev_page(frame)
     if prev == tiling:farthest("right") then
         return
     end
-    local screen = frame:workspace_holder_of()
-    local x = screen:screen_to_viewport(prev:geom().x)
+    local ws_holder = frame:workspace_holder_of()
+    local x = ws_holder:screen_to_viewport(prev:geom().x)
     if x <= 0 then
         prev:snap_left()
     end
@@ -311,8 +311,8 @@ end
 -- Designed as a support function for `goto_focus`.
 function WRegion.ensure_in_viewport(reg)
 
-    local screen = reg:workspace_holder_of()
-    if screen == nil then
+    local ws_holder = reg:workspace_holder_of()
+    if ws_holder == nil then
         return
     end
 
@@ -329,9 +329,9 @@ function WRegion.ensure_in_viewport(reg)
     end
 
     local g = target_frame:geom()
-    local x = screen:screen_to_viewport(g.x)
+    local x = ws_holder:screen_to_viewport(g.x)
 
-    local view_g = screen:viewport_geom()
+    local view_g = ws_holder:viewport_geom()
     if x < 0 then
         target_frame:snap_left()
     elseif x + g.w > view_g.w then
@@ -391,11 +391,11 @@ end
 
 function WFrame.paper_maximize(frame)
     -- IMPROVEMENT: Remember unmaximized size (need aux. weak table)
-    local screen = frame:workspace_holder_of()
-    local view_g = screen:viewport_geom()
+    local ws_holder = frame:workspace_holder_of()
+    local view_g = ws_holder:viewport_geom()
     frame:resize_right(view_g.w)
     local g = frame:geom()
-    right(frame, g.x - screen:viewport_origin())
+    right(frame, g.x - ws_holder:viewport_origin())
 end
 
 -- Expand the frame utilizing all space occupied by partially visible
