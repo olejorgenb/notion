@@ -450,7 +450,7 @@ function WScreen.create_workspace(screen, name, geom)
     geom.w = 20000
     local wsholder = rootws:attach_new({name="*workspaceholder*", type="WFrame", geom=geom})
     wsholder:set_mode("tiled-alt")
-    local workspace = ioncore.create_ws(wsholder, {name=name, sizepolicy="full"}, "default")
+    local workspace = ioncore.create_ws(wsholder, {name=name, sizepolicy="full"}, "full")
     adapt_workspace(workspace)
 
     return workspace
