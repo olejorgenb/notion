@@ -194,28 +194,6 @@ function adapt_workspace(ws)
     return true
 end
 
--- dir == 1 | -1
-function switch_workspace(dir)
-  local screen = ioncore.find_screen_id(screen_id)
-
-  local cur_ws = screen:current()
-  local i = screen:get_index(cur_ws)
-
-  local target_ws = screen:mx_nth(i+dir)
-
-  local cur_frame = current_frame(cur_ws)
-  local target_frame = current_frame(target_ws)
-
-  local a = cur_frame:geom()
-  local b = target_frame:geom()
-
-  local dx = b.x - a.x
-
-  screen:rqgeom({x=screen:geom().x-dx})
-
-  target_frame:goto_()
-end
-
 -- in ws_holder coordinates
 function WMPlex.viewport_origin(ws_holder)
     return -ws_holder:geom().x + overlap.x
