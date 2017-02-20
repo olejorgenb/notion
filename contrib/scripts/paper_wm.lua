@@ -102,6 +102,33 @@ function WMPlex.move_screen(ws_holder, x)
     ws_holder:rqgeom({x=x})
 end
 
+-- Simple animation along the x axis
+function WMPlex.animate_move_right(ws_holder, delta, duration, curve)
+    local duration = duration or 250
+    local time = 0
+    local t_delta = 10
+
+    -- linear curve
+    function linear(time)
+        return delta/duration*t_delta
+    end
+    curve = curve or linear
+
+    function animate ()
+        if time >= duration then
+            return
+        end
+        local step = math.floor(curve(time, t_delta))
+        ws_holder:screen_right(step)
+        time = time + t_delta
+
+        -- set up new frame
+        local timer = ioncore.create_timer()
+        timer:set(t_delta, animate)
+    end
+    animate()
+end
+
 -- Align the viewport origin with sx
 function move_viewport(reg, sx)
     local ws_holder = reg:workspace_holder_of()
