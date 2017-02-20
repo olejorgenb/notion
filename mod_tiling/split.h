@@ -148,6 +148,8 @@ DYNFUN void splitinner_do_rqsize(WSplitInner *p, WSplit *node,
                                  WRectangle *rg, bool tryonly);
 extern ExtlTab split_rqgeom(WSplit *node, ExtlTab g);
 
+extern void split_move_subtree_right(WSplit *node, int w_delta);
+
 /* Split */
 
 extern void splittree_rqgeom(WSplit *node, int flags,

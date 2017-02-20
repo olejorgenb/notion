@@ -1206,7 +1206,106 @@ WSplitRegion *tiling_node_of(WTiling *ws, WRegion *reg)
 /*}}}*/
 
 
-/*{{{ Flip and transpose */
+/*{{{ Flip, swap, transpose, etc. */
+
+static WSplit **node_home(WSplitSplit *parent, WSplit *node)
+{
+    if(parent->tl==node)
+        return &parent->tl;
+    else if(parent->br==node)
+        return &parent->br;
+    else
+        return NULL;
+}
+
+
+/* Propagates the geometry changes in leftmost up and to the right */
+static void propgate_geom_change_right(WSplit *leftmost)
+{
+    if(leftmost->parent==NULL)
+        return;
+    
+    WSplitSplit *parent=OBJ_CAST(leftmost->parent, WSplitSplit);
+    if(parent==NULL){
+        fprintf(stderr, "Unexpected parent type\n");
+        return;
+    }
+
+    if(parent->tl==leftmost){
+        // we've probably displaced ->tr
+        // Simply move the whole right sub-tree
+        int delta_x = (leftmost->geom.x+leftmost->geom.w) - parent->br->geom.x;
+        split_move_subtree_right(parent->br, delta_x);
+        /* not needed due to update-from-children below? */
+        leftmost->parent->split.geom.w += delta_x;
+    }
+
+    splitsplit_update_geom_from_children(parent);
+
+    propgate_geom_change_right((WSplit*)leftmost->parent);
+}
+
+/* NOTE: rot_rs_rotate_left etc. might be possible to use as alternatives
+   primitives to shift a "page" right/left */
+/* EXPERIMENTAL: Works somehow as long as there's no vertical splits ^^
+   Should probably do some split_update_bounds? */
+/* Might as well take WRegions as argument? (although we want to support
+   non-leaves at some point) */
+EXTL_EXPORT_MEMBER
+void tiling_swap_leaves(WTiling *tiling, WSplit *a, WSplit *b)
+{
+    if(a==NULL || b==NULL){
+        return;
+    }
+
+    if(split_find_root((WSplit*)a) != split_find_root((WSplit*)b)){
+        fprintf(stderr, "Tried to swap leaves from different trees!\n");
+        return;
+    }
+
+    if(!OBJ_IS(a, WSplitRegion) || !OBJ_IS(b, WSplitRegion)){
+        /* want to support this to able to swap pages containing vertical splits
+        though */
+        fprintf(stderr, "Tried to swap non leaves\n");
+        return;
+    }
+
+    WSplitSplit *pa=OBJ_CAST(a->parent, WSplitSplit);
+    WSplitSplit *pb=OBJ_CAST(b->parent, WSplitSplit);
+
+    WSplit **ha=node_home(pa, a);
+    WSplit **hb=node_home(pb, b);
+
+    /* swap x positions (assume full-height splits. ie. equal y's) */
+    int temp=a->geom.x;
+    a->geom.x = b->geom.x;
+    b->geom.x = temp;
+
+    /* swap! (making the tree inconsistent) */
+    *ha=b;
+    *hb=a;
+    b->parent=(WSplitInner*)pa;
+    a->parent=(WSplitInner*)pb;
+
+    WSplit *leftmost = NULL;
+    WSplit *rightmost = NULL;
+
+    if(a->geom.x < b->geom.x) {
+        leftmost=a;
+        rightmost=b;
+    }else{
+        leftmost=b;
+        rightmost=a;
+    }
+
+    /* simply walk the tree correcting the geometry */
+    propgate_geom_change_right(leftmost);
+    propgate_geom_change_right(rightmost);
+
+    region_fit(((WSplitRegion*)leftmost)->reg, &leftmost->geom, REGION_FIT_EXACT);
+    region_fit(((WSplitRegion*)rightmost)->reg, &rightmost->geom, REGION_FIT_EXACT);
+}
+
 
 
 static WSplitSplit *get_at_split(WTiling *ws, WRegion *reg)
