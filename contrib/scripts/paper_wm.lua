@@ -198,14 +198,6 @@ function WMPlex.viewport_to_screen(ws_holder, x)
     return ws_holder:viewport_origin() + x
 end
 
-function maximize_frame(frame)
-    local ws_holder = frame:workspace_holder_of()
-    local view_g = ws_holder:viewport_geom()
-    frame:rqgeom({w=view_g.w})
-    local g = frame:geom()
-    right(frame, g.x - ws_holder:viewport_origin())
-end
-
 -- Align left viewport edge with frame's left edge
 function WFrame.snap_left(frame)
     local g = frame:geom()
