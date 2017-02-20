@@ -52,6 +52,8 @@ paper = paper or {}
 -- Create a mini workspace (aka "paper strip"?) and tile it vertically with `ws` (below)
 -- Can be useful for testing
 function paper.setup_ministrip(ws, name, height)
+    ws = ws or current_workspace()
+
     if ws:aux("ministrip") then
         debug.print_line(ws:name().." already have a strip")
         return
