@@ -114,11 +114,14 @@ function WMPlex.animate_move_right(ws_holder, delta, duration, curve)
     end
     curve = curve or linear
 
+    local rest = 0
     function animate ()
         if time >= duration then
             return
         end
-        local step = math.floor(curve(time, t_delta))
+        local raw_step = curve(time, t_delta) + rest
+        local step = math.floor(raw_step)
+        rest = raw_step - step
         ws_holder:screen_right(step)
         time = time + t_delta
 
