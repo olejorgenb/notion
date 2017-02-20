@@ -1449,6 +1449,7 @@ void split_move_subtree_right(WSplit *node, int w_delta)
         return;
 
     node->geom.x+=w_delta;
+    split_update_bounds(node, FALSE);
 
     WSplitSplit *split=OBJ_CAST(node, WSplitSplit);
     WSplitRegion *split_reg=OBJ_CAST(node, WSplitRegion);
@@ -1468,6 +1469,7 @@ void split_move_up_right(WSplit *node, int w_delta)
     }
 
     node->geom.w+=w_delta;
+    split_update_bounds(node, FALSE);
 
     WSplitSplit *parent=OBJ_CAST(node->parent, WSplitSplit);
 
@@ -1510,6 +1512,13 @@ void split_resize_right(WSplit *node, int new_width)
     split_update_bounds(root, TRUE);
 
     split_move_up_right(node, w_delta);
+
+    /* Find right buffer */
+    WSplitFilter *filter=NULL; //(any ? NULL : nostdispfilter);
+    WSplit *right_buffer=split_current_todir(root, PRIMN_BR, PRIMN_BR, filter);
+    /* Reduce the width by w_delta. Should work to use split_move_up_right,
+       since the path should only contains right nodes */
+    split_move_up_right(right_buffer, -w_delta);
 
     region_fit(splitreg->reg, &node->geom, REGION_FIT_EXACT);
 
