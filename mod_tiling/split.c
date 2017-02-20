@@ -1462,6 +1462,28 @@ void split_move_subtree_right(WSplit *node, int w_delta)
     }
 }
 
+/* Change this node's width (without moving the origo). When resizing the
+   descendants only the rightmost node is touched.
+   TODO: Does not handle cases where a rightmost node is assigned negative width
+   IMPROVEMENT: Could maybe use one of the existing split_rqgeom methods instead?
+*/
+void split_resize_descentdant_right(WSplit *node, int w_delta)
+{
+    node->geom.w+=w_delta;
+    split_update_bounds(node, FALSE);
+
+    WSplitSplit *split=OBJ_CAST(node, WSplitSplit);
+    WSplitRegion *split_reg=OBJ_CAST(node, WSplitRegion);
+
+    if(split!=NULL){
+        if(split->dir == SPLIT_VERTICAL)
+            split_resize_descentdant_right(split->tl, w_delta);
+        split_resize_descentdant_right(split->br, w_delta);
+    }else if(split_reg!=NULL){
+        region_fit(split_reg->reg, &node->geom, REGION_FIT_EXACT);
+    }
+}
+
 void split_move_up_right(WSplit *node, int w_delta)
 {
     if(node->parent==NULL) {
@@ -1472,17 +1494,26 @@ void split_move_up_right(WSplit *node, int w_delta)
     split_update_bounds(node, FALSE);
 
     WSplitSplit *parent=OBJ_CAST(node->parent, WSplitSplit);
+    WSplit *other=NULL;
 
     if(parent==NULL){
         fprintf(stderr, "parent not a splitsplit?!\n");
         return;
     }
 
-    if(parent->tl == node){
+    if(parent->tl==node)
+        other=parent->br;
+    else
+        other=parent->tl;
+
+    if(parent->dir == SPLIT_VERTICAL){
+        split_resize_descentdant_right(other, w_delta);
+    }else if(parent->tl == node){
         /* We're the left node -> move the right subtree */
         split_move_subtree_right(parent->br, w_delta);
     }
-    split_move_up_right(parent, w_delta);
+
+    split_move_up_right((WSplit*)parent, w_delta);
 }
 
 
@@ -1496,13 +1527,13 @@ void split_resize_right(WSplit *node, int new_width)
 {
     /* Nice an easy at first - simply increase the with of `node` fixing
        `node.x`, displacing all splits to the right */
-    /* Assume a WSplitRegion */
-    /* Assume no vertical splits */
-
+    /* Assume a node is a WSplitRegion */
+    /* IMPROVEMENT? not sure all split_update_bounds are needed */
+    /* TODO: does not handle out-of-right-buffer cases */
 
     WSplitRegion *splitreg=OBJ_CAST(node, WSplitRegion);
     if(splitreg==NULL){
-        fprintf(stderr, "rqgeom_push requested for non-split-region\n");
+        fprintf(stderr, "rqgeom_push requested for non-leaf-split\n");
         return;
     }
 
