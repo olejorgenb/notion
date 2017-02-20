@@ -475,8 +475,8 @@ defbindings("WFrame", {
                 , kpress(META.."Shift+period", "_:snap_left():paper_goto()")
                 , kpress(META.."Shift+comma", "_:snap_right():paper_goto()")
                 --- Resizing
-                , kpress(META.."backslash", "_:resize_right_delta(30):goto_focus()")
-                , kpress(META.."plus", "_:resize_right_delta(-30):goto_focus()")
+                , kpress(META.."plus", "_:resize_right_delta(30):goto_focus()")
+                , kpress(META.."minus", "_:resize_right_delta(-30):goto_focus()")
                 , kpress(META.."H", "_:paper_maximize():goto_focus()")
                 --- Page creation/deletion
                 , kpress(META.."D", "_:delete_page()")
