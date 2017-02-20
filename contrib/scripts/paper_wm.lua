@@ -355,26 +355,6 @@ end
 WRegion.goto_focus = WRegion.paper_goto
 WRegion.goto_ = WRegion.goto_focus
 
-
--- Make the viewport follow the focused window. Note that using the mouse with
--- this activated is a bit jarring.
-function notify_hook_move_viewport(reg, what)
-    if what == "activated" and not is_buffer_frame(reg) then
-        ioncore.defer(function() reg:ensure_in_viewport() end)
-    end
-end
-
--- Temporary wrapper to make it more convenient to change the actual hook with
--- out removing and adding it again
-function notify_hook_move_viewport_indirection(reg, what)
-    notify_hook_move_viewport(reg, what)
-end
-
--- notify_hook = ioncore.get_hook("region_notify_hook")
--- notify_hook:add(notify_hook_move_viewport_indirection)
--- notify_hook:remove(notify_hook_move_viewport_indirection)
-
-
 -- EXPERIMENTAL:
 function WFrame.resize_right_delta(frame, delta)
     local new_w = frame:geom().w + delta
