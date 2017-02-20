@@ -19,6 +19,26 @@ function WMPlex.viewport_geom(screen)
 end
 
 -- Utility functions
+
+-- IMPROVEMENT: Find a way to store (and restore) the region aux table in saved_layout.lua
+local region_aux_map = { __mode="k" }
+-- Return the region's /auxiliary/ table - allowing lua code to associate
+-- arbitrary data with a region.
+--
+-- With non-nil key: equivalent to reg:aux()[key] except the table isn't created
+function WRegion.aux(reg, key)
+    local tab = region_aux_map[reg]
+    if key then
+        return tab and tab[key]
+    end
+
+    if not tab then
+        tab = {}
+        region_aux_map[reg] = tab
+    end
+    return tab
+end
+
 function current_workspace(ws_holder)
     ws_holder = ws_holder or ioncore.current():workspace_holder_of()
     return ws_holder:current()
@@ -355,10 +375,10 @@ end
 WRegion.goto_focus = WRegion.paper_goto
 WRegion.goto_ = WRegion.goto_focus
 
--- EXPERIMENTAL:
+
 function WFrame.resize_right_delta(frame, delta)
     local new_w = frame:geom().w + delta
-    frame:resize_right(new_w)
+    return frame:resize_right(new_w)
 end
 
 function WFrame.resize_right(frame, new_w)
@@ -367,15 +387,29 @@ function WFrame.resize_right(frame, new_w)
     if new_w > 5 then
         node:resize_right(new_w)
     end
+    return frame
 end
 
 function WFrame.paper_maximize(frame)
-    -- IMPROVEMENT: Remember unmaximized size (need aux. weak table)
-    local ws_holder = frame:workspace_holder_of()
-    local view_g = ws_holder:viewport_geom()
-    frame:resize_right(view_g.w)
-    local g = frame:geom()
-    right(frame, g.x - ws_holder:viewport_origin())
+    local frame_aux = frame:aux()
+    if frame_aux.maximized then
+        frame:resize_right(frame_aux.original_g.w)
+        left(frame, frame_aux.original_viewport_x)
+        frame_aux.maximized = nil
+        frame_aux.original_g = nil
+    else
+        local ws_holder = frame:workspace_holder_of()
+        local view_g = ws_holder:viewport_geom()
+
+        local g = frame:geom()
+        
+        frame_aux.maximized = true
+        frame_aux.original_g = frame:geom()
+        frame_aux.original_viewport_x = ws_holder:screen_to_viewport(g.x)
+
+        frame:resize_right(view_g.w)
+        right(frame, g.x - ws_holder:viewport_origin())
+    end
 end
 
 -- Expand the frame utilizing all space occupied by partially visible
