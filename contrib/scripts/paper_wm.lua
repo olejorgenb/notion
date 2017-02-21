@@ -227,29 +227,30 @@ end
 -- Find the nth tiling frame (1-indexed)
 function WGroupWS.nth_page(ws, n)
     local tiling = current_tiling(ws)
-    local current = tiling:farthest("left")
-    local stop = tiling:farthest("right")
-    local next = tiling:nextto(current, "right")
+    local stop = ws:last_page()
+    local next = ws:first_page()
 
     while n > 1 and next ~= stop do
-        current = next
-        next = tiling:nextto(current, "right")
+        next = tiling:nextto(next, "right")
         n = n-1
     end
-    return current
+    return next
 end
 
+-- Returns the page which is considered First
+-- Use this to constrain page movement
 function WGroupWS.first_page(ws)
-    local first = ws:nth_page(1)
-    first:snap_left():goto_()
+    local tiling = current_tiling(ws)
+    local first = tiling:farthest("left")
     return first
 end
 
+-- Returns the page which is considered Last
+-- Use this to constrain page movement
 function WGroupWS.last_page(ws)
     local tiling = current_tiling(ws)
     local rbuffer = tiling:farthest("right")
     local last = tiling:nextto(rbuffer, "left")
-    last:snap_right():goto_focus()
     return last
 end
 
@@ -481,7 +482,7 @@ defbindings("WFrame.toplevel", {
 })
 
 defbindings("WGroupWS", {
-              kpress(META.."Home", "_:first_page()")
+              kpress(META.."Home", "_:first_page():snap_left():goto_focus()")
               , kpress(META.."End", "_:last_page()")
               , kpress(META.."1", "_:nth_page(1):goto_focus()")
               , kpress(META.."2", "_:nth_page(2):goto_focus()")
@@ -492,7 +493,7 @@ defbindings("WGroupWS", {
               , kpress(META.."7", "_:nth_page(7):goto_focus()")
               , kpress(META.."8", "_:nth_page(8):goto_focus()")
               , kpress(META.."9", "_:nth_page(9):goto_focus()")
-              , kpress(META.."0", "_:last_page()")
+              , kpress(META.."0", "_:last_page():snap_right():goto_focus()")
               --- Page creation/deletion
               , kpress(META.."N", "_:insert_page():paper_goto()")
               , kpress(META.."Shift+N", "_:new_page():paper_goto()")
