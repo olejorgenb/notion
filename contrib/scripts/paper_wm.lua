@@ -275,17 +275,16 @@ function WTiling.insert_page(tiling, frame, direction)
     local frame_g = frame:geom()
     local view_g = tiling:workspace_holder_of():viewport_geom()
 
-    frame:resize_right(view_g.w)
+    tiling:resize_right(frame, view_g.w)
     local new = tiling:split_at(frame, direction, false)
-    frame:resize_right(frame_g.w)
+    tiling:resize_right(frame, frame_g.w)
     frame:paper_goto()
     return new
 end
 
 -- Delete frame from tiling, preserving all other page widths
 -- frame = current_frame()
-function WFrame.delete_page(frame)
-    local tiling = frame:manager()
+function WTiling.delete_page(tiling, frame)
     local left = tiling:nextto(frame, "left")
     local right = tiling:nextto(frame, "right")
     -- remember geometry
@@ -295,28 +294,25 @@ function WFrame.delete_page(frame)
     frame:rqclose()
     -- fix up widths
     ioncore.defer(function ()
-            left:resize_right(left_g.w)
-            right:resize_right(right_g.w)
+            tiling:resize_right(left, left_g.w)
+            tiling:resize_right(right, right_g.w)
     end)
 end
 
 -- Move frame in direction 'dir'
-function WFrame.move_page(frame, dir)
+function WTiling.move_page(tiling, frame, dir)
     dir = dir or "right"
-    local tiling = frame:manager()
     local next_frame_in_dir = tiling:nextto(frame, dir)
     tiling:swap_leaves(tiling:node_of(frame), tiling:node_of(next_frame_in_dir))
     return frame
 end
 
-
-function WFrame.next_page(frame)
-    local tiling = frame:manager()
-    local next = tiling:nextto(frame, 'right')
-    if next == tiling:farthest("right") then
+function WTiling.next_page(tiling, frame)
+    if frame == tiling:last_page() then
         return
     end
-    local ws_holder = frame:workspace_holder_of()
+    local next = tiling:nextto(frame, 'right')
+    local ws_holder = tiling:workspace_holder_of()
     local x = ws_holder:screen_to_viewport(next:geom().x)
     local w = next:geom().w
     local view_g = frame:workspace_holder_of():viewport_geom()
@@ -326,13 +322,12 @@ function WFrame.next_page(frame)
     next:goto_()
 end
 
-function WFrame.prev_page(frame)
-    local tiling = frame:manager()
-    local prev = tiling:nextto(frame, 'left')
-    if prev == tiling:farthest("right") then
+function WTiling.prev_page(tiling, frame)
+    if frame == tiling:first_page() then
         return
     end
-    local ws_holder = frame:workspace_holder_of()
+    local prev = tiling:nextto(frame, 'left')
+    local ws_holder = tiling:workspace_holder_of()
     local x = ws_holder:screen_to_viewport(prev:geom().x)
     if x <= 0 then
         prev:snap_left()
@@ -393,13 +388,12 @@ WRegion.goto_focus = WRegion.paper_goto
 WRegion.goto_ = WRegion.goto_focus
 
 
-function WFrame.resize_right_delta(frame, delta)
+function WTiling.resize_right_delta(tiling, frame, delta)
     local new_w = frame:geom().w + delta
-    return frame:resize_right(new_w)
+    return tiling:resize_right(frame, new_w)
 end
 
-function WFrame.resize_right(frame, new_w)
-    local tiling = frame:manager()
+function WTiling.resize_right(tiling, frame, new_w)
     local node = tiling:node_of(frame)
     if new_w > 5 then
         node:resize_right(new_w)
@@ -407,10 +401,10 @@ function WFrame.resize_right(frame, new_w)
     return frame
 end
 
-function WFrame.paper_maximize(frame)
+function WTiling.paper_maximize(tiling, frame)
     local frame_aux = frame:aux()
     if frame_aux.maximized then
-        frame:resize_right(frame_aux.original_g.w)
+        tiling:resize_right(frame, frame_aux.original_g.w)
         left(frame, frame_aux.original_viewport_x)
         frame_aux.maximized = nil
         frame_aux.original_g = nil
@@ -419,12 +413,12 @@ function WFrame.paper_maximize(frame)
         local view_g = ws_holder:viewport_geom()
 
         local g = frame:geom()
-        
+
         frame_aux.maximized = true
         frame_aux.original_g = frame:geom()
         frame_aux.original_viewport_x = ws_holder:screen_to_viewport(g.x)
 
-        frame:resize_right(view_g.w)
+        tiling:resize_right(frame, view_g.w)
         right(frame, g.x - ws_holder:viewport_origin())
     end
     return frame
@@ -473,7 +467,12 @@ defbindings("WFrame.toplevel", {
 })
 
 defbindings("WTiling", {
-              kpress(META.."Home", "_:first_page():snap_left():goto_focus()")
+                -- Moving
+                kpress(META.."Page_Down", "_:next_page(_sub)")
+              , kpress(META.."Page_Up", "_:prev_page(_sub)")
+              , kpress(META.."period", "_:next_page(_sub)")
+              , kpress(META.."comma", "_:prev_page(_sub)")
+              , kpress(META.."Home", "_:first_page():snap_left():goto_focus()")
               , kpress(META.."End", "_:last_page()")
               , kpress(META.."1", "_:nth_page(1):goto_focus()")
               , kpress(META.."2", "_:nth_page(2):goto_focus()")
@@ -485,35 +484,32 @@ defbindings("WTiling", {
               , kpress(META.."8", "_:nth_page(8):goto_focus()")
               , kpress(META.."9", "_:nth_page(9):goto_focus()")
               , kpress(META.."0", "_:last_page():snap_right():goto_focus()")
+
               --- Page creation/deletion
               , kpress(META.."N", "_:insert_page(_sub):paper_goto()")
               , kpress(META.."Shift+N", "_:new_page():paper_goto()")
+              , kpress(META.."D", "_:delete_page(_sub)")
 
               -- , mdrag(META.."Button1", "WRegion.p_move(_)") -- comment in to move the whole workspace with the mouse
+
+              --- Resizing
+              , kpress(META.."plus", "_:resize_right_delta(_sub, 30):goto_focus()")
+              , kpress(META.."minus", "_:resize_right_delta(_sub, -30):goto_focus()")
+              , kpress(META.."H", "_:paper_maximize(_sub):goto_focus()")
+              --- Page rearranging
+              , kpress(META.."Shift+period", "_:move_page(_sub, 'right'):paper_goto()")
+              , kpress(META.."Shift+comma", "_:move_page(_sub, 'left'):paper_goto()")
 })
 
 defbindings("WFrame.toplevel", {
                 -- Moving
-                  kpress(META.."Page_Down", "_:next_page()")
-                , kpress(META.."Page_Up", "_:prev_page()")
-                , kpress(META.."period", "_:next_page()")
-                , kpress(META.."comma", "_:prev_page()")
-                , kpress(META.."Left", "left(_, _:viewport_geom().w/2)")
+                  kpress(META.."Left", "left(_, _:viewport_geom().w/2)")
                 , kpress(META.."Right", "right(_, _:viewport_geom().w/2)")
                 -- , kpress(META.."Shift+period", "_:snap_left():paper_goto()")
                 -- , kpress(META.."Shift+comma", "_:snap_right():paper_goto()")
-                --- Resizing
-                , kpress(META.."plus", "_:resize_right_delta(30):goto_focus()")
-                , kpress(META.."minus", "_:resize_right_delta(-30):goto_focus()")
-                , kpress(META.."H", "_:paper_maximize():goto_focus()")
-                --- Page creation/deletion
-                , kpress(META.."D", "_:delete_page()")
                 , mclick("Button1@tab", "_:ensure_in_viewport() _:p_switch_tab()")
-                , kpress(META.."Shift+period", "_:snap_left():paper_goto()")
-                , kpress(META.."Shift+comma", "_:snap_right():paper_goto()")
-                --- Page rearranging
-                , kpress(META.."Shift+period", "_:move_page('right'):paper_goto()")
-                , kpress(META.."Shift+comma", "_:move_page('left'):paper_goto()")
+                -- , kpress(META.."Shift+period", "_:snap_left():paper_goto()")
+                -- , kpress(META.."Shift+comma", "_:snap_right():paper_goto()")
                 , kpress(META.."Left", "left(_, _:viewport_geom().w/2)")
                 , kpress(META.."Right", "right(_, _:viewport_geom().w/2)")
 })
