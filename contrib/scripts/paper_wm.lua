@@ -296,6 +296,16 @@ function WFrame.delete_page(frame)
     end)
 end
 
+-- Move frame in direction 'dir'
+function WFrame.move_page(frame, dir)
+    dir = dir or "right"
+    local tiling = frame:manager()
+    local next_frame_in_dir = tiling:nextto(frame, dir)
+    tiling:swap_leaves(tiling:node_of(frame), tiling:node_of(next_frame_in_dir))
+    return frame
+end
+
+
 function WFrame.next_page(frame)
     local tiling = frame:manager()
     local next = tiling:nextto(frame, 'right')
@@ -483,8 +493,8 @@ defbindings("WFrame", {
                 , kpress(META.."Page_Up", "_:prev_page()")
                 , kpress(META.."period", "_:next_page()")
                 , kpress(META.."comma", "_:prev_page()")
-                , kpress(META.."Shift+period", "_:snap_left():paper_goto()")
-                , kpress(META.."Shift+comma", "_:snap_right():paper_goto()")
+                -- , kpress(META.."Shift+period", "_:snap_left():paper_goto()")
+                -- , kpress(META.."Shift+comma", "_:snap_right():paper_goto()")
                 --- Resizing
                 , kpress(META.."plus", "_:resize_right_delta(30):goto_focus()")
                 , kpress(META.."minus", "_:resize_right_delta(-30):goto_focus()")
@@ -492,4 +502,9 @@ defbindings("WFrame", {
                 --- Page creation/deletion
                 , kpress(META.."D", "_:delete_page()")
                 , mclick("Button1@tab", "_:ensure_in_viewport() _:p_switch_tab()")
+                , kpress(META.."Shift+period", "_:snap_left():paper_goto()")
+                , kpress(META.."Shift+comma", "_:snap_right():paper_goto()")
+                --- Page rearranging
+                , kpress(META.."Shift+period", "_:move_page('right'):paper_goto()")
+                , kpress(META.."Shift+comma", "_:move_page('left'):paper_goto()")
 })
