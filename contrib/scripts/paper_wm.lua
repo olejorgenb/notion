@@ -489,10 +489,13 @@ defbindings("WGroupWS", {
 })
 
 defbindings("WFrame.toplevel", {
+                -- Moving
                   kpress(META.."Page_Down", "_:next_page()")
                 , kpress(META.."Page_Up", "_:prev_page()")
                 , kpress(META.."period", "_:next_page()")
                 , kpress(META.."comma", "_:prev_page()")
+                , kpress(META.."Left", "left(_, _:viewport_geom().w/2)")
+                , kpress(META.."Right", "right(_, _:viewport_geom().w/2)")
                 -- , kpress(META.."Shift+period", "_:snap_left():paper_goto()")
                 -- , kpress(META.."Shift+comma", "_:snap_right():paper_goto()")
                 --- Resizing
