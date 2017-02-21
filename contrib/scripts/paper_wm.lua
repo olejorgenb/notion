@@ -457,6 +457,7 @@ defbindings("WScreen", {
               , kpress(META.."Tab", "mod_menu.grabmenu(_, _sub, 'focuslist', {sizepolicy = 'center', big=true })")
               , submap(META.."space", {
                            kpress("Tab", "mod_menu.grabmenu(_, _sub, 'workspacefocuslist', { sizepolicy = 'center', big=true})")
+                           , kpress("N", "_:create_workspace()")
                       })
 })
 
