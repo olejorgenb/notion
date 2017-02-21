@@ -253,6 +253,18 @@ function WGroupWS.last_page(ws)
     return last
 end
 
+
+-- Returns the page number of frame in tiling
+function WTiling.page_number_of(tiling, frame)
+    local page_number = 1
+    local first_page = tiling:farthest("left")
+    while frame ~= first_page do
+        page_number = page_number + 1
+        frame = tiling:nextto(frame, "left")
+    end
+    return page_number
+end
+
 -- Create new page/frame after last_page
 function WGroupWS.new_page(ws)
     local tiling = ws:current()
