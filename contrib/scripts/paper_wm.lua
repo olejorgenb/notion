@@ -461,12 +461,6 @@ defbindings("WScreen", {
                       })
 })
 
-defbindings("WFrame.toplevel", {
-                  kpress(META.."Left", "left(_, _:viewport_geom().w/2)")
-                , kpress(META.."Right", "right(_, _:viewport_geom().w/2)")
-
-})
-
 defbindings("WTiling", {
                 -- Moving
                 kpress(META.."Page_Down", "_:next_page(_sub)")
