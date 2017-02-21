@@ -225,10 +225,9 @@ function WFrame.snap_right(frame)
 end
 
 -- Find the nth tiling frame (1-indexed)
-function WGroupWS.nth_page(ws, n)
-    local tiling = current_tiling(ws)
-    local stop = ws:last_page()
-    local next = ws:first_page()
+function WTiling.nth_page(tiling, n)
+    local stop = tiling:last_page()
+    local next = tiling:first_page()
 
     while n > 1 and next ~= stop do
         next = tiling:nextto(next, "right")
@@ -239,16 +238,14 @@ end
 
 -- Returns the page which is considered First
 -- Use this to constrain page movement
-function WGroupWS.first_page(ws)
-    local tiling = current_tiling(ws)
+function WTiling.first_page(tiling)
     local first = tiling:farthest("left")
     return first
 end
 
 -- Returns the page which is considered Last
 -- Use this to constrain page movement
-function WGroupWS.last_page(ws)
-    local tiling = current_tiling(ws)
+function WTiling.last_page(tiling)
     local rbuffer = tiling:farthest("right")
     local last = tiling:nextto(rbuffer, "left")
     return last
@@ -267,20 +264,19 @@ function WTiling.page_number_of(tiling, frame)
 end
 
 -- Create new page/frame after last_page
-function WGroupWS.new_page(ws)
-    local new = ws:insert_page(ws:last_page())
+function WTiling.new_page(tiling)
+    local new = tiling:insert_page(tiling:last_page())
     return new
 end
 
 -- Insert a blank page to the right/left of frame
-function WGroupWS.insert_page(ws, frame, direction)
+function WTiling.insert_page(tiling, frame, direction)
     direction = direction or "right"
-    local tiling = ws:current()
     local frame_g = frame:geom()
-    local view_g = ws:workspace_holder_of():viewport_geom()
+    local view_g = tiling:workspace_holder_of():viewport_geom()
 
     frame:resize_right(view_g.w)
-    local new = WTiling.split_at(tiling, frame, direction, false)
+    local new = tiling:split_at(frame, direction, false)
     frame:resize_right(frame_g.w)
     frame:paper_goto()
     return new
@@ -476,7 +472,7 @@ defbindings("WFrame.toplevel", {
 
 })
 
-defbindings("WGroupWS", {
+defbindings("WTiling", {
               kpress(META.."Home", "_:first_page():snap_left():goto_focus()")
               , kpress(META.."End", "_:last_page()")
               , kpress(META.."1", "_:nth_page(1):goto_focus()")
@@ -490,7 +486,7 @@ defbindings("WGroupWS", {
               , kpress(META.."9", "_:nth_page(9):goto_focus()")
               , kpress(META.."0", "_:last_page():snap_right():goto_focus()")
               --- Page creation/deletion
-              , kpress(META.."N", "_:insert_page(current_frame(_)):paper_goto()")
+              , kpress(META.."N", "_:insert_page(_sub):paper_goto()")
               , kpress(META.."Shift+N", "_:new_page():paper_goto()")
 
               -- , mdrag(META.."Button1", "WRegion.p_move(_)") -- comment in to move the whole workspace with the mouse
