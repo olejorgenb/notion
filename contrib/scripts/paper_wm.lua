@@ -488,7 +488,7 @@ defbindings("WGroupWS", {
               -- , mdrag(META.."Button1", "WRegion.p_move(_)") -- comment in to move the whole workspace with the mouse
 })
 
-defbindings("WFrame", {
+defbindings("WFrame.toplevel", {
                   kpress(META.."Page_Down", "_:next_page()")
                 , kpress(META.."Page_Up", "_:prev_page()")
                 , kpress(META.."period", "_:next_page()")
@@ -507,4 +507,6 @@ defbindings("WFrame", {
                 --- Page rearranging
                 , kpress(META.."Shift+period", "_:move_page('right'):paper_goto()")
                 , kpress(META.."Shift+comma", "_:move_page('left'):paper_goto()")
+                , kpress(META.."Left", "left(_, _:viewport_geom().w/2)")
+                , kpress(META.."Right", "right(_, _:viewport_geom().w/2)")
 })
