@@ -268,19 +268,14 @@ end
 
 -- Create new page/frame after last_page
 function WGroupWS.new_page(ws)
-    local tiling = ws:current()
-    local rbuffer = tiling:farthest("right")
-    local new = WTiling.split_at(tiling, rbuffer, 'left', false)
-    local view_g = ws:workspace_holder_of():viewport_geom()
-    new:rqgeom({w=view_g.w/2})
+    local new = ws:insert_page(ws:last_page())
     return new
 end
 
--- Insert a blank page to the right/left of the current frame
-function WGroupWS.insert_page(ws, direction)
+-- Insert a blank page to the right/left of frame
+function WGroupWS.insert_page(ws, frame, direction)
     direction = direction or "right"
     local tiling = ws:current()
-    local frame = tiling:current()
     local frame_g = frame:geom()
     local view_g = ws:workspace_holder_of():viewport_geom()
 
@@ -495,7 +490,7 @@ defbindings("WGroupWS", {
               , kpress(META.."9", "_:nth_page(9):goto_focus()")
               , kpress(META.."0", "_:last_page():snap_right():goto_focus()")
               --- Page creation/deletion
-              , kpress(META.."N", "_:insert_page():paper_goto()")
+              , kpress(META.."N", "_:insert_page(current_frame(_)):paper_goto()")
               , kpress(META.."Shift+N", "_:new_page():paper_goto()")
 
               -- , mdrag(META.."Button1", "WRegion.p_move(_)") -- comment in to move the whole workspace with the mouse
