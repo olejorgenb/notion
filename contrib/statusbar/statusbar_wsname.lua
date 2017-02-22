@@ -44,8 +44,6 @@ local wsname = table.join(wsname or {}, defaults)
 local function get_ws_name(t)
     local reg = t["reg"]
 
-    debug.print_line("update wsnames")
-
     if not obj_is(reg, "WScreen") then
         return
     end
@@ -60,18 +58,10 @@ local function get_ws_name(t)
         local ws_names, before, id = nil, true, screen:id()
 
         local function compose_ws_names(ws)
-
-            debug.print_line("ws name: "..ws:name())
-
-            if ws:screen_of() ~= screen then
-                return true
-            end
-
             local marker, current = "", false
             local wsn = ws:name() or "?"
 
-            local current_ws = screen:mx_current():current():current()
-            if ws == current_ws then
+            if ws == screen:mx_current() then
                 marker = wsname.marker
                 before = false
                 current = true
@@ -100,14 +90,9 @@ local function get_ws_name(t)
             return true
         end
 
-        -- screen:mx_i(compose_ws_names)
+        screen:mx_i(compose_ws_names)
 
-        ioncore.region_i(compose_ws_names, "WGroupWS")
---: false
-
-        local current_ws = screen:mx_current():current():current()
-        mod_statusbar.inform("wsname_"..id, current_ws:name())
-        mod_statusbar.inform("wsname_"..id.."_hint", "important")
+        mod_statusbar.inform("wsname_"..id, screen:mx_current():name())
         mod_statusbar.inform("wsname_full_"..id, ws_names)
         mod_statusbar.inform("wsname_full_"..id.."_template", ws_names:len())
         mod_statusbar.inform("wsname_pre_"..id, wsname_pre)
@@ -116,7 +101,7 @@ local function get_ws_name(t)
         mod_statusbar.inform("wsname_post_"..id.."_template", wsname_post:len())
 
         if id == 0 then
-            mod_statusbar.inform("wsname", current_ws:name())
+            mod_statusbar.inform("wsname", screen:mx_current():name())
             mod_statusbar.inform("wsname_full", ws_names)
             mod_statusbar.inform("wsname_full_template", ws_names:len())
             mod_statusbar.inform("wsname_pre", wsname_pre)
@@ -149,16 +134,6 @@ local function setup_hooks()
     if hook then
         hook:add(get_ws_name)
     end
-    notify_hook = ioncore.get_hook("region_notify_hook")
---: "Type:   WHook
---:   Id:     userdata: 0x1019258"
-    notify_hook:add(function (reg, what)
-
-            if obj_is(reg, "WGroupWS") and what == "activated" then
-                local id = reg:screen_of():id()
-                mod_statusbar.inform("wsname_"..id, reg:name())
-            end
-    end)
 end
 
 -- Init
@@ -175,7 +150,6 @@ local function inform(screen)
     end
 
     mod_statusbar.inform("wsname_"..id.."_template", template)
-    mod_statusbar.inform("wsname_"..id.."_template", "important")
 
     return true
 end

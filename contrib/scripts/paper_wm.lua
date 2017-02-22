@@ -63,12 +63,12 @@ function frame_of(reg)
 end
 
 
--- Find the mplex that holds the current workspace
+-- Find the frame that holds the current workspace
 -- returns nil if the parent of reg's workspace isn't a frame
 function WRegion.workspace_holder_of(reg)
     local workspace = workspace_of(reg)
     local parent = workspace and workspace:parent()
-    if parent and obj_is(parent, "WMPlex") then
+    if parent and parent.__typename == "WFrame" then
         return parent
     end
     return nil
@@ -86,7 +86,8 @@ function string.has_prefix(str, prefix)
 end
 
 function is_buffer_frame(reg)
-    return reg:name():has_prefix("*right*")
+    local n = reg:name()
+    return n:has_prefix("*right*") or n:has_prefix("*left*")
 end
 
 function WMPlex.screen_left(ws_holder, amount)
@@ -260,7 +261,8 @@ function WTiling.page_i(tiling, iter_fn, from, dir, include_buffers)
     dir = dir or "right"
     include_buffers = include_buffers or false
 
-    local right_buffer = tiling:farthest("right")
+    local lbuffer = tiling:farthest("left")
+    local rbuffer = tiling:farthest("right")
 
     local next = from
     local i = 1
@@ -325,7 +327,7 @@ end
 -- Returns the page which is considered First
 -- Use this to constrain page movement
 function WTiling.first_page(tiling)
-    local lbuffer = tiling:farthest("left"), "right"
+    local lbuffer = tiling:farthest("left")
     local first = tiling:nextto(lbuffer, "right")
     return first
 end
@@ -339,11 +341,11 @@ function WTiling.last_page(tiling)
 end
 
 
--- Returns the page number of frame in tiling
+-- Returns the page number of frame in tiling (lbuffer == 0, first_page == 1)
 function WTiling.page_number_of(tiling, frame)
-    local page_number = 1
-    local first_page = tiling:farthest("left")
-    while frame ~= first_page do
+    local page_number = 0
+    local lbuffer = tiling:farthest("left")
+    while frame ~= lbuffer do
         page_number = page_number + 1
         frame = tiling:nextto(frame, "left")
     end
@@ -467,7 +469,7 @@ end
 
 -- A viewport aware `WRegion.goto_focus`
 function WRegion.paper_goto(reg)
-    -- debug.print_line("paper_goto: "..reg:name())
+    debug.print_line("paper_goto: "..reg:name())
 
     if obj_is(reg:workspace_holder_of(), "WFrame") then
         reg:ensure_in_viewport()
