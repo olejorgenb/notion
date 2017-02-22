@@ -163,6 +163,7 @@ function ensure_buffer(tiling, dir, buffer_w)
         buffer:rqgeom({w = buffer_w})
     end
     buffer:set_mode("tiled-alt")
+    buffer:set_grattr("paperbuffer")
 
     return buffer, buffer ~= buffer_maybe
 end
@@ -561,6 +562,8 @@ function WScreen.create_workspace(screen, name, geom)
     geom.w = 20000
     local wsholder = rootws:attach_new({name="*workspaceholder*", type="WFrame", geom=geom})
     wsholder:set_mode("tiled-alt")
+    wsholder:set_grattr("workspaceholder", "set")
+
     local workspace = ioncore.create_ws(wsholder, {name=name, sizepolicy="full"}, "full")
     adapt_workspace(workspace)
 
