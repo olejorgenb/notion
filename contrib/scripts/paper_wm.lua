@@ -551,6 +551,7 @@ function WTiling.paper_expand_free(tiling, frame)
         end
         tiling:resize_right_delta(frame, total_free_w)
     end
+    return frame
 end
 
 -- IDEA: slurp / barf for pages (assoc lisp editing mode)
@@ -616,6 +617,7 @@ defbindings("WTiling", {
               , kpress(META.."plus", "_:resize_right_delta(_sub, 30):goto_focus()")
               , kpress(META.."minus", "_:resize_right_delta(_sub, -30):goto_focus()")
               , kpress(META.."H", "_:paper_maximize(_sub):goto_focus()")
+              , kpress(META.."Shift+H", "_:paper_expand_free(_sub):goto_focus()")
               --- Page rearranging
               , kpress(META.."Shift+period", "_:move_page(_sub, 'right'):paper_goto()")
               , kpress(META.."Shift+comma", "_:move_page(_sub, 'left'):paper_goto()")
