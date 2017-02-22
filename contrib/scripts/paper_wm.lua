@@ -196,6 +196,21 @@ function adapt_workspace(ws)
     return true
 end
 
+-- Returns the geometry of region in workspace coordinates
+function WRegion.workspace_geom(reg)
+    ws_holder = reg:workspace_holder_of()
+    parent = reg:parent()
+    parent_g = parent:geom()
+    g = reg:geom()
+    while parent ~= ws_holder do
+        g.x = g.x + parent_g.x
+        g.y = g.y + parent_g.y
+        parent = parent:parent()
+        parent_g = parent:geom()
+    end
+    return g
+end
+
 -- in ws_holder coordinates
 function WMPlex.viewport_origin(ws_holder)
     return -ws_holder:geom().x + overlap.x
