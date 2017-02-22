@@ -12,7 +12,7 @@ restore_class = {Firefox = true, Emacs = true}
 blacklist = {
     -- eg. Firefox starts off with the title Mozilla Firefox
     Firefox = { "^Mozilla Firefox", "^Nighthly" }
-    , Emacs = { "^\\*Minibuf-1\\*" }
+    , Emacs = { "^*Minibuf-1*" }
 }
 
 
