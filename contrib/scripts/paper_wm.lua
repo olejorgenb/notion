@@ -469,7 +469,9 @@ end
 function WRegion.paper_goto(reg)
     -- debug.print_line("paper_goto: "..reg:name())
 
-    reg:ensure_in_viewport()
+    if obj_is(reg:workspace_holder_of(), "WFrame") then
+        reg:ensure_in_viewport()
+    end
 
     reg:original_goto()
 end
