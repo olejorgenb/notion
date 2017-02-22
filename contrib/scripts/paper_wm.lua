@@ -255,7 +255,7 @@ function WTiling.page_i(tiling, iter_fn, from, dir, include_buffers)
         end
         i = i+1
         next = tiling:nextto(next, dir)
-        if next == rbuffer or next == lbuffer then 
+        if next == rbuffer or next == lbuffer then
             if include_buffers then
                 return not iter_fn(next)
             else
@@ -265,14 +265,15 @@ function WTiling.page_i(tiling, iter_fn, from, dir, include_buffers)
     end
 end
 
--- REORG? or on WScreen?
 -- NB! only checks horizontal visibility
 -- As a extra "service": return the amount of partial viewport overlap when the
 -- frame isn't fully visible (EXPERIMENTAL: negative if the overlap "is to the
 -- right")
-function WTiling.is_fully_visible(tiling, frame)
-    local wsh = tiling:workspace_holder_of()
-    local g = frame:geom() 
+-- IMPROVEMENT: Make this work for all regions. Ie. regions that aren't direct
+-- children of the workspace holder
+function WFrame.is_fully_visible(frame)
+    local wsh = frame:workspace_holder_of()
+    local g = frame:geom()
     local vp_g = wsh:viewport_geom()
     g.x = wsh:screen_to_viewport(g.x)
 
@@ -412,6 +413,9 @@ end
 -- by being the closest parenting frame.
 --
 -- Designed as a support function for `goto_focus`.
+-- 
+-- IMPROVEMENT: Make this work for all regions. Ie. regions that aren't direct
+-- children workspace holder
 function WRegion.ensure_in_viewport(reg)
 
     local ws_holder = reg:workspace_holder_of()
@@ -498,7 +502,7 @@ end
 -- Expand the frame utilizing all space occupied by partially visible frames
 function WTiling.paper_expand_free(tiling, frame)
 
-    if not tiling:is_fully_visible(frame) then
+    if not frame:is_fully_visible() then
         -- Bail!
         return
     end
@@ -511,7 +515,7 @@ function WTiling.paper_expand_free(tiling, frame)
         local inside_w
         tiling:page_i(function(p)
                 local fully
-                fully, inside_w = tiling:is_fully_visible(p)
+                fully, inside_w = p:is_fully_visible()
 
                 found_frame = p 
                 if not fully then
