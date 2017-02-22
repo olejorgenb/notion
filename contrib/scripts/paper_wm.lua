@@ -189,8 +189,8 @@ function adapt_workspace(ws)
     local ws_holder = ws:workspace_holder_of()
     local view_g = ws_holder:viewport_geom()
     local b, new_b = ensure_buffer(tiling, "right", ws_holder:geom().w - view_g.w)
-    local b, new_b = ensure_buffer(tiling, "right", ws_holder:geom().w - view_g.w)
-    if new_b then
+    local a, new_a = ensure_buffer(tiling, "left", overlap.x)
+    if new_b or new_a then
         tiling:first_page():snap_left()
     end
     return true
