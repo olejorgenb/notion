@@ -228,7 +228,7 @@ function WFrame.snap_right(frame)
 end
 
 --[[
-Iterates through the /pages/ of the tiling - in order. (excluding buffers)
+Iterates through the /pages/ of the tiling - in order. (excluding buffers by default)
 
  The intention is that this function should iterate through the top-level
  horizontal splits (aka. /pages/?).
@@ -241,9 +241,10 @@ Iterates through the /pages/ of the tiling - in order. (excluding buffers)
  
  Note that WTiling.managed_i descends into all the splits (both vertical and horizontal)
 ]]
-function WTiling.page_i(tiling, iter_fn, from, dir)
+function WTiling.page_i(tiling, iter_fn, from, dir, include_buffers)
     from = from or tiling:first_page()
     dir = dir or "right"
+    include_buffers = include_buffers or false
 
     local lbuffer = tiling:farthest("left")
     local rbuffer = tiling:farthest("right")
@@ -257,7 +258,11 @@ function WTiling.page_i(tiling, iter_fn, from, dir)
         i = i+1
         next = tiling:nextto(next, dir)
         if next == rbuffer or next == lbuffer then 
-            return
+            if include_buffers then
+                return not iter_fn(next)
+            else
+                return true
+            end
         end
     end
 end
@@ -503,6 +508,7 @@ function WTiling.paper_expand_free(tiling, frame)
     function find_first_partial_visible(dir)
         -- Or hidden if none are /partial/ visible
         -- Or last fully visible if all are fully visible
+        -- Can return the left/right buffers
         local found_frame = nil
         local inside_w
         tiling:page_i(function(p)
@@ -514,37 +520,32 @@ function WTiling.paper_expand_free(tiling, frame)
                     return false
                 end
                 return true
-        end, frame, dir)
+        end, frame, dir, true)
         return found_frame, (inside_w and math.abs(inside_w)) or 0
     end
 
     local a, a_free_w = find_first_partial_visible("left")
     local b, b_free_w = find_first_partial_visible("right")
 
-    -- yucky edge-cases:
+    -- Edge-cases:
 
     local wsh = tiling:workspace_holder_of()
+    local first_in_vp = tiling:nextto(a, "right")
 
-    if b_free_w == 0 then
-        -- Could be that b is the _last_ buffer and fully visible (would be more
-        -- elegant if page_i included the buffer actually)
-        local vp_g = wsh:viewport_geom()
-        local b_g = b:geom()
-        b_g.x = wsh:screen_to_viewport(b_g.x)
-        if b_g.x+b_g.w < vp_g.w then
-            -- b _is_ fully visible
-            b_free_w = vp_g.w - (b_g.x+b_g.w)
-        end
+    if a_free_w == 0 and is_buffer_frame(a) then
+        a_free_w = wsh:screen_to_viewport(first_in_vp:geom().x)
     end
-    if a_free_w == 0 and a == frame then
-        a_free_w = wsh:screen_to_viewport(frame:geom().x)
+    if b_free_w == 0 and is_buffer_frame(b) then
+        -- will never happen as long as the right buffer is huge though
+        local vp_w = wsh:viewport_geom().w
+        b_free_w = vp_w - wsh:screen_to_viewport(b:geom().x)
     end
 
     local total_free_w = a_free_w + b_free_w
 
     if(total_free_w > 0) then
         if(a_free_w > 0) then
-            frame:snap_left()
+            first_in_vp:snap_left()
         end
         tiling:resize_right_delta(frame, total_free_w)
     end
