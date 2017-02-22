@@ -63,12 +63,12 @@ function frame_of(reg)
 end
 
 
--- Find the frame that holds the current workspace
--- returns nil if the parent of reg's workspace isn't a frame
+-- Find the mplex that holds the current workspace
+-- returns nil if the parent of reg's workspace isn't a mplex
 function WRegion.workspace_holder_of(reg)
     local workspace = workspace_of(reg)
     local parent = workspace and workspace:parent()
-    if parent and parent.__typename == "WFrame" then
+    if parent and obj_is(parent, "WMPlex") then
         return parent
     end
     return nil
