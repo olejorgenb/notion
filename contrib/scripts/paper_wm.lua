@@ -63,12 +63,12 @@ function frame_of(reg)
 end
 
 
--- Find the frame that holds the current workspace
+-- Find the mplex that holds the current workspace
 -- returns nil if the parent of reg's workspace isn't a frame
 function WRegion.workspace_holder_of(reg)
     local workspace = workspace_of(reg)
     local parent = workspace and workspace:parent()
-    if parent and parent.__typename == "WFrame" then
+    if parent and obj_is(parent, "WMPlex") then
         return parent
     end
     return nil
@@ -86,8 +86,7 @@ function string.has_prefix(str, prefix)
 end
 
 function is_buffer_frame(reg)
-    local n = reg:name()
-    return n:has_prefix("*right*") or n:has_prefix("*left*")
+    return reg:name():has_prefix("*right*")
 end
 
 function WMPlex.screen_left(ws_holder, amount)
@@ -190,8 +189,8 @@ function adapt_workspace(ws)
     local ws_holder = ws:workspace_holder_of()
     local view_g = ws_holder:viewport_geom()
     local b, new_b = ensure_buffer(tiling, "right", ws_holder:geom().w - view_g.w)
-    local a, new_a = ensure_buffer(tiling, "left", overlap.x)
-    if new_b or new_a then
+    local b, new_b = ensure_buffer(tiling, "right", ws_holder:geom().w - view_g.w)
+    if new_b then
         tiling:first_page():snap_left()
     end
     return true
@@ -246,8 +245,7 @@ function WTiling.page_i(tiling, iter_fn, from, dir, include_buffers)
     dir = dir or "right"
     include_buffers = include_buffers or false
 
-    local lbuffer = tiling:farthest("left")
-    local rbuffer = tiling:farthest("right")
+    local right_buffer = tiling:farthest("right")
 
     local next = from
     local i = 1
@@ -311,7 +309,7 @@ end
 -- Returns the page which is considered First
 -- Use this to constrain page movement
 function WTiling.first_page(tiling)
-    local lbuffer = tiling:farthest("left")
+    local lbuffer = tiling:farthest("left"), "right"
     local first = tiling:nextto(lbuffer, "right")
     return first
 end
@@ -325,11 +323,11 @@ function WTiling.last_page(tiling)
 end
 
 
--- Returns the page number of frame in tiling (lbuffer == 0, first_page == 1)
+-- Returns the page number of frame in tiling
 function WTiling.page_number_of(tiling, frame)
-    local page_number = 0
-    local lbuffer = tiling:farthest("left")
-    while frame ~= lbuffer do
+    local page_number = 1
+    local first_page = tiling:farthest("left")
+    while frame ~= first_page do
         page_number = page_number + 1
         frame = tiling:nextto(frame, "left")
     end
@@ -450,7 +448,7 @@ end
 
 -- A viewport aware `WRegion.goto_focus`
 function WRegion.paper_goto(reg)
-    debug.print_line("paper_goto: "..reg:name())
+    -- debug.print_line("paper_goto: "..reg:name())
 
     reg:ensure_in_viewport()
 
