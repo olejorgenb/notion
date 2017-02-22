@@ -261,12 +261,30 @@ end
 
 -- REORG? or on WScreen?
 -- NB! only checks horizontal visibility
+-- As a extra "service": return the amount of partial viewport overlap when the
+-- frame isn't fully visible (EXPERIMENTAL: negative if the overlap "is to the
+-- right")
 function WTiling.is_fully_visible(tiling, frame)
-    local viewport = tiling:screen_of()
+    local wsh = tiling:workspace_holder_of()
     local g = frame:geom() 
-    local vp_g = viewport:viewport_geom()
-    g.x = viewport:screen_to_viewport(g.x)
-    return 0 <= g.x and g.x+g.w <= vp_g.w
+    local vp_g = wsh:viewport_geom()
+    g.x = wsh:screen_to_viewport(g.x)
+
+    local is_fully = true
+    local partial_w = nil
+    if g.x < 0 then
+        if g.x+g.w > 0 then
+            partial_w = -(g.x + g.w)
+        end
+        is_fully = false
+    elseif g.x+g.w > vp_g.w then
+        if g.x < vp_g.w then
+            partial_w = vp_g.w - g.x
+        end
+        is_fully = false
+    end
+    -- return 0 <= g.x and g.x+g.w <= vp_g.w
+    return is_fully, partial_w
 end
 
 
@@ -470,10 +488,62 @@ function WTiling.paper_maximize(tiling, frame)
     return frame
 end
 
--- Expand the frame utilizing all space occupied by partially visible
--- frames
-function WFrame.paper_expand_free(frame)
-    -- TOOD:
+-- Expand the frame utilizing all space occupied by partially visible frames
+function WTiling.paper_expand_free(tiling, frame)
+
+    if not tiling:is_fully_visible(frame) then
+        -- Bail!
+        return
+    end
+
+    function find_first_partial_visible(dir)
+        -- Or hidden if none are /partial/ visible
+        -- Or last fully visible if all are fully visible
+        local found_frame = nil
+        local inside_w
+        tiling:page_i(function(p)
+                local fully
+                fully, inside_w = tiling:is_fully_visible(p)
+
+                found_frame = p 
+                if not fully then
+                    return false
+                end
+                return true
+        end, frame, dir)
+        return found_frame, (inside_w and math.abs(inside_w)) or 0
+    end
+
+    local a, a_free_w = find_first_partial_visible("left")
+    local b, b_free_w = find_first_partial_visible("right")
+
+    -- yucky edge-cases:
+
+    local wsh = tiling:workspace_holder_of()
+
+    if b_free_w == 0 then
+        -- Could be that b is the _last_ buffer and fully visible (would be more
+        -- elegant if page_i included the buffer actually)
+        local vp_g = wsh:viewport_geom()
+        local b_g = b:geom()
+        b_g.x = wsh:screen_to_viewport(b_g.x)
+        if b_g.x+b_g.w < vp_g.w then
+            -- b _is_ fully visible
+            b_free_w = vp_g.w - (b_g.x+b_g.w)
+        end
+    end
+    if a_free_w == 0 and a == frame then
+        a_free_w = wsh:screen_to_viewport(frame:geom().x)
+    end
+
+    local total_free_w = a_free_w + b_free_w
+
+    if(total_free_w > 0) then
+        if(a_free_w > 0) then
+            frame:snap_left()
+        end
+        tiling:resize_right_delta(frame, total_free_w)
+    end
 end
 
 -- IDEA: slurp / barf for pages (assoc lisp editing mode)
