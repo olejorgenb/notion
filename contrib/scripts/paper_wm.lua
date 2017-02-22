@@ -224,6 +224,52 @@ function WFrame.snap_right(frame)
     return frame
 end
 
+--[[
+Iterates through the /pages/ of the tiling - in order.
+
+ The intention is that this function should iterate through the top-level
+ horizontal splits (aka. /pages/?).
+
+ Atm. it iterates through frames though, choosing an arbitrary from vertical splits.
+
+ As with all other notion iterators - don't modify the collection during iterations. (insert new pages, etc.)
+
+ Does not wrap around.
+ 
+ Note that WTiling.managed_i descends into all the splits (both vertical and horizontal)
+]]
+function WTiling.page_i(tiling, iter_fn, from, dir)
+    from = from or tiling:first_page()
+    dir = dir or "right"
+
+    local right_buffer = tiling:farthest("right")
+
+    local next = from
+    local i = 1
+    while true do
+        if not iter_fn(next) then
+            return false
+        end
+        i = i+1
+        next = tiling:nextto(next, dir)
+        if next == right_buffer then 
+            -- Works both ways since 'nextto' wraps around
+            return
+        end
+    end
+end
+
+-- REORG? or on WScreen?
+-- NB! only checks horizontal visibility
+function WTiling.is_fully_visible(tiling, frame)
+    local viewport = tiling:screen_of()
+    local g = frame:geom() 
+    local vp_g = viewport:viewport_geom()
+    g.x = viewport:screen_to_viewport(g.x)
+    return 0 <= g.x and g.x+g.w <= vp_g.w
+end
+
+
 -- Find the nth tiling frame (1-indexed)
 function WTiling.nth_page(tiling, n)
     local stop = tiling:last_page()
