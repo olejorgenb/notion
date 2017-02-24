@@ -412,7 +412,7 @@ function WTiling.next_page(tiling, frame)
     if x + w >= view_g.w then
         next:snap_right()
     end
-    next:goto_()
+    next:original_goto()
 end
 
 function WTiling.prev_page(tiling, frame)
@@ -425,7 +425,7 @@ function WTiling.prev_page(tiling, frame)
     if x <= 0 then
         prev:snap_left()
     end
-    prev:goto_()
+    prev:original_goto()
 end
 
 -- Move the viewport (if needed) such that the frame /associated/ with `reg`
