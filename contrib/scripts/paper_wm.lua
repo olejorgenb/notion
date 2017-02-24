@@ -139,7 +139,11 @@ end
 -- Align the viewport origin with sx
 function move_viewport(reg, sx)
     local ws_holder = reg:workspace_holder_of()
-    ws_holder:screen_left(ws_holder:screen_to_viewport(sx))
+    if animate then
+        ws_holder:animate_move_right(-ws_holder:screen_to_viewport(sx))
+    else
+        ws_holder:screen_left(ws_holder:screen_to_viewport(sx))
+    end
 end
 
 function left(reg, amount)
