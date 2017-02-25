@@ -250,6 +250,22 @@ function WFrame.snap_right(frame)
     return frame
 end
 
+function WFrame.snap_other(frame)
+    local g = frame:geom()
+    local wsh = frame:workspace_holder_of()
+    local vpg = wsh:viewport_geom()
+    local vx = wsh:screen_to_viewport(g.x)
+    if vx == 0 then
+        frame:snap_right()
+    elseif vx+g.w == vpg.w then
+        frame:snap_left()
+    else
+        frame:snap_left() -- could "snap_closest" to of course
+    end
+    return frame
+end
+
+
 --[[
 Iterates through the /pages/ of the tiling - in order. (excluding buffers by default)
 
@@ -633,6 +649,8 @@ defbindings("WTiling", {
               , kpress(META.."8", "_:nth_page(8):goto_focus()")
               , kpress(META.."9", "_:nth_page(9):goto_focus()")
               , kpress(META.."0", "_:last_page():snap_right():goto_focus()")
+
+              , kpress(META.."L", "_sub:snap_other():original_goto()")
 
               --- Page creation/deletion
               , kpress(META.."N", "_:insert_page(_sub):paper_goto()")
