@@ -597,6 +597,7 @@ function WScreen.create_workspace(screen, name, geom)
 
     local workspace = ioncore.create_ws(wsholder, {name=name, sizepolicy="full"}, "full")
     adapt_workspace(workspace)
+    workspace:current():first_page():goto_focus()
 
     return workspace
 end
