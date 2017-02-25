@@ -109,7 +109,7 @@ end
 local animation_timer = ioncore.create_timer()
 -- Simple animation along the x axis
 function WMPlex.animate_move_right(ws_holder, delta, duration, curve)
-    animation_timer.reset()
+    animation_timer:reset()
     local duration = duration or 250
     local time = 0
     local travelled = 0
