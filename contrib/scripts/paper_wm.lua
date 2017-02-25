@@ -103,8 +103,13 @@ function WMPlex.move_screen(ws_holder, x)
     ws_holder:rqgeom({x=x})
 end
 
+-- Only one animation at a time. Starting a second animation cancels the first.
+-- CAVEAT: This means that concurrent animation on different workspaces doesn't work.
+--         If this is needed it should be simple to add one timer per workspace.
+local animation_timer = ioncore.create_timer()
 -- Simple animation along the x axis
 function WMPlex.animate_move_right(ws_holder, delta, duration, curve)
+    animation_timer.reset()
     local duration = duration or 250
     local time = 0
     local travelled = 0
@@ -130,8 +135,7 @@ function WMPlex.animate_move_right(ws_holder, delta, duration, curve)
         time = time + t_delta
 
         -- set up new frame
-        local timer = ioncore.create_timer()
-        timer:set(t_delta, animate)
+        animation_timer:set(t_delta, animate)
     end
     animate()
 end
