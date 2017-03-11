@@ -1,21 +1,25 @@
 
 overlap = {x = 10, y = 0}
 
-mod_xinerama.query_screens()
-display_geoms = mod_xinerama.query_screens()
-viewport_geoms = {}
-for i, g in ipairs(display_geoms) do
-    local view_g = {
-        x = g.x + overlap.x
-      , y = g.y + overlap.y
-      , w = g.w - 2*overlap.x
-      , h = g.h - 2*overlap.y
-    }
-    viewport_geoms[i] = view_g
-end
 
+local viewport_geoms = {}
 function WMPlex.viewport_geom(screen)
-    return viewport_geoms[screen:screen_of():id()+1]
+    local i = screen:screen_of():id()
+    if viewport_geoms[i+1] then
+        return viewport_geoms[i+1]
+    end
+    mod_xinerama.query_screens()
+    display_geoms = mod_xinerama.query_screens()
+    for i, g in ipairs(display_geoms) do
+        local view_g = {
+            x = g.x + overlap.x
+            , y = g.y + overlap.y
+            , w = g.w - 2*overlap.x
+            , h = g.h - 2*overlap.y
+        }
+        viewport_geoms[i] = view_g
+    end
+    return viewport_geoms[i+1]
 end
 
 -- Utility functions
