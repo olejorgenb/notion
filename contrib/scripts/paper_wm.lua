@@ -604,11 +604,23 @@ end
 -- IDEA: slurp / barf for pages (assoc lisp editing mode)
 
 
-function WScreen.create_workspace(screen, name, geom)
-    local rootws = ioncore.lookup_region("*rootws*")
+local function get_rootws(screen)
+    local rootws = nil
+    screen:mx_i(function (ws)
+            if string.find(ws:name(), "^*rootws*") then
+                rootws = ws
+                return false
+            end
+            return true
+    end)
     if not rootws then
         rootws = ioncore.create_ws(screen, {name="*rootws*", sizepolicy="full"}, "empty")
     end
+    return rootws
+end
+
+function WScreen.create_workspace(screen, name, geom)
+    local rootws = get_rootws(screen)
     local geom = geom or screen:geom()
     geom.w = 20000
     local wsholder = rootws:attach_new({name="*workspaceholder*", type="WFrame", geom=geom})
