@@ -634,6 +634,14 @@ function WScreen.create_workspace(screen, name, geom)
     return workspace
 end
 
+function WScreen.attach_workspace(screen, ws)
+    local rootws = get_rootws(screen)
+    local ws_holder = ws:workspace_holder_of()
+    local view_g = screen:viewport_geom()
+    rootws:attach(ws_holder)
+    ws_holder:rqgeom{h = view_g.h, y = 0}
+end
+
 
 defbindings("WScreen", {
                 kpress(META.."Up", "switch_workspace(1)")
