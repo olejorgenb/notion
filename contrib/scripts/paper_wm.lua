@@ -417,6 +417,25 @@ function WTiling.delete_page(tiling, frame)
     return left
 end
 
+function WTiling.merge_pages(tiling, frame)
+    if frame:mx_count() == 0 then
+        return tiling:delete_page(frame)
+    end
+
+    local frame_g = frame:geom()
+    local ws_holder = frame:workspace_holder_of()
+    local x = ws_holder:screen_to_viewport(frame_g.x)
+
+    local screen_g = frame:screen_of():geom()
+    if (x + frame_g.w/2) < screen_g.w/2 then
+        debug.print_line("merging left")
+        return tiling:merge_pages_left(frame)
+    else
+        debug.print_line("merging right")
+        return tiling:merge_pages_right(frame)
+    end
+end
+
 local function move_clients(from, to)
     for _, reg in ipairs(mcollect(from.mx_i, from)) do
         to:attach(reg)
