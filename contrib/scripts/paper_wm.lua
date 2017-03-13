@@ -414,6 +414,7 @@ function WTiling.delete_page(tiling, frame)
             tiling:resize_right(left, left_g.w)
             tiling:resize_right(right, right_g.w)
     end)
+    return left
 end
 
 -- Delete a frame and insert it's content into the left page
@@ -726,7 +727,7 @@ defbindings("WTiling", {
               --- Page creation/deletion
               , kpress(META.."N", "_:insert_page(_sub):paper_goto()")
               , kpress(META.."Shift+N", "_:new_page():paper_goto()")
-              , kpress(META.."D", "_:delete_page(_sub)")
+              , kpress(META.."D", "_:delete_page(_sub):paper_goto()")
 
               -- , mdrag(META.."Button1", "WRegion.p_move(_)") -- comment in to move the whole workspace with the mouse
 
