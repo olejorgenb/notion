@@ -644,6 +644,20 @@ function WScreen.attach_workspace(screen, ws)
     ws:paper_goto()
 end
 
+function attach_paper_workspace_handler(mplex, name)
+    local ws = ioncore.lookup_region(name, "WGroupWS")
+    if ws then
+        mplex:screen_of():attach_workspace(ws)
+    else
+        mod_query.warn(mplex, "No workspace with that name")
+    end
+end
+
+function mod_query.query_paper_workspace(mplex)
+    mod_query.query(mplex, TR("Goto or create workspace: "), nil,
+                    attach_paper_workspace_handler,
+                    mod_query.make_completor(mod_query.complete_workspace),
+                    "workspacename")
 end
 
 
