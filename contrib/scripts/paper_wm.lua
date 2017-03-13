@@ -748,7 +748,7 @@ defbindings("WTiling", {
               --- Page creation/deletion
               , kpress(META.."N", "_:insert_page(_sub):paper_goto()")
               , kpress(META.."Shift+N", "_:new_page():paper_goto()")
-              , kpress(META.."D", "_:delete_page(_sub):paper_goto()")
+              , kpress(META.."D", "_:merge_pages(_sub):paper_goto()")
 
               -- , mdrag(META.."Button1", "WRegion.p_move(_)") -- comment in to move the whole workspace with the mouse
 
