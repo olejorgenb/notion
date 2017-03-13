@@ -638,8 +638,12 @@ function WScreen.attach_workspace(screen, ws)
     local rootws = get_rootws(screen)
     local ws_holder = ws:workspace_holder_of()
     local view_g = screen:viewport_geom()
+    local holder_g = ws_holder:geom()
     rootws:attach(ws_holder)
-    ws_holder:rqgeom{h = view_g.h, y = 0}
+    ws_holder:rqgeom{x = holder_g.x, h = view_g.h, y = 0}
+    ws:paper_goto()
+end
+
 end
 
 
