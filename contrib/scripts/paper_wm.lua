@@ -417,33 +417,35 @@ function WTiling.delete_page(tiling, frame)
     return left
 end
 
+local function move_clients(from, to)
+    for _, reg in ipairs(mcollect(from.mx_i, from)) do
+        to:attach(reg)
+    end
+end
+
 -- Delete a frame and insert it's content into the left page
 function WTiling.merge_pages_left(tiling, frame)
+    if frame == tiling:first_page() then
+        return tiling:merge_pages_right(frame)
+    end
+
     local left = tiling:nextto(frame, "left")
-    -- remember geometry
-    local left_g = left:geom()
-
-    tiling:unsplit_at(frame)
-    -- fix up widths
-    ioncore.defer(function ()
-            tiling:resize_right(left, left_g.w)
-    end)
-    return left
-
+    move_clients(left, frame)
+    tiling:delete_page(left)
+    return frame
 end
 
 function WTiling.merge_pages_right(tiling, frame)
+    if frame == tiling:last_page() then
+        return tiling:merge_pages_left(frame)
+    end
+
     local right = tiling:nextto(frame, "right")
-    -- remember geometry
-    local frame_g = frame:geom()
+    move_clients(right, frame)
 
-    tiling:unsplit_at(right)
-    -- fix up widths
-    ioncore.defer(function ()
-            tiling:resize_right(frame, frame_g.w)
-    end)
+    tiling:delete_page(right)
+
     return frame
-
 end
 
 -- Move frame in direction 'dir'
