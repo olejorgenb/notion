@@ -711,7 +711,7 @@ function attach_paper_workspace_handler(mplex, name)
 end
 
 function mod_query.query_paper_workspace(mplex)
-    mod_query.query(mplex, TR("Goto or create workspace: "), nil,
+    mod_query.query(mplex, TR("Goto or attach workspace: "), nil,
                     attach_paper_workspace_handler,
                     mod_query.make_completor(mod_query.complete_workspace),
                     "workspacename")
