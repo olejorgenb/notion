@@ -515,7 +515,7 @@ end
 function WRegion.ensure_in_viewport(reg)
 
     local ws_holder = reg:workspace_holder_of()
-    if ws_holder == nil then
+    if not obj_is(ws_holder, "WFrame") then
         return
     end
 
