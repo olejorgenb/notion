@@ -728,6 +728,11 @@ defbindings("WScreen", {
                            kpress("Tab", "mod_menu.grabmenu(_, _sub, 'workspacefocuslist', { sizepolicy = 'center', big=true})")
                            , kpress("N", "_:create_workspace()")
                       })
+
+              -- workspaces
+              , submap(META.."space", {
+                           kpress("A", "mod_query.query_paper_workspace(_)")
+                      })
 })
 
 defbindings("WTiling", {
