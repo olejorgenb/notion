@@ -701,10 +701,12 @@ end
 
 function attach_paper_workspace_handler(mplex, name)
     local ws = ioncore.lookup_region(name, "WGroupWS")
-    if ws then
-        mplex:screen_of():attach_workspace(ws)
-    else
+    if not ws then
         mod_query.warn(mplex, "No workspace with that name")
+    elseif ws:screen_of() == mplex:screen_of() then
+        ws:paper_goto()
+    else
+        mplex:screen_of():attach_workspace(ws)
     end
 end
 
