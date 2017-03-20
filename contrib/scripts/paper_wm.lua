@@ -690,9 +690,13 @@ function WScreen.attach_workspace(screen, ws)
     local ws_holder = ws:workspace_holder_of()
     local view_g = screen:viewport_geom()
     local holder_g = ws_holder:geom()
-    rootws:attach(ws_holder)
-    ws_holder:rqgeom{x = holder_g.x, h = view_g.h, y = 0}
-    ws:paper_goto()
+    if obj_is(ws_holder, "WFrame") then
+        rootws:attach(ws_holder)
+        ws_holder:rqgeom{x = holder_g.x, h = view_g.h, y = 0}
+        ws:paper_goto()
+    else
+        screen:attach(ws)
+    end
 end
 
 function attach_paper_workspace_handler(mplex, name)
