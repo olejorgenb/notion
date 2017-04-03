@@ -476,6 +476,22 @@ function WTiling.unstack(tiling, frame, reg)
     new_page:attach(reg)
 end
 
+-- |A|B|C| => |A|C|B|
+--  ^          ^
+function WTiling.swap_siblings(tiling, frame, dir)
+    -- TODO: choose direction intelligently like in merge_pages?
+    dir = dir or 'right'
+    local a = tiling:nextto(frame, dir)
+    local b = tiling:nextto(a, dir)
+
+    if is_buffer_frame(a) or is_buffer_frame(b) then
+        return
+    end
+
+    -- TODO: support vertical splits too (need changes in swap_leaves)
+    tiling:swap_leaves(tiling:node_of(a), tiling:node_of(b))
+end
+
 -- Move frame in direction 'dir'
 function WTiling.move_page(tiling, frame, dir)
     dir = dir or "right"
@@ -764,6 +780,8 @@ defbindings("WTiling", {
               , kpress(META.."0", "_:last_page():snap_right():goto_focus()")
 
               , kpress(META.."L", "_sub:snap_other():original_goto()")
+
+              , kpress(META.."E", "_:swap_siblings(_sub)")
 
               --- Page creation/deletion
               , kpress(META.."N", "_:insert_page(_sub):paper_goto()")
