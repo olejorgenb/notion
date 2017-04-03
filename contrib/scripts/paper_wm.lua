@@ -467,6 +467,15 @@ function WTiling.merge_pages_right(tiling, frame)
     return frame
 end
 
+-- Metaphor: Frame as a stack of pages/windows
+-- Moves 'reg' to a new page to the right
+-- Atm: Focus is moved to the next page in the stack/frame.
+function WTiling.unstack(tiling, frame, reg)
+    local new_page = tiling:insert_page(frame, "right")
+    WTiling.resize_right(tiling, new_page, frame:geom().w)
+    new_page:attach(reg)
+end
+
 -- Move frame in direction 'dir'
 function WTiling.move_page(tiling, frame, dir)
     dir = dir or "right"
@@ -760,6 +769,7 @@ defbindings("WTiling", {
               , kpress(META.."N", "_:insert_page(_sub):paper_goto()")
               , kpress(META.."Shift+N", "_:new_page():paper_goto()")
               , kpress(META.."D", "_:merge_pages(_sub):paper_goto()")
+              , kpress(META.."Q", "_:unstack(_sub, _sub:current())")
 
               -- , mdrag(META.."Button1", "WRegion.p_move(_)") -- comment in to move the whole workspace with the mouse
 
