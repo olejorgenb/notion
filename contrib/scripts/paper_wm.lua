@@ -308,6 +308,18 @@ function WTiling.page_i(tiling, iter_fn, from, dir, include_buffers)
     end
 end
 
+-- Weird this isn't available already?
+-- NB: buffers are excluded
+-- FIXME: handle vertical splits (is a vertical split one or multiple pages?)
+function WTiling.page_count(tiling)
+    local count = 0
+    tiling:managed_i(function()
+            count = count + 1
+            return true
+    end)
+    return count-2 -- just assume there's two buffers
+end
+
 -- NB! only checks horizontal visibility
 -- As a extra "service": return the amount of partial viewport overlap when the
 -- frame isn't fully visible (EXPERIMENTAL: negative if the overlap "is to the
@@ -768,24 +780,36 @@ function rqclose_propagate_paper(reg, sub)
     end
 
     if is_page(reg) then
-        if reg:mx_count() == 0 then
-            WTiling.delete_page(reg:manager(), reg):snap_left()
-            return
-        end
-
-        local timer = ioncore.create_timer()
         local i = 0
-        function close()
+        local timer = nil
+
+        function close_empty()
+            local tiling = reg:manager()
+
+            if tiling:page_count() == 1 then
+                -- Don't remove the last page
+                return
+            end
+
             if reg:mx_count() == 0 then
-                WTiling.delete_page(reg:manager(), reg):snap_left()
-            elseif i < 5 then
-                timer:set(100, close)
+                WTiling.delete_page(tiling, reg):snap_left()
+            elseif timer and i < 5 then
+                i = i + 1
+                timer:set(100, close_empty)
             end
         end
-        -- For some reason defer isn't enough (not even 5k defers ^^)
-        -- IMPROVEMENT? there's a clientwin_unmapped_hook hook
-        timer:set(100, close)
-        reg:rqclose_propagate(reg, sub)
+
+        if reg:mx_count() > 0 then
+            -- Check sub ~= nil instead?
+            reg:rqclose_propagate(reg, sub)
+
+            -- For some reason defer isn't enough (not even 5k defers ^^)
+            -- IMPROVEMENT? there's a clientwin_unmapped_hook hook
+            timer = ioncore.create_timer()
+            timer:set(100, close_empty)
+        else
+            close_empty()
+        end
     else
         reg:rqclose_propagate(reg, sub)
     end
