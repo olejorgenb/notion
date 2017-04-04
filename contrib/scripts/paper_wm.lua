@@ -2,24 +2,15 @@
 overlap = {x = 10, y = 0}
 
 
-local viewport_geoms = {}
-function WMPlex.viewport_geom(screen)
-    local i = screen:screen_of():id()
-    if viewport_geoms[i+1] then
-        return viewport_geoms[i+1]
-    end
-    mod_xinerama.query_screens()
-    display_geoms = mod_xinerama.query_screens()
-    for i, g in ipairs(display_geoms) do
-        local view_g = {
-            x = g.x + overlap.x
-            , y = g.y + overlap.y
-            , w = g.w - 2*overlap.x
-            , h = g.h - 2*overlap.y
-        }
-        viewport_geoms[i] = view_g
-    end
-    return viewport_geoms[i+1]
+function WMPlex.viewport_geom(ws_holder)
+    wsholder:parent():geom()
+
+    local geom = ws_holder:parent():geom()
+    geom.x = geom.x + overlap.x
+    geom.y = geom.y + overlap.y
+    geom.w = geom.w - 2*overlap.x
+    geom.h = geom.h - 2*overlap.y
+    return geom
 end
 
 -- Utility functions
