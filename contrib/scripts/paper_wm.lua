@@ -753,6 +753,7 @@ function manage_handler(clientwin, options)
     local tiling = current_tiling()
     local frame = tiling:insert_page(tiling:current())
     frame:attach(clientwin:manager())
+    clientwin:paper_goto()
 end
 
 -- mapped_hook = ioncore.get_hook("clientwin_do_manage_alt")
