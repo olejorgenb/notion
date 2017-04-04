@@ -28,13 +28,15 @@ function WRegion.aux(reg, key)
 end
 
 function current_workspace(ws_holder)
+    -- Can return nil/false if ws_holder is directly managed by WScreen
+    -- eg. scratchpads (or return screen in that case?)
     ws_holder = ws_holder or ioncore.current():workspace_holder_of()
-    return ws_holder:current()
+    return ws_holder and ws_holder:current()
 end
 
 function current_tiling(ws)
     ws = ws or current_workspace()
-    return ws:current()
+    return ws and ws:current()
 end
 
 function current_frame(ws)
@@ -76,6 +78,14 @@ end
 function is_buffer_frame(reg)
     local n = reg:name()
     return n:has_prefix("*right*") or n:has_prefix("*left*")
+end
+
+function is_paper_tiling(tiling)
+    if not tiling or tiling.__typename ~= "WTiling" then
+        return false
+    end
+    local wsh = tiling:workspace_holder_of()
+    return wsh and wsh.__typename == "WFrame"
 end
 
 function WMPlex.screen_left(ws_holder, amount)
@@ -753,19 +763,29 @@ function mod_query.query_paper_workspace(mplex)
 end
 
 -- support reloading the file alone
-if manage_hook and mapped_hook then
-    mapped_hook:remove(manage_hook)
-end
--- attach new windows in a new page
-function manage_handler(clientwin, options)
-    debug.print_line(clientwin:name())
-    local tiling = current_tiling()
-    local frame = tiling:insert_page(tiling:current())
-    frame:attach(clientwin:manager())
-    clientwin:paper_goto()
+if manage_hook and manage_handler then
+    mapped_hook:remove(manage_handler)
 end
 
--- mapped_hook = ioncore.get_hook("clientwin_do_manage_alt")
+-- Attach new windows in a new page
+function manage_handler(clientwin, options)
+    local tiling = current_tiling()
+    if tiling and is_paper_tiling(tiling) then
+        -- Note: at this point the window is already placed.
+        --       We thus check for mx_count 1 and not 0
+        if tiling:current():mx_count() == 1 then
+            return
+        end
+        local frame = tiling:insert_page(tiling:current())
+        frame:attach(clientwin:manager())
+        clientwin:paper_goto()
+    end
+end
+
+-- Note: Doesn't seem to be possible to properly place a clientwin from
+--       clientwin_manage_alt.. That is: can't wrap it in a WGroupCW(?)
+--       We thus use the mapped hook instead and re-place the window in a new
+--       page.
 mapped_hook = ioncore.get_hook("clientwin_mapped_hook")
 mapped_hook:add(manage_handler)
 
