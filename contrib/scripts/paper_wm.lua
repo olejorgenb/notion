@@ -759,6 +759,45 @@ end
 mapped_hook = ioncore.get_hook("clientwin_mapped_hook")
 mapped_hook:add(manage_handler)
 
+-- Hack to delete page when closing the last window
+function rqclose_propagate_paper(reg, sub)
+    function is_page(reg)
+        if not reg or reg.__typename ~= "WFrame" then
+            return false
+        end
+        local wph = reg:workspace_holder_of()
+        return wph and wph.__typename == "WFrame"
+    end
+
+    if is_page(reg) then
+        if reg:mx_count() == 0 then
+            WTiling.delete_page(reg:manager(), reg):snap_left()
+            return
+        end
+
+        local timer = ioncore.create_timer()
+        local i = 0
+        function close()
+            if reg:mx_count() == 0 then
+                WTiling.delete_page(reg:manager(), reg):snap_left()
+            elseif i < 5 then
+                timer:set(100, close)
+            end
+        end
+        -- For some reason defer isn't enough (not even 5k defers ^^)
+        -- IMPROVEMENT? there's a clientwin_unmapped_hook hook
+        timer:set(100, close)
+        reg:rqclose_propagate(reg, sub)
+    else
+        reg:rqclose_propagate(reg, sub)
+    end
+end
+
+defbindings("WMPlex", {
+                bdoc("Close current object."),
+                kpress_wait(META.."C", "rqclose_propagate_paper(_, _sub)"),
+})
+
 defbindings("WScreen", {
                 kpress(META.."Up", "switch_workspace(1)")
               , kpress(META.."Down", "switch_workspace(-1)")
