@@ -390,7 +390,7 @@ function WTiling.insert_page(tiling, frame, direction)
     local frame_g = frame:geom()
     local view_g = tiling:workspace_holder_of():viewport_geom()
 
-    tiling:resize_right(frame, view_g.w)
+    tiling:resize_right(frame, view_g.w - 2*overlap.x)
     local new = tiling:split_at(frame, direction, false)
     tiling:resize_right(frame, frame_g.w)
     frame:paper_goto()
