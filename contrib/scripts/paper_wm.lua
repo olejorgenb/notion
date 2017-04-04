@@ -742,6 +742,21 @@ function mod_query.query_paper_workspace(mplex)
                     "workspacename")
 end
 
+-- support reloading the file alone
+if manage_hook and mapped_hook then
+    mapped_hook:remove(manage_hook)
+end
+-- attach new windows in a new page
+function manage_handler(clientwin, options)
+    debug.print_line(clientwin:name())
+    local tiling = current_tiling()
+    local frame = tiling:insert_page(tiling:current())
+    frame:attach(clientwin:manager())
+end
+
+-- mapped_hook = ioncore.get_hook("clientwin_do_manage_alt")
+mapped_hook = ioncore.get_hook("clientwin_mapped_hook")
+mapped_hook:add(manage_handler)
 
 defbindings("WScreen", {
                 kpress(META.."Up", "switch_workspace(1)")
