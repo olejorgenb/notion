@@ -770,11 +770,14 @@ end
 function manage_handler(clientwin, options)
     local tiling = current_tiling()
     if tiling and is_paper_tiling(tiling) then
-        -- Note: at this point the window is already placed.
+        -- Note: at this point the window is already placed in the current page/frame
         --       We thus check for mx_count 1 and not 0
+        --       This also prevents transients from being moved to a new page
+        --       (by accident :))
         if tiling:current():mx_count() == 1 then
             return
         end
+
         local frame = tiling:insert_page(tiling:current())
         frame:attach(clientwin:manager())
         clientwin:paper_goto()
