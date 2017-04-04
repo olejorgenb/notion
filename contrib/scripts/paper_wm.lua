@@ -475,11 +475,10 @@ function WTiling.merge_pages_left(tiling, frame)
 end
 
 function WTiling.merge_pages_right(tiling, frame)
-    if frame == tiling:last_page() then
-        return tiling:merge_pages_left(frame)
-    end
-
     local right = tiling:nextto(frame, "right")
+    if is_buffer_frame(right) then
+        return
+    end
     move_clients(right, frame)
 
     tiling:delete_page(right)
@@ -883,7 +882,7 @@ defbindings("WTiling", {
               --- Page creation/deletion
               , kpress(META.."N", "_:insert_page(_sub):paper_goto()")
               , kpress(META.."Shift+N", "_:new_page():paper_goto()")
-              , kpress(META.."D", "_:merge_pages(_sub):paper_goto()")
+              , kpress(META.."D", "_:merge_pages_right(_sub):snap_left()")
               , kpress(META.."Q", "_:unstack(_sub, _sub:current())")
 
               -- , mdrag(META.."Button1", "WRegion.p_move(_)") -- comment in to move the whole workspace with the mouse
