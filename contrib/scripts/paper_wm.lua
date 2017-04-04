@@ -6,10 +6,6 @@ function WMPlex.viewport_geom(ws_holder)
     wsholder:parent():geom()
 
     local geom = ws_holder:parent():geom()
-    geom.x = geom.x + overlap.x
-    geom.y = geom.y + overlap.y
-    geom.w = geom.w - 2*overlap.x
-    geom.h = geom.h - 2*overlap.y
     return geom
 end
 
@@ -217,7 +213,7 @@ end
 
 -- in ws_holder coordinates
 function WMPlex.viewport_origin(ws_holder)
-    return -ws_holder:geom().x + overlap.x
+    return -ws_holder:geom().x
 end
 
 -- screen_to_viewport(viewport_to_screen(100))
@@ -233,7 +229,14 @@ end
 -- Align left viewport edge with frame's left edge
 function WFrame.snap_left(frame)
     local g = frame:geom()
-    move_viewport(frame, g.x)
+    local manager = frame:manager()
+    local gap = 0
+    if obj_is(manager, "WTiling") then
+        if manager:first_page() ~= frame and manager:last_page() ~= frame then
+            gap = overlap.x
+        end
+    end
+    move_viewport(frame, g.x - gap)
     return frame
 end
 
@@ -241,7 +244,14 @@ end
 function WFrame.snap_right(frame)
     local g = frame:geom()
     local view_g = frame:workspace_holder_of():viewport_geom()
-    move_viewport(frame, g.x + g.w - view_g.w)
+    local manager = frame:manager()
+    local gap = 0
+    if obj_is(manager, "WTiling") then
+        if manager:first_page() ~= frame and manager:last_page() ~= frame then
+            gap = overlap.x
+        end
+    end
+    move_viewport(frame, g.x + g.w - view_g.w + gap)
     return frame
 end
 
