@@ -447,7 +447,7 @@ function WTiling.merge_pages(tiling, frame)
     local x = ws_holder:screen_to_viewport(frame_g.x)
 
     local screen_g = frame:screen_of():geom()
-    if (x + frame_g.w/2) < screen_g.w/2 then
+    if (x + frame_g.w/2) <= screen_g.w/2 then
         debug.print_line("merging right")
         return tiling:merge_pages_right(frame)
     else
