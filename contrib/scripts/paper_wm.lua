@@ -3,10 +3,7 @@ overlap = {x = 10, y = 0}
 
 
 function WMPlex.viewport_geom(ws_holder)
-    wsholder:parent():geom()
-
-    local geom = ws_holder:parent():geom()
-    return geom
+    return ws_holder:parent():geom()
 end
 
 -- Utility functions
