@@ -920,6 +920,10 @@ defbindings("WTiling", {
               , kpress(META.."T", "_sub:set_tagged('toggle') _sub:set_grattr('tagged', 'toggle')")
               , kpress(META.."Shift+T", "ioncore.tagged_attach(_)")
 
+              -- execute lua with tiling context
+              , bdoc("Query for Lua code to execute.")
+              , kpress(META.."F3", "mod_query.query_lua(_)")
+
 })
 
 defbindings("WFrame.toplevel", {
