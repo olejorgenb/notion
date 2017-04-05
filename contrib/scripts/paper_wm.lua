@@ -870,14 +870,9 @@ end
 
 function WTiling.attach(tiling, reg, params)
     local new = tiling:insert_page(tiling:current())
+    tiling:resize_right(new, reg:geom().w)
     if obj_is(reg, "WFrame") then
         move_clients(reg, new)
-        local manager = reg:manager()
-        debug.print_line("manager: "..manager:name())
-        if obj_is(manager, "WTiling") then
-            debug.print_line("delete page")
-            manager:delete_page(reg)
-        end
     else
         new:attach(reg)
     end
