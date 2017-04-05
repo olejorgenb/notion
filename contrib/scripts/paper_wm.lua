@@ -801,6 +801,27 @@ end
 manage_hook = ioncore.get_hook("clientwin_do_manage_alt")
 manage_hook:add(manage_handler_wrap)
 
+-- delete empty pages
+function frame_handler(params)
+    local frame = params.reg
+    local tiling = frame:manager()
+    if is_paper_tiling(tiling) and frame:mx_count() == 0 then
+        if tiling:page_count() == 1 then
+            return
+        end
+        ioncore.defer(function ()
+                tiling:delete_page(frame)
+        end)
+    end
+end
+
+function frame_handler_wrap(frame, mode, sw, sub)
+    return frame_handler(frame, mode, sw, sub)
+end
+
+frame_hook = ioncore.get_hook("frame_managed_changed_hook")
+frame_hook:add(frame_handler_wrap)
+
 -- Hack to delete page when closing the last window
 function rqclose_propagate_paper(reg, sub)
     function is_page(reg)
