@@ -837,6 +837,24 @@ function rqclose_propagate_paper(reg, sub)
     end
 end
 
+function WTiling.attach(tiling, reg, params)
+    local new = tiling:insert_page(tiling:current())
+    if obj_is(reg, "WFrame") then
+        move_clients(reg, new)
+        local manager = reg:manager()
+        debug.print_line("manager: "..manager:name())
+        if obj_is(manager, "WTiling") then
+            debug.print_line("delete page")
+            manager:delete_page(reg)
+        end
+    else
+        new:attach(reg)
+    end
+    if params and params.switchto then
+        new:paper_goto()
+    end
+end
+
 defbindings("WMPlex", {
                 bdoc("Close current object."),
                 kpress_wait(META.."C", "rqclose_propagate_paper(_, _sub)"),
@@ -898,6 +916,10 @@ defbindings("WTiling", {
               --- Page rearranging
               , kpress(META.."Shift+period", "_:move_page(_sub, 'right'):paper_goto()")
               , kpress(META.."Shift+comma", "_:move_page(_sub, 'left'):paper_goto()")
+              -- tag/attach
+              , kpress(META.."T", "_sub:set_tagged('toggle') _sub:set_grattr('tagged', 'toggle')")
+              , kpress(META.."Shift+T", "ioncore.tagged_attach(_)")
+
 })
 
 defbindings("WFrame.toplevel", {
