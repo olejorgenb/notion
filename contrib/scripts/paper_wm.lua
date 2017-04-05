@@ -596,12 +596,9 @@ end
 
 -- A viewport aware `WRegion.goto_focus`
 function WRegion.paper_goto(reg)
-    debug.print_line("paper_goto: "..reg:name())
-
     if obj_is(reg:workspace_holder_of(), "WFrame") then
         reg:ensure_in_viewport()
     end
-
     reg:original_goto()
 end
 
