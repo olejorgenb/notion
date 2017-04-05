@@ -763,33 +763,37 @@ end
 
 -- support reloading the file alone
 if manage_hook and manage_handler then
-    mapped_hook:remove(manage_handler)
+    manage_hook:remove(manage_handler)
 end
 
 -- Attach new windows in a new page
 function manage_handler(clientwin, options)
-    local tiling = current_tiling()
-    if tiling and is_paper_tiling(tiling) then
-        -- Note: at this point the window is already placed in the current page/frame
-        --       We thus check for mx_count 1 and not 0
-        --       This also prevents transients from being moved to a new page
-        --       (by accident :))
-        if tiling:current():mx_count() == 1 then
-            return
-        end
+    if options.tfor or options.dockapp then
+        return false
+    end
 
+    local winprop = ioncore.getwinprop(clientwin)
+    if winprop and (winprop.target or winprop.float) then
+        return false
+    end
+
+    local tiling = current_tiling()
+
+    if tiling and is_paper_tiling(tiling) then
         local frame = tiling:insert_page(tiling:current())
-        frame:attach(clientwin:manager())
+        -- See https://github.com/raboof/notion/issues/41 for some details
+        frame:attach_new { type="WGroupCW", managed={{reg=clientwin, bottom=true}} }
         clientwin:paper_goto()
+        return true
     end
 end
+function manage_handler_wrap(clientwin, options)
+    -- Make it more convenient to re-eval the actual hook (TODO: remove me when stabilized)
+    return manage_handler(clientwin, options)
+end
 
--- Note: Doesn't seem to be possible to properly place a clientwin from
---       clientwin_manage_alt.. That is: can't wrap it in a WGroupCW(?)
---       We thus use the mapped hook instead and re-place the window in a new
---       page.
-mapped_hook = ioncore.get_hook("clientwin_mapped_hook")
-mapped_hook:add(manage_handler)
+manage_hook = ioncore.get_hook("clientwin_do_manage_alt")
+manage_hook:add(manage_handler_wrap)
 
 -- Hack to delete page when closing the last window
 function rqclose_propagate_paper(reg, sub)
