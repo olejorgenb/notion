@@ -271,7 +271,7 @@ function WFrame.snap_other(frame)
     local wsh = frame:workspace_holder_of()
     local vpg = wsh:viewport_geom()
     local vx = wsh:screen_to_viewport(g.x)
-    if vx == 0 then
+    if vx <= overlap.x then
         frame:snap_right()
     elseif vx+g.w == vpg.w then
         frame:snap_left()
