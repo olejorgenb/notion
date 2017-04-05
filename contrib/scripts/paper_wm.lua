@@ -954,8 +954,8 @@ defbindings("WTiling", {
 
 defbindings("WFrame.toplevel", {
                 -- Moving
-                  kpress(META.."Left", "left(_, _:viewport_geom().w/2)")
-                , kpress(META.."Right", "right(_, _:viewport_geom().w/2)")
+                  kpress(META.."Left", "left(_, _:workspace_holder_of():viewport_geom().w/2)")
+                , kpress(META.."Right", "right(_, _:workspace_holder_of():viewport_geom().w/2)")
                 -- , kpress(META.."Shift+period", "_:snap_left():paper_goto()")
                 -- , kpress(META.."Shift+comma", "_:snap_right():paper_goto()")
                 , mclick("Button1@tab", "_:ensure_in_viewport() _:p_switch_tab()")
