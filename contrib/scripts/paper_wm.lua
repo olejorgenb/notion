@@ -233,16 +233,25 @@ function WMPlex.viewport_to_screen(ws_holder, x)
     return ws_holder:viewport_origin() + x
 end
 
--- Align left viewport edge with frame's left edge
-function WFrame.snap_left(frame)
-    local g = frame:geom()
-    local manager = frame:manager()
+local function compute_gap(frame)
     local gap = 0
+    local ws_holder = frame:workspace_holder_of()
+    local view_g = ws_holder:viewport_geom()
+    local manager = frame:manager()
     if obj_is(manager, "WTiling") then
-        if manager:first_page() ~= frame and manager:last_page() ~= frame then
+        if view_g.w <= frame:geom().w then
+            gap = 0
+        elseif manager:first_page() ~= frame and manager:last_page() ~= frame then
             gap = overlap.x
         end
     end
+    return gap
+end
+
+-- Align left viewport edge with frame's left edge
+function WFrame.snap_left(frame)
+    local g = frame:geom()
+    local gap = compute_gap(frame)
     move_viewport(frame, g.x - gap)
     return frame
 end
@@ -250,14 +259,9 @@ end
 -- Align right viewport edge with frame's right edge
 function WFrame.snap_right(frame)
     local g = frame:geom()
-    local view_g = frame:workspace_holder_of():viewport_geom()
-    local manager = frame:manager()
-    local gap = 0
-    if obj_is(manager, "WTiling") then
-        if manager:first_page() ~= frame and manager:last_page() ~= frame then
-            gap = overlap.x
-        end
-    end
+    local gap = compute_gap(frame)
+    local ws_holder = frame:workspace_holder_of()
+    local view_g = ws_holder:viewport_geom()
     move_viewport(frame, g.x + g.w - view_g.w + gap)
     return frame
 end
