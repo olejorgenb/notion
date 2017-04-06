@@ -519,7 +519,10 @@ end
 function WTiling.move_page(tiling, frame, dir)
     dir = dir or "right"
     local next_frame_in_dir = tiling:nextto(frame, dir)
-    tiling:swap_leaves(tiling:node_of(frame), tiling:node_of(next_frame_in_dir))
+    if not is_buffer_frame(next_frame_in_dir) then 
+        -- Should maybe separate such logic from the more raw functionality?
+        tiling:swap_leaves(tiling:node_of(frame), tiling:node_of(next_frame_in_dir))
+    end
     return frame
 end
 
