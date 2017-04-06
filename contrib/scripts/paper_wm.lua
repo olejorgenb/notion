@@ -772,7 +772,11 @@ function manage_handler(clientwin, options)
     end
 
     local winprop = ioncore.getwinprop(clientwin)
-    if winprop and (winprop.target or winprop.float) then
+    if winprop and (
+        winprop.target
+            or winprop.float
+            or winprop.transient_mode == "current"
+    ) then
         return false
     end
 
