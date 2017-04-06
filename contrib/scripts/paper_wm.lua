@@ -765,11 +765,6 @@ function mod_query.query_paper_workspace(mplex)
                     "workspacename")
 end
 
--- support reloading the file alone
-if manage_hook and manage_handler then
-    manage_hook:remove(manage_handler)
-end
-
 -- Attach new windows in a new page
 function manage_handler(clientwin, options)
     if options.tfor or options.dockapp then
