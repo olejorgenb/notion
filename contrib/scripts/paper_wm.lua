@@ -825,7 +825,7 @@ end
 frame_hook = ioncore.get_hook("frame_managed_changed_hook")
 frame_hook:add(frame_handler_wrap)
 
--- Hack to delete page when closing the last window
+-- Guard against deleting the last page
 function rqclose_propagate_paper(reg, sub)
     function is_page(reg)
         if not reg or reg.__typename ~= "WFrame" then
@@ -836,35 +836,11 @@ function rqclose_propagate_paper(reg, sub)
     end
 
     if is_page(reg) then
-        local i = 0
-        local timer = nil
-
-        function close_empty()
-            local tiling = reg:manager()
-
-            if tiling:page_count() == 1 then
-                -- Don't remove the last page
-                return
-            end
-
-            if reg:mx_count() == 0 then
-                WTiling.delete_page(tiling, reg):snap_left()
-            elseif timer and i < 5 then
-                i = i + 1
-                timer:set(100, close_empty)
-            end
-        end
-
-        if reg:mx_count() > 0 then
-            -- Check sub ~= nil instead?
-            reg:rqclose_propagate(reg, sub)
-
-            -- For some reason defer isn't enough (not even 5k defers ^^)
-            -- IMPROVEMENT? there's a clientwin_unmapped_hook hook
-            timer = ioncore.create_timer()
-            timer:set(100, close_empty)
+        local tiling = reg:manager()
+        if is_paper_tiling(tiling) and tiling:page_count() == 1 then
+            return
         else
-            close_empty()
+            reg:rqclose_propagate(reg, sub)
         end
     else
         reg:rqclose_propagate(reg, sub)
