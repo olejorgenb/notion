@@ -50,17 +50,27 @@ static
 void *
 start_thread(void *arg)
 {
-    Window w = *((Window*)arg);
-    minimap_run(w);
+    minimap_run();
     return NULL;
 }
 
 
 EXTL_EXPORT
-void mod_clutter_run_minimap(int w)
+void mod_clutter_minimap_run()
 {
     gchar *name = "minimap";
-    GThread *thread = g_thread_new(name, &start_thread, &w);
+    GThread *thread = g_thread_new(name, &start_thread, NULL);
+}
+
+EXTL_EXPORT
+void mod_clutter_minimap_add_window(WRegion *wwin_reg)
+{
+    WWindow *wwin = OBJ_CAST(wwin_reg, WWindow);
+    if(wwin==NULL)
+        return;
+
+    /* HACK: pass the int directly through the pointer */
+    g_idle_add(&minimap_add_window, (gpointer)wwin->win);
 }
 
 bool mod_clutter_init()

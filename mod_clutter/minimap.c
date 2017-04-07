@@ -88,8 +88,8 @@ window_destroyed (ClutterActor *tex, GParamSpec *pspec, gpointer unused)
     g_print ("window destroyed\n");
 }
 
-static void
-add_xwindow (Window w)
+void
+minimap_add_window (Window w)
 {
     XWindowAttributes attr;    
     ClutterActor *tex;
@@ -185,11 +185,9 @@ void init(int argc, char *argv[])
 }
 
 void
-minimap_run(Window w)
+minimap_run()
 {
     init(0, NULL);
-    if(w != 0)
-        add_xwindow (w);
 
     GMainLoop *loop = g_main_loop_new (NULL, FALSE);
     g_main_context = g_main_loop_get_context (loop);
@@ -215,7 +213,7 @@ main (int argc, char *argv[])
         Window w;
         parse_xid(argv[i], &w);
         printf("Added %d\n", w);
-        add_xwindow (w);
+        minimap_add_window (w);
     }
 
     g_main_loop_run (g_main_loop_new (NULL, FALSE));
