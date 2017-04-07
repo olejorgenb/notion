@@ -36,13 +36,10 @@ end
 
 function current_tiling(reg)
     local reg = reg or ioncore.current()
-    if not reg then
-        return nil
-    elseif obj_is(reg, "WTiling") then
-        return reg
-    else
-        return current_tiling(reg:manager())
+    while reg and not obj_is(reg, "WTiling") do
+        reg = reg:manager()
     end
+    return reg
 end
 
 function current_frame(ws)
