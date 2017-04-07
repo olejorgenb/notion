@@ -209,6 +209,21 @@ function adapt_workspace(ws)
     return true
 end
 
+function adapt_tiling(tiling)
+    if not tiling or tiling.__typename ~= "WTiling" then
+        debug.print_line("Can only adapt tiling workspaces atm. "
+                             .. ((tiling and tiling.__typename) or "nil"))
+        return false
+    end
+    local ws_holder = tiling:parent()
+    local view_g = ws_holder:viewport_geom()
+    local b, new_b = ensure_buffer(tiling, "right", ws_holder:geom().w - view_g.w)
+    local a, new_a = ensure_buffer(tiling, "left", overlap.x)
+    if new_b or new_a then
+        tiling:first_page():snap_left()
+    end
+    return true
+end
 -- Returns the geometry of region in workspace coordinates
 function WRegion.workspace_geom(reg)
     ws_holder = reg:workspace_holder_of()
