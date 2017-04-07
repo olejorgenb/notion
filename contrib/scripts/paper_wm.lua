@@ -34,9 +34,15 @@ function current_workspace(ws_holder)
     return ws_holder and ws_holder:current()
 end
 
-function current_tiling(ws)
-    ws = ws or current_workspace()
-    return ws and ws:current()
+function current_tiling(reg)
+    local reg = reg or ioncore.current()
+    if not reg then
+        return nil
+    elseif obj_is(reg, "WTiling") then
+        return reg
+    else
+        return current_tiling(reg:manager())
+    end
 end
 
 function current_frame(ws)
