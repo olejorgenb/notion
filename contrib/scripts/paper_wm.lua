@@ -740,18 +740,18 @@ local function get_rootws(screen)
 end
 
 function WScreen.create_workspace(screen, name, geom)
-    local rootws = get_rootws(screen)
+    local rootws = ioncore.create_ws(screen, {name=name, sizepolicy="full"}, "empty")
     local geom = geom or screen:geom()
     geom.w = 20000
     local wsholder = rootws:attach_new({name="*workspaceholder*", type="WFrame", geom=geom})
     wsholder:set_mode("tiled-alt")
     wsholder:set_grattr("workspaceholder", "set")
 
-    local workspace = ioncore.create_ws(wsholder, {name=name, sizepolicy="full"}, "full")
-    adapt_workspace(workspace)
-    workspace:current():first_page():goto_focus()
+    local tiling = wsholder:attach_new{type="WTiling"}
+    adapt_tiling(tiling)
+    tiling:current():first_page():goto_focus()
 
-    return workspace
+    return wsholder
 end
 
 function WScreen.attach_workspace(screen, ws)
