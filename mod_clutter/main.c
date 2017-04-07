@@ -59,11 +59,8 @@ start_thread(void *arg)
 EXTL_EXPORT
 void mod_clutter_run_minimap(int w)
 {
-    pthread_t thread;
-    pthread_attr_t attr;
-    pthread_attr_init(&attr);
-    pthread_create(&thread, &attr, &start_thread, &w);
-    pthread_attr_destroy(&attr);
+    gchar *name = "minimap";
+    GThread *thread = g_thread_new(name, &start_thread, &w);
 }
 
 bool mod_clutter_init()
