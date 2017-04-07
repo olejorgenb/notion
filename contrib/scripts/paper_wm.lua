@@ -882,8 +882,22 @@ function WTiling.attach(tiling, reg, params)
 end
 
 defbindings("WMPlex", {
-                bdoc("Close current object."),
-                kpress_wait(META.."C", "rqclose_propagate_paper(_, _sub)"),
+                bdoc("Close current object.")
+                , kpress_wait(META.."C", "rqclose_propagate_paper(_, _sub)")
+                , submap(META.."space", {
+                             kpress("space"
+                                    , "mod_query.query_menu(_, _, 'ctxmenu', 'Context menu:')"),
+                        })
+})
+
+defbindings("WMPlex.toplevel", {
+                  kpress(META.."T", "_sub:set_tagged('toggle')")
+                , submap(META.."space", {
+                             kpress("space"
+                                    , "mod_query.query_menu(_, _, 'ctxmenu', 'Context menu:')"),
+                        })
+                , bdoc("Query for Lua code to execute.")
+                , kpress(META.."F3", "mod_query.query_lua(_)")
 })
 
 defbindings("WScreen", {
@@ -901,6 +915,9 @@ defbindings("WScreen", {
               , submap(META.."space", {
                            kpress("A", "mod_query.query_paper_workspace(_)")
                       })
+
+              -- queries
+              , kpress(ALTMETA.."F12", "mod_query.query_menu(_, _sub, 'mainmenu', 'Main menu:')"),
 })
 
 defbindings("WTiling", {
@@ -943,24 +960,21 @@ defbindings("WTiling", {
               , kpress(META.."Shift+period", "_:move_page(_sub, 'right'):paper_goto()")
               , kpress(META.."Shift+comma", "_:move_page(_sub, 'left'):paper_goto()")
               -- tag/attach
-              , kpress(META.."T", "_sub:set_tagged('toggle') _sub:set_grattr('tagged', 'toggle')")
               , kpress(META.."Shift+T", "ioncore.tagged_attach(_)")
-
               -- execute lua with tiling context
-              , bdoc("Query for Lua code to execute.")
-              , kpress(META.."F3", "mod_query.query_lua(_)")
-
 })
 
 defbindings("WFrame.toplevel", {
                 -- Moving
-                  kpress(META.."Left", "left(_, _:workspace_holder_of():viewport_geom().w/2)")
-                , kpress(META.."Right", "right(_, _:workspace_holder_of():viewport_geom().w/2)")
-                -- , kpress(META.."Shift+period", "_:snap_left():paper_goto()")
-                -- , kpress(META.."Shift+comma", "_:snap_right():paper_goto()")
+                kpress(META.."Left", "left(_, 2)")
+                , kpress(META.."Right", "right(_, 2)")
+                --   kpress(META.."Left", "left(_, _:workspace_holder_of():viewport_geom().w/2)")
+                -- , kpress(META.."Right", "right(_, _:workspace_holder_of():viewport_geom().w/2)")
+                , bdoc("Query for a client window to attach.")
+                , kpress(META.."A", "mod_query.query_attachclient(_)")
+
                 , mclick("Button1@tab", "_:ensure_in_viewport() _:p_switch_tab()")
-                -- , kpress(META.."Shift+period", "_:snap_left():paper_goto()")
-                -- , kpress(META.."Shift+comma", "_:snap_right():paper_goto()")
-                , kpress(META.."Left", "left(_, _:viewport_geom().w/2)")
-                , kpress(META.."Right", "right(_, _:viewport_geom().w/2)")
+                -- terminal
+                , kpress(ALTMETA.."F2", "ioncore.exec_on(_, XTERM or 'xterm')")
 })
+
