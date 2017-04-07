@@ -593,7 +593,7 @@ function WRegion.ensure_in_viewport(reg)
 
     local target_frame = nil
     if reg.__typename == "WGroupWS" then
-        target_frame = find_current(reg, "WFrame")
+        return
     else
         target_frame = frame_of(reg)
     end
