@@ -804,12 +804,13 @@ function manage_handler(clientwin, options)
     local tiling = current_tiling()
 
     if tiling and is_paper_tiling(tiling) then
+        local frame
         if tiling:current():mx_count() == 0 then
             -- Fill empty pages
-            return false
+            frame = tiling:current()
+        else
+            frame = tiling:insert_page(tiling:current())
         end
-
-        local frame = tiling:insert_page(tiling:current())
         -- See https://github.com/raboof/notion/issues/41 for some details
         frame:attach_new { type="WGroupCW", managed={{reg=clientwin, bottom=true}} }
         clientwin:paper_goto()
