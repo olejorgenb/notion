@@ -59,11 +59,11 @@ function frame_of(reg)
 end
 
 
--- Find the mplex that holds the current workspace
+-- Find the mplex that holds the current tiling
 -- returns nil if the parent of reg's workspace isn't a mplex
 function WRegion.workspace_holder_of(reg)
-    local workspace = workspace_of(reg)
-    local parent = workspace and workspace:parent()
+    local tiling = current_tiling(reg)
+    local parent = tiling and tiling:parent()
     if parent and obj_is(parent, "WMPlex") then
         return parent
     end
