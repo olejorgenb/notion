@@ -126,6 +126,11 @@ minimap_add_window (Window w)
     /* } */
 }
 
+void
+minimap_clear() {
+    clutter_actor_destroy_all_children(stage);
+}
+
 static ClutterX11FilterReturn
 event_filter (XEvent *ev, ClutterEvent *cev, gpointer unused)
 {
