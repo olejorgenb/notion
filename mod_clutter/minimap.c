@@ -185,6 +185,7 @@ void init(int argc, char *argv[])
     minimap = clutter_actor_new();
 
     clutter_actor_set_scale(minimap, 0.3, 0.3);
+    clutter_actor_set_position(minimap, 478, 0);
     /* clutter_actor_set_rotation_angle(minimap, CLUTTER_Z_AXIS, 0); */
 
     clutter_actor_add_child (CLUTTER_CONTAINER (stage), minimap);
