@@ -27,42 +27,39 @@ function WRegion.aux(reg, key)
     return tab
 end
 
-function current_workspace(reg)
-    -- Can return nil/false if ws_holder is directly managed by WScreen
-    -- eg. scratchpads (or return screen in that case?)
-    reg = reg or ioncore.current()
-    while reg and not obj_is(reg, "WGroupWS") do
-        reg = reg:manager()
-    end
-    return reg
-end
-
-function current_tiling(reg)
+function manager_of(class_name, reg)
     local reg = reg or ioncore.current()
-    while reg and not obj_is(reg, "WTiling") do
+    while reg and not obj_is(reg, class_name) do
         reg = reg:manager()
     end
     return reg
 end
 
-function current_frame(ws)
-    ws = ws or current_workspace()
-    return ws:current():current()
+function parent_of(class_name, reg)
+    local reg = reg or ioncore.current()
+    while reg and not obj_is(reg, class_name) do
+        reg = reg:parent()
+    end
+    return reg
+end
+
+function workspace_of(reg)
+    return manager_of("WGroupWS", reg)
+end
+
+function tiling_of(reg)
+    return manager_of("WTiling", reg)
 end
 
 --- Moves up in the manager tree until the first WFrame is found
 function frame_of(reg)
-    while reg and reg.__typename ~= "WFrame" do
-        reg = reg:manager()
-    end
-    return reg
+    return parent_of("WFrame", reg)
 end
-
 
 -- Find the mplex that holds the current tiling
 -- returns nil if the parent of reg's workspace isn't a mplex
 function WRegion.workspace_holder_of(reg)
-    local tiling = current_tiling(reg)
+    local tiling = tiling_of(reg)
     local parent = tiling and tiling:parent()
     if parent and obj_is(parent, "WMPlex") then
         return parent
@@ -801,7 +798,7 @@ function manage_handler(clientwin, options)
         return false
     end
 
-    local tiling = current_tiling()
+    local tiling = tiling_of()
 
     if tiling and is_paper_tiling(tiling) then
         local frame
