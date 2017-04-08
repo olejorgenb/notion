@@ -970,7 +970,7 @@ defbindings("WFrame.toplevel", {
                 , bdoc("Query for a client window to attach.")
                 , kpress(META.."A", "mod_query.query_attachclient(_)")
 
-                , mclick("Button1@tab", "_:ensure_in_viewport() _:p_switch_tab()")
+                , mclick("Button1@tab", "_:paper_goto() _:p_switch_tab()")
                 -- terminal
                 , kpress(ALTMETA.."F2", "ioncore.exec_on(_, XTERM or 'xterm')")
 })
