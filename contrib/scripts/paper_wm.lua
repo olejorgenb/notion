@@ -746,7 +746,7 @@ function WScreen.create_workspace(screen, name, geom)
 
     local tiling = wsholder:attach_new{type="WTiling"}
     adapt_tiling(tiling)
-    tiling:current():first_page():goto_focus()
+    tiling:first_page():goto_focus()
 
     return wsholder
 end
