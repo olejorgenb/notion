@@ -858,15 +858,15 @@ function rqclose_propagate_paper(reg, sub)
         local tiling = frame:manager()
         if frame:mx_count() == 1 then
             local new_focus = tiling:nextto(frame, "left")
-            frame:rqclose_propagate(frame, sub)
+            frame:rqclose_propagate(sub)
             return new_focus
         elseif is_paper_tiling(tiling) and tiling:page_count() == 1 then
             return frame
         else
-            return frame:rqclose_propagate(frame, sub)
+            return frame:rqclose_propagate(sub)
         end
     else
-        return reg:rqclose_propagate(reg, sub)
+        return reg:rqclose_propagate(sub)
     end
 end
 
