@@ -27,11 +27,14 @@ function WRegion.aux(reg, key)
     return tab
 end
 
-function current_workspace(ws_holder)
+function current_workspace(reg)
     -- Can return nil/false if ws_holder is directly managed by WScreen
     -- eg. scratchpads (or return screen in that case?)
-    ws_holder = ws_holder or ioncore.current():workspace_holder_of()
-    return ws_holder and ws_holder:current()
+    reg = reg or ioncore.current()
+    while reg and not obj_is(reg, "WGroupWS") do
+        reg = reg:manager()
+    end
+    return reg
 end
 
 function current_tiling(reg)
