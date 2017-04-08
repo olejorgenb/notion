@@ -51,6 +51,7 @@ prep_stage()
   clutter_stage_set_user_resizable(stage, TRUE);
   stage_win = clutter_x11_get_stage_window (CLUTTER_STAGE (stage));
   clutter_actor_show_all (stage);
+  clutter_stage_set_title(stage, "*minimap*");
 }
 
 static void
