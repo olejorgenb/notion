@@ -25,7 +25,7 @@ local function kcb_equal(kcb_spec, kcb)
     return kcb_spec == kcb
 end
 
-function bindutils.nuke_bindings(kcb)
+function bindutils.nuke_bindings(kcb, submaps_too)
     function nuke(context, bindmap, kcb)
         for i, bind in ipairs(bindmap) do
             if bind.kcb and kcb_equal(bind.kcb, kcb) then
@@ -33,6 +33,8 @@ function bindutils.nuke_bindings(kcb)
                     ioncore.defbindings(context, {kpress(bind.kcb, nil)})
                 elseif string.find(bind.action, "kpress_wai") then
                     ioncore.defbindings(context, {kpress_wait(bind.kcb, nil)})
+                elseif submaps_too and bind.submap then
+                    ioncore.defbindings(context, {submap(bind.kcb, nil)})
                 end
             end
         end
