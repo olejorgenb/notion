@@ -75,7 +75,7 @@ void mod_clutter_minimap_add_window(WRegion *wwin_reg)
 
 EXTL_EXPORT
 void mod_clutter_minimap_clear() {
-    g_idle_add(&minimap_clear, 0);
+    g_idle_add(&minimap_clear, NULL);
 }
 
 bool mod_clutter_init()
