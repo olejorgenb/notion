@@ -854,14 +854,19 @@ function rqclose_propagate_paper(reg, sub)
     end
 
     if is_page(reg) then
-        local tiling = reg:manager()
-        if is_paper_tiling(tiling) and tiling:page_count() == 1 then
-            return
+        local frame = reg
+        local tiling = frame:manager()
+        if frame:mx_count() == 1 then
+            local new_focus = tiling:nextto(frame, "left")
+            frame:rqclose_propagate(frame, sub)
+            return new_focus
+        elseif is_paper_tiling(tiling) and tiling:page_count() == 1 then
+            return frame
         else
-            reg:rqclose_propagate(reg, sub)
+            return frame:rqclose_propagate(frame, sub)
         end
     else
-        reg:rqclose_propagate(reg, sub)
+        return reg:rqclose_propagate(reg, sub)
     end
 end
 
@@ -880,7 +885,7 @@ end
 
 defbindings("WMPlex", {
                 bdoc("Close current object.")
-                , kpress_wait(META.."C", "rqclose_propagate_paper(_, _sub)")
+                , kpress(META.."C", "rqclose_propagate_paper(_, _sub):paper_goto()")
                 , submap(META.."space", {
                              kpress("space"
                                     , "mod_query.query_menu(_, _, 'ctxmenu', 'Context menu:')"),
