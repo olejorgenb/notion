@@ -31,6 +31,8 @@ Window stage_win;
 
 GType texture_pixmap_type;
 
+static GAsyncQueue *clutter_to_notion_queue;
+
 void
 prep_clutter (int *argc, char ***argv)
 {
@@ -89,6 +91,15 @@ window_destroyed (ClutterActor *tex, GParamSpec *pspec, gpointer unused)
     g_print ("window destroyed\n");
 }
 
+static gboolean
+on_clicked(ClutterClickAction *action, ClutterActor *actor)
+{
+    // Ideally need a mechanism to wake up notion directly? (fd)
+    printf("onclicked\n");
+    // HACK: sends an int packed in the pointer for proof of concept
+    g_async_queue_push(clutter_to_notion_queue, (gpointer)1);
+}
+
 void
 minimap_add_window (Window w)
 {
@@ -102,10 +113,19 @@ minimap_add_window (Window w)
     tex = g_object_new (texture_pixmap_type, "window", w,
                         "automatic-updates", TRUE, NULL);
 
+    /* Enable input event tracking for actor */
+    clutter_actor_set_reactive (tex, TRUE);
+
+    ClutterAction *action = clutter_click_action_new (); // TODO: cleanup?
+    clutter_actor_add_action (tex, action);
+    g_signal_connect (action, "clicked", G_CALLBACK (on_clicked), NULL);
+
     clutter_actor_add_child (CLUTTER_CONTAINER (minimap), tex);
     /* gfloat width; gfloat height; */
     /* clutter_actor_get_transformed_size(tex, &width, &height); */
     /* clutter_actor_set_size(stage, width*20, height); */
+
+
     clutter_actor_show (tex);
     window_position_changed(tex, NULL, NULL);
 
@@ -191,9 +211,11 @@ void init(int argc, char *argv[])
     clutter_actor_add_child (CLUTTER_CONTAINER (stage), minimap);
 }
 
+
 void
-minimap_run()
+minimap_run(GAsyncQueue *channel)
 {
+    clutter_to_notion_queue = channel;
     init(0, NULL);
 
     GMainLoop *loop = g_main_loop_new (NULL, FALSE);

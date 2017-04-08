@@ -16,6 +16,9 @@
 #include <ioncore/bindmaps.h>
 #include <ioncore/ioncore.h>
 
+#include <libmainloop/defer.h>
+#include <libmainloop/signal.h>
+
 /* #include "query.h" */
 /* #include "edln.h" */
 /* #include "wedln.h" */
@@ -24,13 +27,17 @@
 /* #include "history.h" */
 #include "exports.h"
 /* #include "main.h" */
-#include <pthread.h>
 
 #include <glib.h>
 
 #include "minimap.h"
 
 GMainContext *g_main_context;
+
+/* The clutter thread adds event to this queue, to be picked up by notion's mainloop */
+static GAsyncQueue  *clutter_to_notion_queue;
+static WTimer* clutter_event_timer   = NULL;
+static unsigned int clutter_poll_interval = 50;
 
 /*{{{ Module information */
 
@@ -46,11 +53,31 @@ void mod_clutter_deinit()
     mod_clutter_unregister_exports();
 }
 
+void process_clutter_events()
+{
+    while(TRUE){
+        gpointer event = g_async_queue_try_pop(clutter_to_notion_queue);
+        if(event==NULL){
+            break;
+        }
+
+        printf("event received %d\n", ((int)event));
+    }
+}
+
+void poll_clutter_events(WTimer* timer, Obj* UNUSED(dummy2))
+{
+    process_clutter_events();
+
+    timer_set(clutter_event_timer, clutter_poll_interval,
+              (WTimerHandler*)poll_clutter_events, NULL);
+}
+
 static
 void *
 start_thread(void *arg)
 {
-    minimap_run();
+    minimap_run(clutter_to_notion_queue);
     return NULL;
 }
 
@@ -60,6 +87,8 @@ void mod_clutter_minimap_run()
 {
     gchar *name = "minimap";
     GThread *thread = g_thread_new(name, &start_thread, NULL);
+
+    poll_clutter_events(NULL, NULL);
 }
 
 EXTL_EXPORT
@@ -78,10 +107,14 @@ void mod_clutter_minimap_clear() {
     g_idle_add(&minimap_clear, NULL);
 }
 
+
 bool mod_clutter_init()
 {
     if(!mod_clutter_register_exports())
         goto err;
+
+    clutter_to_notion_queue = g_async_queue_new();
+    clutter_event_timer = create_timer();
 
 
     return TRUE;
