@@ -859,17 +859,21 @@ function manage_handler(clientwin, options)
     end
 
     if clientwin:name() == "*minimap*" then
+        local screen = current_screen()
         local screen_g = current_screen():geom()
-        local ws = workspace_of()
         local geom = {x=0, y=screen_g.h - 200, w=screen_g.w, h=200 }
-        local frame = WGroup.attach_new(ws, {type="WFrame"
-                                    , float=true
-                                    , level=2})
+        local frame = screen:attach_new({type="WFrame"
+                                         , name="*minimap-frame*"
+                                         , unnumbered=true
+                                         , geom=geom
+                                         , sizepolicy="free"
+                                         , float=true
+                                         , level=2})
         frame:attach_new{type="WGroupCW"
                          , float=true
                          , managed={{reg=clientwin, bottom=true}}
                          , level=2}
-        frame:rqgeom(geom)
+        frame:set_mode("floating-alt")
         return true
     end
 
