@@ -2,8 +2,8 @@
 overlap = {x = 10, y = 0}
 
 
-function WMPlex.viewport_geom(ws_holder)
-    return ws_holder:parent():geom()
+function WMPlex.viewport_geom(scroll_frame)
+    return scroll_frame:parent():geom()
 end
 
 -- Utility functions
@@ -58,7 +58,7 @@ end
 
 -- Find the mplex that holds the current tiling
 -- returns nil if the parent of reg's workspace isn't a mplex
-function WRegion.workspace_holder_of(reg)
+function WRegion.scroll_frame_of(reg)
     local tiling = tiling_of(reg)
     local parent = tiling and tiling:parent()
     if parent and obj_is(parent, "WMPlex") then
@@ -87,21 +87,21 @@ function is_paper_tiling(tiling)
     if not tiling or tiling.__typename ~= "WTiling" then
         return false
     end
-    local wsh = tiling:workspace_holder_of()
-    return wsh and wsh.__typename == "WFrame"
+    local scroll_frame = tiling:scroll_frame_of()
+    return scroll_frame and scroll_frame.__typename == "WFrame"
 end
 
-function WMPlex.screen_left(ws_holder, amount)
-    ws_holder:rqgeom{x=ws_holder:geom().x-amount} -- LEFT
+function WMPlex.screen_left(scroll_frame, amount)
+    scroll_frame:rqgeom{x=scroll_frame:geom().x-amount} -- LEFT
 end
 
-function WMPlex.screen_right(ws_holder, amount)
-    ws_holder:rqgeom{x=ws_holder:geom().x+amount} -- RIGHT
+function WMPlex.screen_right(scroll_frame, amount)
+    scroll_frame:rqgeom{x=scroll_frame:geom().x+amount} -- RIGHT
 end
 
-function WMPlex.move_screen(ws_holder, x)
+function WMPlex.move_screen(scroll_frame, x)
     local y = 0
-    ws_holder:rqgeom({x=x})
+    scroll_frame:rqgeom({x=x})
 end
 
 -- Only one animation at a time. Starting a second animation cancels the first.
@@ -109,7 +109,7 @@ end
 --         If this is needed it should be simple to add one timer per workspace.
 local animation_timer = ioncore.create_timer()
 -- Simple animation along the x axis
-function WMPlex.animate_move_right(ws_holder, delta, duration, curve)
+function WMPlex.animate_move_right(scroll_frame, delta, duration, curve)
     animation_timer:reset()
     local duration = duration or 250
     local time = 0
@@ -128,11 +128,11 @@ function WMPlex.animate_move_right(ws_holder, delta, duration, curve)
         local step = math.floor(raw_step)
         rest = raw_step - step
         if math.abs(travelled + step) > math.abs(delta) then
-            ws_holder:screen_right(delta - travelled)
+            scroll_frame:screen_right(delta - travelled)
             return
         end
         travelled = travelled + step
-        ws_holder:screen_right(step)
+        scroll_frame:screen_right(step)
         time = time + t_delta
 
         -- set up new frame
@@ -143,19 +143,19 @@ end
 
 -- Align the viewport origin with sx
 function move_viewport(reg, sx)
-    local ws_holder = reg:workspace_holder_of()
+    local scroll_frame = reg:scroll_frame_of()
     if animate then
-        ws_holder:animate_move_right(-ws_holder:screen_to_viewport(sx))
+        scroll_frame:animate_move_right(-scroll_frame:screen_to_viewport(sx))
     else
-        ws_holder:screen_left(ws_holder:screen_to_viewport(sx))
+        scroll_frame:screen_left(scroll_frame:screen_to_viewport(sx))
     end
 end
 
 function left(reg, amount)
-    reg:workspace_holder_of():screen_right(amount)
+    reg:scroll_frame_of():screen_right(amount)
 end
 function right(reg, amount)
-    reg:workspace_holder_of():screen_left(amount)
+    reg:scroll_frame_of():screen_left(amount)
 end
 
 -- return true if a new buffer was created
@@ -196,9 +196,9 @@ function adapt_workspace(ws)
                              .. ((tiling and tiling.__typename) or "nil"))
         return false
     end
-    local ws_holder = ws:workspace_holder_of()
-    local view_g = ws_holder:viewport_geom()
-    local b, new_b = ensure_buffer(tiling, "right", ws_holder:geom().w - view_g.w)
+    local scroll_frame = ws:scroll_frame_of()
+    local view_g = scroll_frame:viewport_geom()
+    local b, new_b = ensure_buffer(tiling, "right", scroll_frame:geom().w - view_g.w)
     local a, new_a = ensure_buffer(tiling, "left", overlap.x)
     if new_b or new_a then
         tiling:first_page():snap_left()
@@ -212,9 +212,9 @@ function adapt_tiling(tiling)
                              .. ((tiling and tiling.__typename) or "nil"))
         return false
     end
-    local ws_holder = tiling:parent()
-    local view_g = ws_holder:viewport_geom()
-    local b, new_b = ensure_buffer(tiling, "right", ws_holder:geom().w - view_g.w)
+    local scroll_frame = tiling:parent()
+    local view_g = scroll_frame:viewport_geom()
+    local b, new_b = ensure_buffer(tiling, "right", scroll_frame:geom().w - view_g.w)
     local a, new_a = ensure_buffer(tiling, "left", overlap.x)
     if new_b or new_a then
         tiling:first_page():snap_left()
@@ -223,11 +223,11 @@ function adapt_tiling(tiling)
 end
 -- Returns the geometry of region in workspace coordinates
 function WRegion.workspace_geom(reg)
-    ws_holder = reg:workspace_holder_of()
+    scroll_frame = reg:scroll_frame_of()
     parent = reg:parent()
     parent_g = parent:geom()
     g = reg:geom()
-    while parent ~= ws_holder do
+    while parent ~= scroll_frame do
         g.x = g.x + parent_g.x
         g.y = g.y + parent_g.y
         parent = parent:parent()
@@ -236,25 +236,25 @@ function WRegion.workspace_geom(reg)
     return g
 end
 
--- in ws_holder coordinates
-function WMPlex.viewport_origin(ws_holder)
-    return -ws_holder:geom().x
+-- in scroll_frame coordinates
+function WMPlex.viewport_origin(scroll_frame)
+    return -scroll_frame:geom().x
 end
 
 -- screen_to_viewport(viewport_to_screen(100))
 
-function WMPlex.screen_to_viewport(ws_holder, sx)
-    return sx - ws_holder:viewport_origin()
+function WMPlex.screen_to_viewport(scroll_frame, sx)
+    return sx - scroll_frame:viewport_origin()
 end
 
-function WMPlex.viewport_to_screen(ws_holder, x)
-    return ws_holder:viewport_origin() + x
+function WMPlex.viewport_to_screen(scroll_frame, x)
+    return scroll_frame:viewport_origin() + x
 end
 
 local function compute_gap(frame)
     local gap = 0
-    local ws_holder = frame:workspace_holder_of()
-    local view_g = ws_holder:viewport_geom()
+    local scroll_frame = frame:scroll_frame_of()
+    local view_g = scroll_frame:viewport_geom()
     local manager = frame:manager()
     if obj_is(manager, "WTiling") then
         if view_g.w <= frame:geom().w then
@@ -278,17 +278,17 @@ end
 function WFrame.snap_right(frame)
     local g = frame:geom()
     local gap = compute_gap(frame)
-    local ws_holder = frame:workspace_holder_of()
-    local view_g = ws_holder:viewport_geom()
+    local scroll_frame = frame:scroll_frame_of()
+    local view_g = scroll_frame:viewport_geom()
     move_viewport(frame, g.x + g.w - view_g.w + gap)
     return frame
 end
 
 function WFrame.snap_other(frame)
     local g = frame:geom()
-    local wsh = frame:workspace_holder_of()
-    local vpg = wsh:viewport_geom()
-    local vx = wsh:screen_to_viewport(g.x)
+    local scroll_frame = frame:scroll_frame_of()
+    local vpg = scroll_frame:viewport_geom()
+    local vx = scroll_frame:screen_to_viewport(g.x)
     if vx == overlap.x then
         frame:snap_right()
     elseif vx+g.w == vpg.w then
@@ -359,10 +359,10 @@ end
 -- IMPROVEMENT: Make this work for all regions. Ie. regions that aren't direct
 -- children of the workspace holder
 function WFrame.is_fully_visible(frame)
-    local wsh = frame:workspace_holder_of()
+    local scroll_frame = frame:scroll_frame_of()
     local g = frame:geom()
-    local vp_g = wsh:viewport_geom()
-    g.x = wsh:screen_to_viewport(g.x)
+    local vp_g = scroll_frame:viewport_geom()
+    g.x = scroll_frame:screen_to_viewport(g.x)
 
     local is_fully = true
     local partial_w = nil
@@ -432,7 +432,7 @@ end
 function WTiling.insert_page(tiling, frame, direction)
     direction = direction or "right"
     local frame_g = frame:geom()
-    local view_g = tiling:workspace_holder_of():viewport_geom()
+    local view_g = tiling:scroll_frame_of():viewport_geom()
 
     tiling:resize_right(frame, view_g.w - 2*overlap.x)
     local new = tiling:split_at(frame, direction, false)
@@ -465,8 +465,8 @@ function WTiling.merge_pages(tiling, frame)
     end
 
     local frame_g = frame:geom()
-    local ws_holder = frame:workspace_holder_of()
-    local x = ws_holder:screen_to_viewport(frame_g.x)
+    local scroll_frame = frame:scroll_frame_of()
+    local x = scroll_frame:screen_to_viewport(frame_g.x)
 
     local screen_g = frame:screen_of():geom()
     if (x + frame_g.w/2) <= screen_g.w/2 then
@@ -549,10 +549,10 @@ function WTiling.next_page(tiling, frame)
         return
     end
     local next = tiling:nextto(frame, 'right')
-    local ws_holder = tiling:workspace_holder_of()
-    local x = ws_holder:screen_to_viewport(next:geom().x)
+    local scroll_frame = tiling:scroll_frame_of()
+    local x = scroll_frame:screen_to_viewport(next:geom().x)
     local w = next:geom().w
-    local view_g = frame:workspace_holder_of():viewport_geom()
+    local view_g = frame:scroll_frame_of():viewport_geom()
     if x + w >= view_g.w then
         next:snap_right()
     end
@@ -564,8 +564,8 @@ function WTiling.prev_page(tiling, frame)
         return
     end
     local prev = tiling:nextto(frame, 'left')
-    local ws_holder = tiling:workspace_holder_of()
-    local x = ws_holder:screen_to_viewport(prev:geom().x)
+    local scroll_frame = tiling:scroll_frame_of()
+    local x = scroll_frame:screen_to_viewport(prev:geom().x)
     if x <= 0 then
         prev:snap_left()
     end
@@ -583,8 +583,8 @@ end
 -- children workspace holder
 function WRegion.ensure_in_viewport(reg)
 
-    local ws_holder = reg:workspace_holder_of()
-    if not obj_is(ws_holder, "WFrame") then
+    local scroll_frame = reg:scroll_frame_of()
+    if not obj_is(scroll_frame, "WFrame") then
         return
     end
 
@@ -601,9 +601,9 @@ function WRegion.ensure_in_viewport(reg)
     end
 
     local g = target_frame:geom()
-    local x = ws_holder:screen_to_viewport(g.x)
+    local x = scroll_frame:screen_to_viewport(g.x)
 
-    local view_g = ws_holder:viewport_geom()
+    local view_g = scroll_frame:viewport_geom()
     if x < 0 then
         target_frame:snap_left()
     elseif x + g.w > view_g.w then
@@ -617,7 +617,7 @@ end
 
 -- A viewport aware `WRegion.goto_focus`
 function WRegion.paper_goto(reg)
-    if obj_is(reg:workspace_holder_of(), "WFrame") then
+    if obj_is(reg:scroll_frame_of(), "WFrame") then
         reg:ensure_in_viewport()
     end
     reg:original_goto()
@@ -648,17 +648,17 @@ function WTiling.paper_maximize(tiling, frame)
         frame_aux.maximized = nil
         frame_aux.original_g = nil
     else
-        local ws_holder = frame:workspace_holder_of()
-        local view_g = ws_holder:viewport_geom()
+        local scroll_frame = frame:scroll_frame_of()
+        local view_g = scroll_frame:viewport_geom()
 
         local g = frame:geom()
 
         frame_aux.maximized = true
         frame_aux.original_g = frame:geom()
-        frame_aux.original_viewport_x = ws_holder:screen_to_viewport(g.x)
+        frame_aux.original_viewport_x = scroll_frame:screen_to_viewport(g.x)
 
         tiling:resize_right(frame, view_g.w)
-        right(frame, g.x - ws_holder:viewport_origin())
+        right(frame, g.x - scroll_frame:viewport_origin())
     end
     return frame
 end
@@ -695,16 +695,16 @@ function WTiling.paper_expand_free(tiling, frame)
 
     -- Edge-cases:
 
-    local wsh = tiling:workspace_holder_of()
+    local scroll_frame = tiling:scroll_frame_of()
     local first_in_vp = tiling:nextto(a, "right")
 
     if a_free_w == 0 and is_buffer_frame(a) then
-        a_free_w = wsh:screen_to_viewport(first_in_vp:geom().x)
+        a_free_w = scroll_frame:screen_to_viewport(first_in_vp:geom().x)
     end
     if b_free_w == 0 and is_buffer_frame(b) then
         -- will never happen as long as the right buffer is huge though
-        local vp_w = wsh:viewport_geom().w
-        b_free_w = vp_w - wsh:screen_to_viewport(b:geom().x)
+        local vp_w = scroll_frame:viewport_geom().w
+        b_free_w = vp_w - scroll_frame:screen_to_viewport(b:geom().x)
     end
 
     local total_free_w = a_free_w + b_free_w
@@ -740,25 +740,25 @@ function WScreen.create_workspace(screen, name, geom)
     local rootws = ioncore.create_ws(screen, {name=name, sizepolicy="full"}, "empty")
     local geom = geom or screen:geom()
     geom.w = 20000
-    local wsholder = rootws:attach_new({name="*workspaceholder*", type="WFrame", geom=geom})
-    wsholder:set_mode("tiled-alt")
-    wsholder:set_grattr("workspaceholder", "set")
+    local scroll_frame = rootws:attach_new({name="*workspaceholder*", type="WFrame", geom=geom})
+    scroll_frame:set_mode("tiled-alt")
+    scroll_frame:set_grattr("workspaceholder", "set")
 
-    local tiling = wsholder:attach_new{type="WTiling"}
+    local tiling = scroll_frame:attach_new{type="WTiling"}
     adapt_tiling(tiling)
     tiling:first_page():goto_focus()
 
-    return wsholder
+    return scroll_frame
 end
 
 function WScreen.attach_workspace(screen, ws)
     local rootws = get_rootws(screen)
-    local ws_holder = ws:workspace_holder_of()
+    local scroll_frame = ws:scroll_frame_of()
     local view_g = screen:viewport_geom()
-    local holder_g = ws_holder:geom()
-    if obj_is(ws_holder, "WFrame") then
-        rootws:attach(ws_holder)
-        ws_holder:rqgeom{x = holder_g.x, h = view_g.h, y = 0}
+    local holder_g = scroll_frame:geom()
+    if obj_is(scroll_frame, "WFrame") then
+        rootws:attach(scroll_frame)
+        scroll_frame:rqgeom{x = holder_g.x, h = view_g.h, y = 0}
         ws:paper_goto()
     else
         screen:attach(ws)
@@ -849,8 +849,8 @@ function rqclose_propagate_paper(reg, sub)
         if not reg or reg.__typename ~= "WFrame" then
             return false
         end
-        local wph = reg:workspace_holder_of()
-        return wph and wph.__typename == "WFrame"
+        local scroll_frame = reg:scroll_frame_of()
+        return scroll_frame and scroll_frame.__typename == "WFrame"
     end
 
     if is_page(reg) then
