@@ -43,6 +43,10 @@ function parent_of(class_name, reg)
     return reg
 end
 
+function screen_of(reg)
+    return parent_of("WScreen", reg)
+end
+
 function workspace_of(reg)
     return manager_of("WGroupWS", reg)
 end
