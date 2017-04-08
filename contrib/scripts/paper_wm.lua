@@ -858,6 +858,21 @@ function manage_handler(clientwin, options)
         return false
     end
 
+    if clientwin:name() == "*minimap*" then
+        local screen_g = current_screen():geom()
+        local ws = workspace_of()
+        local geom = {x=0, y=screen_g.h - 200, w=screen_g.w, h=200 }
+        local frame = WGroup.attach_new(ws, {type="WFrame"
+                                    , float=true
+                                    , level=2})
+        frame:attach_new{type="WGroupCW"
+                         , float=true
+                         , managed={{reg=clientwin, bottom=true}}
+                         , level=2}
+        frame:rqgeom(geom)
+        return true
+    end
+
     local winprop = ioncore.getwinprop(clientwin)
     if winprop and (
         winprop.target
