@@ -181,35 +181,6 @@ function ensure_buffer(tiling, dir, buffer_w)
     return buffer, buffer ~= buffer_maybe
 end
 
-function unadapt_workspace(ws)
-    local tiling = ws:current()
-    if tiling.__typename ~= "WTiling" then
-        debug.print_line("Can only unadapt tiling workspaces atm. " .. tiling.__typename)
-        return
-    end
-
-    local rbuffer = tiling:farthest("right")
-    rbuffer:rqclose()
-end
-
-function adapt_workspace(ws)
-    --- Makes 'ws' usable in a paper_wm
-    local tiling = ws:current()
-    if not tiling or tiling.__typename ~= "WTiling" then
-        debug.print_line("Can only adapt tiling workspaces atm. "
-                             .. ((tiling and tiling.__typename) or "nil"))
-        return false
-    end
-    local scroll_frame = ws:scroll_frame_of()
-    local view_g = scroll_frame:viewport_geom()
-    local b, new_b = ensure_buffer(tiling, "right", scroll_frame:geom().w - view_g.w)
-    local a, new_a = ensure_buffer(tiling, "left", overlap.x)
-    if new_b or new_a then
-        tiling:first_page():snap_left()
-    end
-    return true
-end
-
 function adapt_tiling(tiling)
     if not tiling or tiling.__typename ~= "WTiling" then
         debug.print_line("Can only adapt tiling workspaces atm. "
