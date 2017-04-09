@@ -807,7 +807,14 @@ end
 local attach_workspace_handler = function (mplex, name)
     local ws =ioncore.lookup_region(name, "WGroupWS")
     if ws then
-        mplex:screen_of():attach(ws, {switchto = true})
+        local screen = mplex:screen_of()
+        screen:attach(ws, {switchto = true})
+        ws:managed_i(function (frame)
+                if frame:name():has_prefix("*workspaceholder*") then
+                    frame:rqgeom{h=screen:geom().h}
+                end
+                return true
+        end, "WFrame")
     else
         mod_query.warn(mplex, "No workspace with that name")
     end
