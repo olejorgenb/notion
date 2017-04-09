@@ -78,6 +78,17 @@ function find_current(mng, classname)
     return mng
 end
 
+function other_dir(dirstr)
+    -- TERMINOLOGY: opposite_dir instead maybe?
+    if dirstr == "left" then
+        return "right"
+    elseif dirstr == "right" then
+        return "left"
+    else
+        error("invalid dirstr: "..dirstr) -- or just nil? (ref. snapped_at)
+    end
+end
+
 function string.has_prefix(str, prefix)
     return string.sub(str, 1, string.len(prefix)) == prefix
 end
@@ -259,19 +270,72 @@ function WFrame.snap_right(frame)
     return frame
 end
 
-function WFrame.snap_other(frame)
+function WFrame.snapped_at(frame)
     local g = frame:geom()
     local scroll_frame = frame:scroll_frame_of()
     local vpg = scroll_frame:viewport_geom()
     local vx = scroll_frame:screen_to_viewport(g.x)
+
     if math.abs(vx - overlap.x) <= 1 then
-        frame:snap_right()
+        return "left"
     elseif math.abs(vx+g.w - vpg.w) <= 1 then
+        return "right"
+    else
+        return nil
+    end
+end
+
+function WFrame.snap_other(frame)
+    local snapped_at = frame:snapped_at()
+    if snapped_at == "left" then
+        frame:snap_right()
+    elseif snapped_at == "right" then
         frame:snap_left()
     else
         frame:snap_left() -- could "snap_closest" to of course
     end
     return frame
+end
+
+--[[ Peek to the other side
+-- Primary usecase:
+-- A|ABBB|  rightmost content in B less useful => peek_toggle
+--     ^
+-- |AABB|B
+--     ^
+-- IMPROVEMENT: This function probably make too many assumptions.
+--              Likely to behave strange if a neighbour is maximized for instance.
+]]
+function WFrame.peek_toggle(frame)
+    local tiling = tiling_of(frame)
+
+    -- Determine if we're "left" or "right"
+    local snapped_at = frame:snapped_at()
+    if not snapped_at then
+        -- approx. for if we're peeking
+        local is_visible, partial = frame:is_fully_visible()
+
+        if not partial then
+            return
+        end
+
+        if partial < 0 then
+            frame:snap_left()
+        else
+            frame:snap_right()
+        end
+    else
+        local peekdir = other_dir(snapped_at)
+        local neighbour = tiling:nextto(frame, peekdir)
+        if is_buffer_frame(neighbour) then
+            return
+        end
+        if peekdir == "right" then
+            neighbour:snap_right()
+        else
+            neighbour:snap_left()
+        end
+    end
 end
 
 
@@ -947,6 +1011,7 @@ defbindings("WTiling", {
               , kpress(META.."0", "_:last_page():snap_right():goto_focus()")
 
               , kpress(META.."L", "_sub:snap_other():original_goto()")
+              , kpress(META.."Shift+L", "_sub:peek_toggle()")
 
               , kpress(META.."E", "_:swap_siblings(_sub)")
 
