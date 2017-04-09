@@ -897,7 +897,7 @@ defbindings("WMPlex", {
 })
 
 defbindings("WMPlex.toplevel", {
-                  kpress(META.."T", "_sub:set_tagged('toggle')")
+                  kpress(META.."T", "_sub:set_tagged('toggle')", "_sub:non-nil")
                 , submap(META.."space", {
                              kpress("space"
                                     , "mod_query.query_menu(_, _, 'ctxmenu', 'Context menu:')"),
