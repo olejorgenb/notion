@@ -83,13 +83,12 @@ function table_to_string(tab, depth_limit, param)
                 return nil
             end
             if not param.filter(k, v) then
-                debug.print_line("Skipping "..k)
+                -- debug.print_line("Skipping "..k)
                 return nil
             end
             return v
         end
 
-        debug.print_line(tostring(tab == nil))
         local filtered = filter_table(tab, skip_filter_p)
 
         for k,v in pairs(filtered) do
@@ -110,7 +109,6 @@ function table_to_string(tab, depth_limit, param)
                 table.insert(lines, entry)
 
                 indent_char = " "
-                debug.print_line(tostring(next(filtered, k)).." "..k)
                 if next(filtered, k) then
                    indent_char = "|"
                 end
