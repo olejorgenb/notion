@@ -585,30 +585,18 @@ end
 
 function WTiling.next_page(tiling, frame)
     if frame == tiling:last_page() then
-        return
+        return frame
+    else
+        return tiling:nextto(frame, 'right')
     end
-    local next = tiling:nextto(frame, 'right')
-    local scroll_frame = tiling:scroll_frame_of()
-    local x = scroll_frame:screen_to_viewport(next:geom().x)
-    local w = next:geom().w
-    local view_g = frame:scroll_frame_of():viewport_geom()
-    if x + w >= view_g.w then
-        next:snap_right()
-    end
-    next:original_goto()
 end
 
 function WTiling.prev_page(tiling, frame)
     if frame == tiling:first_page() then
-        return
+        return frame
+    else
+        return tiling:nextto(frame, 'left')
     end
-    local prev = tiling:nextto(frame, 'left')
-    local scroll_frame = tiling:scroll_frame_of()
-    local x = scroll_frame:screen_to_viewport(prev:geom().x)
-    if x <= 0 then
-        prev:snap_left()
-    end
-    prev:original_goto()
 end
 
 -- Move the viewport (if needed) such that the frame /associated/ with `reg`
@@ -971,10 +959,10 @@ defbindings("WScreen", {
 
 defbindings("WTiling", {
                 -- Moving
-                kpress(META.."Page_Down", "_:next_page(_sub)")
-              , kpress(META.."Page_Up", "_:prev_page(_sub)")
-              , kpress(META.."period", "_:next_page(_sub)")
-              , kpress(META.."comma", "_:prev_page(_sub)")
+                kpress(META.."Page_Down", "_:next_page(_sub):paper_goto()")
+              , kpress(META.."Page_Up", "_:prev_page(_sub):paper_goto()")
+              , kpress(META.."period", "_:next_page(_sub):paper_goto()")
+              , kpress(META.."comma", "_:prev_page(_sub):paper_goto()")
               , kpress(META.."Home", "_:first_page():snap_left():original_goto()")
               , kpress(META.."End", "_:last_page():snap_right():original_goto()")
               , kpress(META.."1", "_:nth_page(1):goto_focus()")
