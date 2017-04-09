@@ -811,7 +811,9 @@ local attach_workspace_handler = function (mplex, name)
         screen:attach(ws, {switchto = true})
         ws:managed_i(function (frame)
                 if frame:name():has_prefix("*workspaceholder*") then
-                    frame:rqgeom{h=screen:geom().h}
+                    ioncore.defer(function ()
+                            frame:rqgeom{h=screen:geom().h}
+                    end)
                 end
                 return true
         end, "WFrame")
