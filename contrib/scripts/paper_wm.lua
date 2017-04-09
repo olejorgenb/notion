@@ -789,22 +789,6 @@ end
 
 -- IDEA: slurp / barf for pages (assoc lisp editing mode)
 
-
-local function get_rootws(screen)
-    local rootws = nil
-    screen:mx_i(function (ws)
-            if string.find(ws:name(), "^*rootws*") then
-                rootws = ws
-                return false
-            end
-            return true
-    end)
-    if not rootws then
-        rootws = ioncore.create_ws(screen, {name="*rootws*", sizepolicy="full"}, "empty")
-    end
-    return rootws
-end
-
 function WScreen.create_workspace(screen, name, geom)
     local rootws = ioncore.create_ws(screen, {name=name, sizepolicy="full"}, "empty")
     local geom = geom or screen:geom()
@@ -820,36 +804,21 @@ function WScreen.create_workspace(screen, name, geom)
     return scroll_frame
 end
 
-function WScreen.attach_workspace(screen, ws)
-    local rootws = get_rootws(screen)
-    local scroll_frame = ws:scroll_frame_of()
-    local view_g = screen:viewport_geom()
-    local holder_g = scroll_frame:geom()
-    if obj_is(scroll_frame, "WFrame") then
-        rootws:attach(scroll_frame)
-        scroll_frame:rqgeom{x = holder_g.x, h = view_g.h, y = 0}
-        ws:paper_goto()
+local attach_workspace_handler = function (mplex, name)
+    local ws =ioncore.lookup_region(name, "WGroupWS")
+    if ws then
+        mplex:screen_of():attach(ws, {switchto = true})
     else
-        screen:attach(ws)
-    end
-end
-
-function attach_paper_workspace_handler(mplex, name)
-    local ws = ioncore.lookup_region(name, "WGroupWS")
-    if not ws then
         mod_query.warn(mplex, "No workspace with that name")
-    elseif ws:screen_of() == mplex:screen_of() then
-        ws:paper_goto()
-    else
-        mplex:screen_of():attach_workspace(ws)
     end
 end
 
-function mod_query.query_paper_workspace(mplex)
-    mod_query.query(mplex, TR("Goto or attach workspace: "), nil,
-                    attach_paper_workspace_handler,
-                    mod_query.make_completor(mod_query.complete_workspace),
-                    "workspacename")
+function mod_query.attach_workspace(mplex)
+    return mod_query.query(mplex:screen_of(), TR("Attach workspace:"),
+                           nil,
+                           attach_workspace_handler,
+                           mod_query.make_completor(mod_query.complete_workspace),
+                           "workspacename")
 end
 
 -- Attach new windows in a new page
@@ -984,7 +953,7 @@ defbindings("WScreen", {
 
               -- workspaces
               , submap(META.."space", {
-                           kpress("A", "mod_query.query_paper_workspace(_)")
+                           kpress("A", "mod_query.attach_workspace(_)")
                       })
 
               -- queries
