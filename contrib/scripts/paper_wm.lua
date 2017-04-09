@@ -880,23 +880,20 @@ frame_hook:add(frame_handler_wrap)
 
 -- Guard against deleting the last page
 function rqclose_propagate_paper(reg, sub)
-    function is_page(reg)
-        if not reg or reg.__typename ~= "WFrame" then
-            return false
-        end
-        local scroll_frame = reg:scroll_frame_of()
-        return scroll_frame and scroll_frame.__typename == "WFrame"
-    end
-
-    if is_page(reg) then
+    local tiling = reg:manager()
+    if is_paper_tiling(tiling) then
         local frame = reg
-        local tiling = frame:manager()
-        if frame:mx_count() == 1 then
-            local new_focus = tiling:nextto(frame, "left")
+        local count = frame:mx_count()
+        if count > 1 then
+            return frame:rqclose_propagate(sub)
+        elseif count == 1 then
+            local new_focus = tiling:prev_page(frame)
             frame:rqclose_propagate(sub)
             return new_focus
         elseif is_paper_tiling(tiling) and tiling:page_count() == 1 then
             return frame
+        elseif count == 0 then
+            tiling:delete_page(frame)
         else
             return frame:rqclose_propagate(sub)
         end
