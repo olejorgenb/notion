@@ -293,9 +293,9 @@ function WFrame.snap_other(frame)
     local scroll_frame = frame:scroll_frame_of()
     local vpg = scroll_frame:viewport_geom()
     local vx = scroll_frame:screen_to_viewport(g.x)
-    if vx == overlap.x then
+    if math.abs(vx - overlap.x) <= 1 then
         frame:snap_right()
-    elseif vx+g.w == vpg.w then
+    elseif math.abs(vx+g.w - vpg.w) <= 1 then
         frame:snap_left()
     else
         frame:snap_left() -- could "snap_closest" to of course
