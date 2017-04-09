@@ -667,6 +667,36 @@ function WTiling.paper_maximize(tiling, frame)
     return frame
 end
 
+function WTiling.cycle_page_width(tiling, frame)
+    local gr = 1/1.618
+    local ratios = { (1-gr), 1/2, gr, }
+
+    function find_next(tr)
+        -- Find the first ratio that is significantly bigger than 'tr'
+        for i, r in ipairs(ratios) do
+            if tr <= r then
+                if tr/r > 0.9 then
+                    return (i % #ratios) + 1
+                else
+                    return i
+                end
+            end
+        end
+        return 1 -- cycle
+    end
+
+    local sw = frame:screen_of():geom().w
+    local r = frame:geom().w / sw
+
+    local i = find_next(r)
+    local next_w = math.floor(ratios[i]*sw)
+
+    frame:aux().maximized = nil
+
+    tiling:resize_right(frame, next_w)
+    return frame
+end
+
 -- Expand the frame utilizing all space occupied by partially visible frames
 function WTiling.paper_expand_free(tiling, frame)
 
@@ -962,6 +992,7 @@ defbindings("WTiling", {
               , kpress(META.."minus", "_:resize_right_delta(_sub, -30):goto_focus()")
               , kpress(META.."H", "_:paper_maximize(_sub):goto_focus()")
               , kpress(META.."Shift+H", "_:paper_expand_free(_sub):goto_focus()")
+              , kpress(META.."R", "_:cycle_page_width(_sub):goto_focus()")
               --- Page rearranging
               , kpress(META.."Shift+period", "_:move_page(_sub, 'right'):paper_goto()")
               , kpress(META.."Shift+comma", "_:move_page(_sub, 'left'):paper_goto()")
