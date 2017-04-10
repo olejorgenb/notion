@@ -716,7 +716,15 @@ function WTiling.cycle_page_width(tiling, frame)
 
     frame:aux().maximized = nil
 
+    local snapped_at = frame:snapped_at() -- check _before_ resize
+
     tiling:resize_right(frame, next_w)
+
+    if snapped_at == "right" then
+        -- WEAKNESS: depends on resize_right to be instant (eg. not animated)
+        --           (we should have a system for smoothly combine resize and move actions)
+        frame:snap_right()
+    end
     return frame
 end
 
