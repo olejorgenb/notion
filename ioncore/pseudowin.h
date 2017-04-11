@@ -18,19 +18,22 @@
 
 DECLCLASS(WPseudoWin){
     WWindow wwin;
+    Watch real_watch;
     GrBrush *brush;
     char *buffer;
     char *style;
     GrStyleSpec attr;
 };
 
+#define PSEUDOWIN_REAL(PSEUDOWIN) ((WRegion*)(PSEUDOWIN)->real_watch.obj)
+
 #define PSEUDOWIN_BRUSH(PSEUDOWIN) ((PSEUDOWIN)->brush)
 #define PSEUDOWIN_BUFFER(PSEUDOWIN) ((PSEUDOWIN)->buffer)
 
 extern bool pseudowin_init(WPseudoWin *p, WWindow *parent, const WFitParams *fp,
-                         const char *style);
+                           const char *style, WRegion *real);
 extern WPseudoWin *create_pseudowin(WWindow *parent, const WFitParams *fp,
-                                const char *style);
+                                    const char *style, WRegion *real);
 
 extern void pseudowin_deinit(WPseudoWin *p);
 
@@ -40,5 +43,7 @@ extern GrStyleSpec *pseudowin_stylespec(WPseudoWin *p);
 extern WRegion *pseudowin_load(WWindow *par, const WFitParams *fp, ExtlTab tab);
 
 extern void pseudowin_updategr(WPseudoWin *p);
+
+extern WRegion *pseudowin_real(WPseudoWin *p);
 
 #endif /* ION_IONCORE_PSEUDOWIN_H */

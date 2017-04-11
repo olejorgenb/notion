@@ -17,18 +17,27 @@
 #include "gr.h"
 #include "event.h"
 #include "strings.h"
+#include "names.h"
 
 
 /*{{{ Init/deinit */
 
 
 bool pseudowin_init(WPseudoWin *p, WWindow *parent, const WFitParams *fp,
-                  const char *style)
+                    const char *style, WRegion *real)
 {
     XSetWindowAttributes attr;
 
     if(!window_init(&(p->wwin), parent, fp, "WPseudoWin"))
         return FALSE;
+
+    watch_init(&(p->real_watch));
+    if(real!=NULL){
+        if(!watch_setup(&(p->real_watch), (Obj*)real, NULL)){
+            // TODO: deint myself?
+            return FALSE;
+        }
+    }
 
     p->buffer=ALLOC_N(char, PSEUDOWIN_BUFFER_LEN);
     if(p->buffer==NULL)
@@ -71,9 +80,9 @@ fail:
 
 
 WPseudoWin *create_pseudowin(WWindow *parent, const WFitParams *fp,
-                         const char *style)
+                             const char *style, WRegion *real)
 {
-    CREATEOBJ_IMPL(WPseudoWin, pseudowin, (p, parent, fp, style));
+    CREATEOBJ_IMPL(WPseudoWin, pseudowin, (p, parent, fp, style, real));
 }
 
 
@@ -93,6 +102,8 @@ void pseudowin_deinit(WPseudoWin *p)
         grbrush_release(p->brush);
         p->brush=NULL;
     }
+
+    watch_reset(&(p->real_watch));
 
     gr_stylespec_unalloc(&p->attr);
 
@@ -224,6 +235,37 @@ void pseudowin_set_text(WPseudoWin *p, const char *str, int maxw)
 /*}}}*/
 
 
+/*EXTL_DOC
+ * Returns the real region if any.
+ */
+EXTL_EXPORT_MEMBER
+WRegion *pseudowin_real(WPseudoWin *p)
+{
+    return PSEUDOWIN_REAL(p);
+}
+
+
+static cairo_surface_t *pseudowin_icon(WPseudoWin *pwin)
+{
+    WRegion *real=PSEUDOWIN_REAL(pwin);
+    if(real!=NULL){
+        return region_icon(real);
+    }
+    return NULL;
+}
+
+
+static const char *pseudowin_displayname(WPseudoWin *pwin)
+{
+    WRegion *real=PSEUDOWIN_REAL(pwin);
+    if(real!=NULL){
+        return region_displayname(real);
+    }
+    return region_name(pwin);
+
+}
+
+
 /*{{{ Load */
 
 
@@ -231,10 +273,16 @@ WRegion *pseudowin_load(WWindow *par, const WFitParams *fp, ExtlTab tab) // Mark
 {
     char *style=NULL, *text=NULL;
     WPseudoWin *p;
+    WRegion *real=NULL;
+
+    if(extl_table_gets_o(tab, "real", (Obj**)&real)){
+        if(!OBJ_IS(real, WRegion))
+            return FALSE;
+    }
 
     extl_table_gets_s(tab, "style", &style);
 
-    p=create_pseudowin(par, fp, style);
+    p=create_pseudowin(par, fp, style, real);
 
     free(style);
 
@@ -245,6 +293,8 @@ WRegion *pseudowin_load(WWindow *par, const WFitParams *fp, ExtlTab tab) // Mark
         pseudowin_do_set_text(p, text);
         free(text);
     }
+
+
 
     return (WRegion*)p;
 }
@@ -259,8 +309,12 @@ WRegion *pseudowin_load(WWindow *par, const WFitParams *fp, ExtlTab tab) // Mark
 static DynFunTab pseudowin_dynfuntab[]={
     {window_draw, pseudowin_draw},
     {region_updategr, pseudowin_updategr},
-    /* {(DynFun*)region_icon, */
-    /*  (DynFun*)pseudowin_icon}, */
+
+    {(DynFun*)region_displayname,
+     pseudowin_displayname},
+
+    {(DynFun*)region_icon,
+     (DynFun*)pseudowin_icon},
     
     END_DYNFUNTAB
 };
