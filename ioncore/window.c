@@ -216,6 +216,27 @@ double window_xid(WWindow *wwin)
 }
 
 
+EXTL_SAFE
+EXTL_EXPORT_MEMBER
+void window_warp_pointer(WWindow *wwin, int x, int y)
+{
+    XWarpPointer(ioncore_g.dpy, None, wwin->win, 0, 0, 0, 0, x, y);
+}
+
+EXTL_SAFE
+EXTL_EXPORT_MEMBER
+ExtlTab window_pointer_pos(WWindow *wwin)
+{
+    ExtlTab pos=extl_create_table();
+    int px, py;
+    xwindow_pointer_pos(wwin->win, &px, &py);
+
+    extl_table_sets_i(pos, "x", px);
+    extl_table_sets_i(pos, "y", py);
+    return pos;
+}
+
+
 void window_select_input(WWindow *wwin, long event_mask)
 {
     XSelectInput(ioncore_g.dpy, wwin->win, event_mask);

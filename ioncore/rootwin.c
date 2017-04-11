@@ -419,6 +419,13 @@ void rootwin_warp_pointer(WRootWin *root, int x, int y)
     XWarpPointer(ioncore_g.dpy, None, WROOTWIN_ROOT(root), 0, 0, 0, 0, x, y);
 }
 
+EXTL_SAFE
+EXTL_EXPORT_MEMBER
+void rootwin_warp_pointer_delta(WRootWin *root, int x, int y)
+{
+    XWarpPointer(ioncore_g.dpy, None, None, 0, 0, 0, 0, x, y);
+}
+
 
 /*EXTL_DOC
  * Returns the first WRootWin
