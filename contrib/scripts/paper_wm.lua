@@ -107,10 +107,12 @@ function is_paper_tiling(tiling)
 end
 
 function WMPlex.screen_left(scroll_frame, amount)
+    ioncore.rootwin():warp_pointer_delta(-amount, 0)
     scroll_frame:rqgeom{x=scroll_frame:geom().x-amount} -- LEFT
 end
 
 function WMPlex.screen_right(scroll_frame, amount)
+    ioncore.rootwin():warp_pointer_delta(amount, 0)
     scroll_frame:rqgeom{x=scroll_frame:geom().x+amount} -- RIGHT
 end
 
