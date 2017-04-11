@@ -911,15 +911,18 @@ function rqclose_propagate_paper(reg, sub)
 end
 
 function WTiling.attach(tiling, reg, params)
-    local new = tiling:insert_page(tiling:current())
-    tiling:resize_right(new, reg:geom().w)
+    local frame = tiling:current()
+    if frame:mx_count() > 0 then
+        frame = tiling:insert_page(frame)
+        tiling:resize_right(frame, reg:geom().w)
+    end
     if obj_is(reg, "WFrame") then
-        move_clients(reg, new)
+        move_clients(reg, frame)
     else
-        new:attach(reg)
+        frame:attach(reg)
     end
     if params and params.switchto then
-        new:paper_goto()
+        frame:paper_goto()
     end
 end
 
