@@ -18,6 +18,7 @@
 #include "event.h"
 #include "strings.h"
 #include "names.h"
+#include "bindmaps.h"
 
 
 /*{{{ Init/deinit */
@@ -38,6 +39,9 @@ bool pseudowin_init(WPseudoWin *p, WWindow *parent, const WFitParams *fp,
             return FALSE;
         }
     }
+
+
+    region_add_bindmap(&p->wwin.region, ioncore_pseudowin_bindmap);
 
     p->buffer=ALLOC_N(char, PSEUDOWIN_BUFFER_LEN);
     if(p->buffer==NULL)

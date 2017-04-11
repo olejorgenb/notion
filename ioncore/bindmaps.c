@@ -36,6 +36,7 @@ WBindmap *ioncore_group_bindmap=NULL;
 WBindmap *ioncore_groupcw_bindmap=NULL;
 WBindmap *ioncore_groupws_bindmap=NULL;
 WBindmap *ioncore_clientwin_bindmap=NULL;
+WBindmap *ioncore_pseudowin_bindmap=NULL;
 
 static Rb_node known_bindmaps=NULL;
 
@@ -69,6 +70,7 @@ void ioncore_deinit_bindmaps()
     DO_FREE(groupcw, "WGroupCW");
     DO_FREE(groupws, "WGroupWS");
     DO_FREE(clientwin, "WClientWin");
+    DO_FREE(pseudowin, "WPseudoWin");
     rb_free_tree(known_bindmaps);
     known_bindmaps=NULL;
 }
@@ -99,6 +101,7 @@ bool ioncore_init_bindmaps()
     DO_ALLOC(groupcw, "WGroupCW", NULL);
     DO_ALLOC(groupws, "WGroupWS", NULL);
     DO_ALLOC(clientwin, "WClientWin", NULL);
+    DO_ALLOC(pseudowin, "WPseudoWin", NULL);
 
     return TRUE;
 }

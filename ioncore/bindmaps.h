@@ -25,6 +25,7 @@ extern WBindmap *ioncore_group_bindmap;
 extern WBindmap *ioncore_groupcw_bindmap;
 extern WBindmap *ioncore_groupws_bindmap;
 extern WBindmap *ioncore_clientwin_bindmap;
+extern WBindmap *ioncore_pseudowin_bindmap;
 
 extern void ioncore_deinit_bindmaps();
 extern bool ioncore_init_bindmaps();
