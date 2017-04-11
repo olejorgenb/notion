@@ -142,7 +142,7 @@ function WMPlex.animate_move_right(scroll_frame, delta, duration, curve)
         local raw_step = curve(time, t_delta) + rest
         local step = math.floor(raw_step)
         rest = raw_step - step
-        if math.abs(travelled + step) > math.abs(delta) then
+        if math.abs(travelled + step) >= math.abs(delta) then
             scroll_frame:screen_right(delta - travelled)
             return
         end
