@@ -926,6 +926,50 @@ function WTiling.attach(tiling, reg, params)
     end
 end
 
+-- HAAACK
+function toggle_squish(frame, active)
+    local aux = frame:aux()
+
+    local tiling = tiling_of(frame)
+
+    if aux.is_squished then
+        tiling:resize_right(frame, aux.unsquished_width)
+
+        local the_choosen_one
+        for i, reg in ipairs(mcollect(WFrame.managed_i, frame)) do
+            if reg ~= aux.squish_placeholder then 
+                frame:attach(reg, { unnumbered=false,
+                                    hidden=false, index=-1})
+                the_choosen_one = reg
+            end
+        end
+        the_choosen_one:goto_focus()
+        ioncore.defer(function() aux.squish_placeholder:rqclose() end)
+    else
+        aux.squish_placeholder =
+            frame:attach_new{type="WPseudoWin", switchto=true, real=active}
+
+        for i, reg in ipairs(mcollect(WFrame.mx_i, frame)) do
+            if reg ~= aux.squish_placeholder then 
+                frame:attach(reg, { unnumbered=true,
+                                    hidden=true, switchto=false})
+            end
+        end
+
+        aux.unsquished_width = frame:geom().w
+        tiling:resize_right(frame, 32)
+        aux.squish_placeholder:goto_focus()
+    end
+
+    aux.is_squished = not aux.is_squished
+
+end
+
+defbindings("WFrame.toplevel", {
+                kpress(META.."P", "toggle_squish(_, _sub)")
+})
+
+
 defbindings("WMPlex", {
                 bdoc("Close current object.")
                 , kpress(META.."C", "rqclose_propagate_paper(_, _sub):paper_goto()")
