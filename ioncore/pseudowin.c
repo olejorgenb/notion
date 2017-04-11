@@ -9,6 +9,7 @@
 #include <string.h>
 
 #include <libtu/objp.h>
+#include <ioncore/gr-util.h>
 #include "common.h"
 #include "global.h"
 #include "window.h"
@@ -19,6 +20,20 @@
 #include "strings.h"
 #include "names.h"
 #include "bindmaps.h"
+#include "regbind.h"
+
+
+GR_DEFATTR(active);
+GR_DEFATTR(inactive);
+
+static void ensure_create_attrs()
+{
+    GR_ALLOCATTR_BEGIN;
+    GR_ALLOCATTR(active);
+    GR_ALLOCATTR(inactive);
+    GR_ALLOCATTR_END;
+}
+
 
 
 /*{{{ Init/deinit */
@@ -123,6 +138,8 @@ void pseudowin_deinit(WPseudoWin *p)
 
 void pseudowin_draw(WPseudoWin *p, bool UNUSED(complete))
 {
+    ensure_create_attrs();
+
     WRectangle g;
 
     if(p->brush==NULL)
@@ -134,7 +151,18 @@ void pseudowin_draw(WPseudoWin *p, bool UNUSED(complete))
     g.h=REGION_GEOM(p).h;
 
     grbrush_begin(p->brush, &g, GRBRUSH_NO_CLEAR_OK);
-    grbrush_init_attr(p->brush, &p->attr);
+
+    /* grbrush_init_attr(p->brush, &p->attr); */
+
+
+    grbrush_unset_attr(p->brush, GR_ATTR(active));
+    grbrush_unset_attr(p->brush, GR_ATTR(inactive));
+
+    fprintf(stderr, "isactive %d\n", REGION_IS_ACTIVE(p));
+    grbrush_set_attr(p->brush, REGION_IS_ACTIVE(p)
+                     ? GR_ATTR(active)
+                     : GR_ATTR(inactive));
+
     grbrush_draw_textbox(p->brush, &g, p->buffer, TRUE);
     grbrush_end(p->brush);
 }
@@ -261,12 +289,20 @@ static cairo_surface_t *pseudowin_icon(WPseudoWin *pwin)
 
 static const char *pseudowin_displayname(WPseudoWin *pwin)
 {
+    return "";
     WRegion *real=PSEUDOWIN_REAL(pwin);
     if(real!=NULL){
         return region_displayname(real);
     }
     return region_name(pwin);
 
+}
+
+
+
+static void pseudowin_redraw_activity_change(WPseudoWin *pwin)
+{
+    pseudowin_draw(pwin, FALSE);
 }
 
 
@@ -298,8 +334,6 @@ WRegion *pseudowin_load(WWindow *par, const WFitParams *fp, ExtlTab tab) // Mark
         free(text);
     }
 
-
-
     return (WRegion*)p;
 }
 
@@ -319,6 +353,9 @@ static DynFunTab pseudowin_dynfuntab[]={
 
     {(DynFun*)region_icon,
      (DynFun*)pseudowin_icon},
+
+    {region_activated, pseudowin_redraw_activity_change},
+    {region_inactivated, pseudowin_redraw_activity_change},
     
     END_DYNFUNTAB
 };
