@@ -12,3 +12,4 @@ typedef struct {
 extern void minimap_add_window(Window w);
 extern void minimap_clear();
 extern void minimap_run();
+extern void clutter_eval_js(const char *js);

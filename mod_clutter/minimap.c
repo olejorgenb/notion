@@ -21,6 +21,10 @@
 #include <clutter/x11/clutter-x11.h>
 #include <clutter/glx/clutter-glx.h>
 
+#include <gjs/gjs.h>
+#include <gio/gio.h>
+#include <girepository.h>
+
 #include "minimap.h"
 
 Display *dpy;
@@ -32,6 +36,8 @@ Window stage_win;
 GType texture_pixmap_type;
 
 static GAsyncQueue *clutter_to_notion_queue;
+
+static GjsContext *js_context;
 
 void
 prep_clutter (int *argc, char ***argv)
@@ -96,6 +102,7 @@ on_clicked(ClutterClickAction *action, ClutterActor *actor)
 {
     // Ideally need a mechanism to wake up notion directly? (fd)
     printf("onclicked\n");
+    printf("n_children %d\n", clutter_actor_get_n_children (actor)); 
     // HACK: sends an int packed in the pointer for proof of concept
     g_async_queue_push(clutter_to_notion_queue, (gpointer)1);
 }
@@ -125,6 +132,7 @@ minimap_add_window (Window w)
     /* clutter_actor_get_transformed_size(tex, &width, &height); */
     /* clutter_actor_set_size(stage, width*20, height); */
 
+    printf("asdf n_children %d\n", clutter_actor_get_n_children (tex)); 
 
     clutter_actor_show (tex);
     window_position_changed(tex, NULL, NULL);
@@ -212,6 +220,33 @@ void init(int argc, char *argv[])
 }
 
 
+void clutter_eval_js(const char *js)
+{
+
+    GError *error = NULL;
+    int status;
+
+    if (!gjs_context_eval (js_context,
+                           js,
+                           -1,
+                           "<main>",
+                           &status,
+                           &error)) {
+        
+
+        
+    }
+    
+}
+
+void gjs_init()
+{
+    js_context = g_object_new (GJS_TYPE_CONTEXT,
+                               /* "search-path", search_path, */
+                               NULL);
+}
+
+
 void
 minimap_run(GAsyncQueue *channel)
 {
@@ -220,6 +255,8 @@ minimap_run(GAsyncQueue *channel)
 
     GMainLoop *loop = g_main_loop_new (NULL, FALSE);
     g_main_context = g_main_loop_get_context (loop);
+
+    gjs_init();
 
     g_main_loop_run (loop);
 }

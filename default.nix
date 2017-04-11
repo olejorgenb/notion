@@ -7,7 +7,7 @@
   xlibsWrapper, libXinerama, libXrandr, libX11, cairo,
   fetchgit,
   clutter, glib, libXrender, libXcomposite,
-  pth
+  gnome3, gobjectIntrospection
 
 }:
 
@@ -39,7 +39,7 @@ stdenv.mkDerivation {
   # patches = patches ++ stdenv.lib.optional enableXft ./notion-xft_nixos.diff;
   # postPatch = "substituteInPlace system-autodetect.mk --replace '#PRELOAD_MODULES=1' 'PRELOAD_MODULES=1'";
   propagatedBuildInputs = [ stdenv xlibsWrapper lua gettext groff which pkgconfig libXinerama libXrandr libX11 cairo ] ++ stdenv.lib.optional enableXft libXft
-  ++ [ glib clutter ] 
+  ++ [ glib clutter ] ++ [ gnome3.gjs gobjectIntrospection ] 
     ++ [ libXrender libXcomposite ];
 
   buildFlags = "LUA_DIR=${lua} X11_PREFIX=/no-such-path PREFIX=\${out}";

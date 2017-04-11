@@ -30,6 +30,10 @@
 
 #include <glib.h>
 
+#include <gjs/gjs.h>
+#include <gio/gio.h>
+#include <girepository.h>
+
 #include "minimap.h"
 
 GMainContext *g_main_context;
@@ -79,6 +83,12 @@ start_thread(void *arg)
 {
     minimap_run(clutter_to_notion_queue);
     return NULL;
+}
+
+EXTL_EXPORT
+void mod_clutter_eval_js(const char *js)
+{
+    g_idle_add(clutter_eval_js, (gpointer)js);
 }
 
 
