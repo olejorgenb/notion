@@ -56,6 +56,7 @@
 #include "frame.h"
 #include "saveload.h"
 #include "infowin.h"
+#include "pseudowin.h"
 #include "activity.h"
 #include "group-cw.h"
 #include "group-ws.h"
@@ -326,6 +327,8 @@ static bool register_classes()
                                      (WRegionLoadCreateFn*)frame_load);
     fail|=!ioncore_register_regclass(&CLASSDESCR(WInfoWin),
                                      (WRegionLoadCreateFn*)infowin_load);
+    fail|=!ioncore_register_regclass(&CLASSDESCR(WPseudoWin),
+                                     (WRegionLoadCreateFn*)pseudowin_load);
     fail|=!ioncore_register_regclass(&CLASSDESCR(WGroupCW),
                                      (WRegionLoadCreateFn*)groupcw_load);
     fail|=!ioncore_register_regclass(&CLASSDESCR(WGroupWS),
