@@ -927,16 +927,14 @@ function WTiling.attach(tiling, reg, params)
 end
 
 defbindings("WMPlex", {
-                bdoc("Close current object.")
-                , kpress(META.."C", "rqclose_propagate_paper(_, _sub):paper_goto()")
-                , submap(META.."space", {
-                             kpress("space"
-                                    , "mod_query.query_menu(_, _, 'ctxmenu', 'Context menu:')"),
-                        })
+                  bdoc("Close current object.")
+                , kpress(META.."C", "_:rqclose_propagate(_sub)")
 })
 
 defbindings("WMPlex.toplevel", {
                   kpress(META.."T", "_sub:set_tagged('toggle')", "_sub:non-nil")
+                , bdoc("Close current object.")
+                , kpress(META.."C", "rqclose_propagate_paper(_, _sub):paper_goto()")
                 , submap(META.."space", {
                              kpress("space"
                                     , "mod_query.query_menu(_, _, 'ctxmenu', 'Context menu:')"),
