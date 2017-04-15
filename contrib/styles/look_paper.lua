@@ -50,21 +50,16 @@ de.defstyle("frame-tiled", {
                 highlight_pixels = padding,
                 padding_pixels = 0,
                 spacing = 0,
-
                 highlight_colour = decoration.inactive.background,
                 shadow_colour    = decoration.inactive.background,
-                background_colour = "#292b2e",
+                background_colour = empty,
 
                 de.substyle("active", {
-                              highlight_colour = decoration.active.foreground.default,
-                              shadow_colour = decoration.active.foreground.default,
                               background_colour = decoration.active.background,
                               highlight_colour = decoration.active.background,
                               shadow_colour    = decoration.active.background,
                 }),
                 de.substyle("inactive-selected", {
-                              highlight_colour = decoration.inactive.foreground.selected,
-                              shadow_colour = decoration.inactive.foreground.selected,
                               highlight_colour = decoration.inactive.background,
                               shadow_colour    = decoration.inactive.background,
                 })
