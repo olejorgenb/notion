@@ -98,16 +98,21 @@ de.defstyle("tab", {
     }),
 
     -- urgent hint style
-    de.substyle("*-*-*-unselected-activity", {
-                    shadow_colour = "#901010",
+    de.substyle("inactive-*-*-unselected-activity", {
+                  shadow_colour = "#b03030",
                     background_colour = decoration.inactive.background,
-                    foreground_colour = "#901010",
+                    foreground_colour = decoration.inactive.foreground.default,
+}),
+    de.substyle("inactive-*-*-selected-activity", {
+                  shadow_colour = "#fe0f0f",
+                  background_colour = decoration.inactive.background,
+                  foreground_colour = decoration.inactive.foreground.selected,
     }),
 
-    de.substyle("*-*-*-selected-activity", {
-                    shadow_colour = "#b03030",
-                    background_colour = decoration.inactive.background,
-                    foreground_colour = "#b03030",
+    de.substyle("active-*-*-unselected-activity", {
+                  shadow_colour = "#fe0f0f",
+                  background_colour = decoration.active.background,
+                  foreground_colour = decoration.active.foreground.default,
     }),
 })
 
