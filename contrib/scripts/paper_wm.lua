@@ -192,6 +192,18 @@ function ensure_buffer(tiling, dir, buffer_w)
     return buffer, buffer ~= buffer_maybe
 end
 
+function make_room_for_statusbar(reg)
+    local reg = reg or ioncore.current()
+    local screen = reg:screen_of()
+    local statusbars = mod_statusbar.statusbars()
+    for _, s in ipairs(statusbars) do
+        if s:screen_of() == screen then
+            local scroll_frame = reg:scroll_frame_of()
+            scroll_frame:rqgeom{h=screen:geom().h - s:geom().h}
+        end
+    end
+end
+
 function adapt_tiling(tiling)
     if not tiling or tiling.__typename ~= "WTiling" then
         debug.print_line("Can only adapt tiling workspaces atm. "
@@ -202,6 +214,7 @@ function adapt_tiling(tiling)
     local view_g = scroll_frame:viewport_geom()
     local b, new_b = ensure_buffer(tiling, "right", scroll_frame:geom().w - view_g.w)
     local a, new_a = ensure_buffer(tiling, "left", overlap.x)
+    make_room_for_statusbar(tiling)
     if new_b or new_a then
         tiling:first_page():snap_left()
     end
