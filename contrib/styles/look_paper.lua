@@ -171,8 +171,11 @@ de.defstyle("actnotify", {
 
 
 de.defstyle("stdisp", {
+                border_sides = "tb",
+                border_style = "elevated",
                 shadow_pixels = 0,
-                highlight_pixels = 0,
+                highlight_pixels = 2,
+                highlight_colour = decoration.inactive.foreground.default,
                 text_align = "left",
                 background_colour = empty,
                 foreground_colour = "grey",
