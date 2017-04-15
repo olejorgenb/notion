@@ -20,6 +20,10 @@ decoration = {
   , inactive = {
       background = "#212026"
      , foreground  = { default = "#9aa28b", selected = "#eeeeee"}
+  , sp = {
+    background = "#1d4d7a"
+    , foreground  = { default = "grey", selected = "#ffffff"}
+  }
 }}
 
 -- Base decoration
@@ -181,6 +185,20 @@ de.defstyle("stdisp", {
                 de.substyle("critical", {
                                 foreground_colour = "red",
                 }),
+})
+
+de.defstyle("frame-floating-alt", {
+              bar = "none",
+              border_sides = "all",
+              -- padding_pixels = 2,
+              highlight_pixels = 8,
+              shadow_pixels = 8,
+              highlight_colour =
+                decoration.inactive.sp.foreground.default,
+              shadow_colour =
+                decoration.inactive.sp.foreground.default,
+              highlight_colour = decoration.inactive.sp.background,
+              shadow_colour    = decoration.inactive.sp.background,
 })
 
 -- Refresh objects' brushes.
