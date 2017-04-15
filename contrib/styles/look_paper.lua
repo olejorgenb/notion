@@ -204,5 +204,14 @@ de.defstyle("frame-floating-alt", {
               shadow_colour    = decoration.inactive.sp.background,
 })
 
+de.defstyle("frame-unknown-alt", {
+              bar = "none",
+              border_sides = "all",
+              spacing = 0,
+              padding_pixels = 0,
+              highlight_pixels = 0,
+              shadow_pixels = 0
+})
+
 -- Refresh objects' brushes.
 gr.refresh()
