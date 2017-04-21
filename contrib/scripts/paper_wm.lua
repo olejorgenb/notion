@@ -256,8 +256,10 @@ local function compute_gap(frame)
     local view_g = scroll_frame:viewport_geom()
     local manager = frame:manager()
     if obj_is(manager, "WTiling") then
-        if view_g.w <= frame:geom().w then
+        if manager:first_page() == frame or manager:last_page() == frame then
             gap = 0
+        elseif view_g.w - 2*overlap.x <= frame:geom().w then
+            gap = math.floor(math.max(0, (view_g.w - frame:geom().w)/2));
         elseif manager:first_page() ~= frame and manager:last_page() ~= frame then
             gap = overlap.x
         end
@@ -684,7 +686,8 @@ function WTiling.paper_maximize(tiling, frame)
     local frame_aux = frame:aux()
     if frame_aux.maximized then
         tiling:resize_right(frame, frame_aux.original_g.w)
-        left(frame, frame_aux.original_viewport_x)
+        local gap = compute_gap(frame)
+        left(frame, frame_aux.original_viewport_x - gap)
         frame_aux.maximized = nil
         frame_aux.original_g = nil
     else
@@ -697,8 +700,9 @@ function WTiling.paper_maximize(tiling, frame)
         frame_aux.original_g = frame:geom()
         frame_aux.original_viewport_x = scroll_frame:screen_to_viewport(g.x)
 
-        tiling:resize_right(frame, view_g.w)
-        right(frame, g.x - scroll_frame:viewport_origin())
+        local gap = compute_gap(frame)
+        tiling:resize_right(frame, view_g.w - overlap.x - gap)
+        right(frame, g.x - scroll_frame:viewport_origin() - gap)
     end
     return frame
 end
