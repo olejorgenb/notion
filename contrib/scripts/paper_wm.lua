@@ -213,7 +213,6 @@ function adapt_tiling(tiling)
     local scroll_frame = tiling:parent()
     local view_g = scroll_frame:viewport_geom()
     local b, new_b = ensure_buffer(tiling, "right", scroll_frame:geom().w - view_g.w)
-    local a, new_a = ensure_buffer(tiling, "left", overlap.x)
     make_room_for_statusbar(tiling)
     if new_b or new_a then
         tiling:first_page():snap_left()
@@ -403,7 +402,7 @@ function WTiling.page_count(tiling)
             count = count + 1
             return true
     end)
-    return count-2 -- just assume there's two buffers
+    return count-1 -- just assume there's one buffer
 end
 
 -- NB! only checks horizontal visibility
@@ -451,8 +450,7 @@ end
 -- Returns the page which is considered First
 -- Use this to constrain page movement
 function WTiling.first_page(tiling)
-    local lbuffer = tiling:farthest("left")
-    local first = tiling:nextto(lbuffer, "right")
+    local first = tiling:farthest("left")
     return first
 end
 
