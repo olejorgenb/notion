@@ -107,15 +107,17 @@ function is_paper_tiling(tiling)
 end
 
 function WMPlex.screen_left(scroll_frame, amount)
-    scroll_frame:rqgeom{x=scroll_frame:geom().x-amount} -- LEFT
+    scroll_frame:move_screen(scroll_frame:geom().x-amount)
 end
 
 function WMPlex.screen_right(scroll_frame, amount)
-    scroll_frame:rqgeom{x=scroll_frame:geom().x+amount} -- RIGHT
+    scroll_frame:move_screen(scroll_frame:geom().x+amount)
 end
 
 function WMPlex.move_screen(scroll_frame, x)
-    local y = 0
+    if x > 0 then
+        x = 0
+    end
     scroll_frame:rqgeom({x=x})
 end
 
