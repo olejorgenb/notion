@@ -55,6 +55,8 @@ bool pseudowin_init(WPseudoWin *p, WWindow *parent, const WFitParams *fp,
         }
     }
 
+    /* everyone need a name */
+    region_set_name(p, "pseduowin");
 
     region_add_bindmap(&p->wwin.region, ioncore_pseudowin_bindmap);
 
@@ -150,15 +152,13 @@ void pseudowin_draw(WPseudoWin *p, bool UNUSED(complete))
     g.w=REGION_GEOM(p).w;
     g.h=REGION_GEOM(p).h;
 
+    /* NOTE: not sure if this is the most correct to deal with brushes */
+
     grbrush_begin(p->brush, &g, GRBRUSH_NO_CLEAR_OK);
-
-    /* grbrush_init_attr(p->brush, &p->attr); */
-
 
     grbrush_unset_attr(p->brush, GR_ATTR(active));
     grbrush_unset_attr(p->brush, GR_ATTR(inactive));
 
-    fprintf(stderr, "isactive %d\n", REGION_IS_ACTIVE(p));
     grbrush_set_attr(p->brush, REGION_IS_ACTIVE(p)
                      ? GR_ATTR(active)
                      : GR_ATTR(inactive));
@@ -187,7 +187,6 @@ void pseudowin_updategr(WPseudoWin *p)
 
     window_draw(&(p->wwin), TRUE);
 }
-
 
 
 /*}}}*/
@@ -270,6 +269,7 @@ void pseudowin_set_text(WPseudoWin *p, const char *str, int maxw)
 /*EXTL_DOC
  * Returns the real region if any.
  */
+EXTL_SAFE
 EXTL_EXPORT_MEMBER
 WRegion *pseudowin_real(WPseudoWin *p)
 {
@@ -289,13 +289,11 @@ static cairo_surface_t *pseudowin_icon(WPseudoWin *pwin)
 
 static const char *pseudowin_displayname(WPseudoWin *pwin)
 {
-    return "";
     WRegion *real=PSEUDOWIN_REAL(pwin);
     if(real!=NULL){
         return region_displayname(real);
     }
     return region_name(pwin);
-
 }
 
 

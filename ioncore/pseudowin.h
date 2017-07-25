@@ -20,6 +20,7 @@ DECLCLASS(WPseudoWin){
     WWindow wwin;
     Watch real_watch;
     GrBrush *brush;
+    /* Text displayed inside the window */
     char *buffer;
     char *style;
     GrStyleSpec attr;
