@@ -965,6 +965,41 @@ function toggle_squish(frame, active)
 
 end
 
+function paper_set_fullscreen(reg, how)
+    local is_fullscreen = false
+    if obj_is(reg:parent(), "WScreen") then
+        is_fullscreen = true
+    end
+    if not is_fullscreen and how ~= "unset" then
+        local f = frame_of(reg)
+        if f then
+            f:attach_new{type="WPseudoWin", real=reg, style="pseudowin", switchto=false}
+        end
+    end
+
+    reg:set_fullscreen(how)
+
+    if is_fullscreen and how ~= "set" then
+        local f = frame_of(reg)
+        if f then
+            debug.log("frame exist")
+            local pseudo = nil
+            f:managed_i(function(mreg)
+                    if mreg.__typename == "WPseudoWin" and mreg:real() == reg then
+                        pseudo = mreg
+                        return false
+                    end
+                    return true
+            end);
+            if pseudo then
+                pseudo:rqclose()
+            end
+        end
+    end
+
+end
+
+
 defbindings("WFrame.toplevel", {
                 kpress(META.."P", "toggle_squish(_, _sub)")
 })
