@@ -107,15 +107,17 @@ function is_paper_tiling(tiling)
 end
 
 function WMPlex.screen_left(scroll_frame, amount)
-    scroll_frame:rqgeom{x=scroll_frame:geom().x-amount} -- LEFT
+    scroll_frame:move_screen(scroll_frame:geom().x-amount)
 end
 
 function WMPlex.screen_right(scroll_frame, amount)
-    scroll_frame:rqgeom{x=scroll_frame:geom().x+amount} -- RIGHT
+    scroll_frame:move_screen(scroll_frame:geom().x+amount)
 end
 
 function WMPlex.move_screen(scroll_frame, x)
-    local y = 0
+    if x > 0 then
+        x = 0
+    end
     scroll_frame:rqgeom({x=x})
 end
 
@@ -192,6 +194,18 @@ function ensure_buffer(tiling, dir, buffer_w)
     return buffer, buffer ~= buffer_maybe
 end
 
+function make_room_for_statusbar(reg)
+    local reg = reg or ioncore.current()
+    local screen = reg:screen_of()
+    local statusbars = mod_statusbar.statusbars()
+    for _, s in ipairs(statusbars) do
+        if s:screen_of() == screen then
+            local scroll_frame = reg:scroll_frame_of()
+            scroll_frame:rqgeom{h=screen:geom().h - s:geom().h}
+        end
+    end
+end
+
 function adapt_tiling(tiling)
     if not tiling or tiling.__typename ~= "WTiling" then
         debug.print_line("Can only adapt tiling workspaces atm. "
@@ -201,7 +215,7 @@ function adapt_tiling(tiling)
     local scroll_frame = tiling:parent()
     local view_g = scroll_frame:viewport_geom()
     local b, new_b = ensure_buffer(tiling, "right", scroll_frame:geom().w - view_g.w)
-    local a, new_a = ensure_buffer(tiling, "left", overlap.x)
+    make_room_for_statusbar(tiling)
     if new_b or new_a then
         tiling:first_page():snap_left()
     end
@@ -243,8 +257,10 @@ local function compute_gap(frame)
     local view_g = scroll_frame:viewport_geom()
     local manager = frame:manager()
     if obj_is(manager, "WTiling") then
-        if view_g.w <= frame:geom().w then
+        if manager:first_page() == frame or manager:last_page() == frame then
             gap = 0
+        elseif view_g.w - 2*overlap.x <= frame:geom().w then
+            gap = math.floor(math.max(0, (view_g.w - frame:geom().w)/2));
         elseif manager:first_page() ~= frame and manager:last_page() ~= frame then
             gap = overlap.x
         end
@@ -388,7 +404,7 @@ function WTiling.page_count(tiling)
             count = count + 1
             return true
     end)
-    return count-2 -- just assume there's two buffers
+    return count-1 -- just assume there's one buffer
 end
 
 -- NB! only checks horizontal visibility
@@ -436,8 +452,7 @@ end
 -- Returns the page which is considered First
 -- Use this to constrain page movement
 function WTiling.first_page(tiling)
-    local lbuffer = tiling:farthest("left")
-    local first = tiling:nextto(lbuffer, "right")
+    local first = tiling:farthest("left")
     return first
 end
 
@@ -671,7 +686,8 @@ function WTiling.paper_maximize(tiling, frame)
     local frame_aux = frame:aux()
     if frame_aux.maximized then
         tiling:resize_right(frame, frame_aux.original_g.w)
-        left(frame, frame_aux.original_viewport_x)
+        local gap = compute_gap(frame)
+        left(frame, frame_aux.original_viewport_x - gap)
         frame_aux.maximized = nil
         frame_aux.original_g = nil
     else
@@ -684,8 +700,9 @@ function WTiling.paper_maximize(tiling, frame)
         frame_aux.original_g = frame:geom()
         frame_aux.original_viewport_x = scroll_frame:screen_to_viewport(g.x)
 
-        tiling:resize_right(frame, view_g.w)
-        right(frame, g.x - scroll_frame:viewport_origin())
+        local gap = compute_gap(frame)
+        tiling:resize_right(frame, view_g.w - overlap.x - gap)
+        right(frame, g.x - scroll_frame:viewport_origin() - gap)
     end
     return frame
 end
@@ -1006,16 +1023,14 @@ defbindings("WFrame.toplevel", {
 
 
 defbindings("WMPlex", {
-                bdoc("Close current object.")
-                , kpress(META.."C", "rqclose_propagate_paper(_, _sub):paper_goto()")
-                , submap(META.."space", {
-                             kpress("space"
-                                    , "mod_query.query_menu(_, _, 'ctxmenu', 'Context menu:')"),
-                        })
+                  bdoc("Close current object.")
+                , kpress(META.."C", "_:rqclose_propagate(_sub)")
 })
 
 defbindings("WMPlex.toplevel", {
                   kpress(META.."T", "_sub:set_tagged('toggle')", "_sub:non-nil")
+                , bdoc("Close current object.")
+                , kpress(META.."C", "rqclose_propagate_paper(_, _sub):paper_goto()")
                 , submap(META.."space", {
                              kpress("space"
                                     , "mod_query.query_menu(_, _, 'ctxmenu', 'Context menu:')"),
