@@ -894,8 +894,13 @@ static void menu_do_select_nth(WMenu *menu, int n)
     int oldn=menu->selected_entry;
     bool drawfull=FALSE;
 
-    if(oldn==n)
-        return;
+    ExtlTab tab;
+    bool ok;
+    ExtlFn handler;
+
+    /* Temporary commented out so we can use this function to preview the first entry */
+    /* if(oldn==n) */
+    /*     return; */
 
     if(menu->submenu!=NULL)
         destroy_obj((Obj*)menu->submenu);
@@ -931,6 +936,17 @@ static void menu_do_select_nth(WMenu *menu, int n)
             menu_draw_entry(menu, oldn, &igeom, TRUE);
         if(n!=-1)
             menu_draw_entry(menu, n, &igeom, TRUE);
+    }
+
+    if(menu->alt_tab_mode){
+
+        handler=menu->handler;
+        ok=extl_table_geti_t(menu->tab, n+1, &tab);
+
+        if(ok)
+            extl_call(handler, "t", NULL, tab);
+
+        extl_unref_table(tab);
     }
 }
 

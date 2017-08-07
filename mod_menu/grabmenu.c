@@ -111,6 +111,8 @@ WMenu *mod_menu_do_grabmenu(WMPlex *mplex, ExtlFn handler, ExtlTab tab,
     ioncore_grab_establish((WRegion*)menu, grabmenu_handler,
                            grabkilled_handler, 0);
 
+    menu_select_nth(menu, menu->selected_entry);
+
     return menu;
 }
 
