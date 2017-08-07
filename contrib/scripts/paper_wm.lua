@@ -965,7 +965,7 @@ defbindings("WScreen", {
               , kpress(META.."Down", "switch_workspace(-1)")
 
               --- MRU lists/menus
-              , kpress(META.."Tab", "mod_menu.grabmenu(_, _sub, 'focuslist', {sizepolicy = 'center', big=true })")
+              , kpress(META.."Tab", "mod_menu.grabmenu(_, _sub, 'focuslist', {sizepolicy = 'center', big=true, preview=true })")
               , submap(META.."space", {
                            kpress("Tab", "mod_menu.grabmenu(_, _sub, 'workspacefocuslist', { sizepolicy = 'center', big=true})")
                            , kpress("N", "_:create_workspace()")

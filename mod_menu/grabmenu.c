@@ -104,6 +104,7 @@ WMenu *mod_menu_do_grabmenu(WMPlex *mplex, ExtlFn handler, ExtlTab tab,
     if(menu==NULL)
         return NULL;
 
+    menu->alt_tab_mode=extl_table_is_bool_set(param, "preview");
     menu->gm_kcb=kcb;
     menu->gm_state=state;
 

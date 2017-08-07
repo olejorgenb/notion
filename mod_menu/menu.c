@@ -681,10 +681,29 @@ static void deinit_entries(WMenu *menu)
 
 void menu_deinit(WMenu *menu)
 {
+
+    ExtlTab tab;
+    bool ok;
+    ExtlFn handler;
+
     menu_typeahead_clear(menu);
 
     if(menu->submenu!=NULL)
         destroy_obj((Obj*)menu->submenu);
+
+    if(menu->alt_tab_mode) {
+
+        handler=menu->handler;
+        menu->handler=extl_fn_none();
+        ok=extl_table_geti_t(menu->tab, 1, &tab);
+
+        if(ok)
+          extl_call(handler, "t", NULL, tab);
+
+        extl_unref_fn(handler);
+        extl_unref_table(tab);
+
+    }
 
     /*if(menu->cycle_bindmap!=NULL)
         bindmap_destroy(menu->cycle_bindmap);*/

@@ -33,6 +33,7 @@ DECLCLASS(WMenu){
 
     WFitParams last_fp;
 
+    bool alt_tab_mode;
     bool pmenu_mode;
     bool big_mode;
     int n_entries, selected_entry;
