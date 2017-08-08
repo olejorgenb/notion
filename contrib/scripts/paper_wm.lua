@@ -975,6 +975,69 @@ function WTiling.attach(tiling, reg, params)
     end
 end
 
+local function addto(list)
+    return function(tgt, attr)
+        local e=menuentry(tgt:name(), function() tgt:rqorder("front") tgt:goto_focus() end)
+        e.attr=attr;
+        table.insert(list, e)
+        return true
+    end
+end
+
+-- <alt-tab> menu
+local function alt_tab()
+    local do_act = true
+    local entries={}
+    local seen={}
+    local iter_=addto(entries)
+
+    local start_in_scratchpad = is_scratchpad(frame_of(current)) or
+                                is_scratchpad(workspace_of(current))
+
+    local function iter(obj, attr)
+        if obj_is(obj, "WClientWin") then
+            local in_scratchpad = is_scratchpad(frame_of(obj)) or
+                                  is_scratchpad(workspace_of(obj))
+            -- Ignore scratchpad if we didn't start there
+            if not start_in_scratchpad and in_scratchpad then
+                return true
+            end
+            iter_(obj, attr)
+            seen[obj]=true
+        end
+        return true
+    end
+
+    local function iter_act(obj)
+        iter_(obj, "activity")
+        seen[obj]=true
+        return true
+    end
+
+    local function iter_foc(obj)
+        return (seen[obj] or iter(obj))
+    end
+
+    -- Add the current window to the top of the list
+    iter(ioncore.current())
+
+    if do_act then
+        -- Windows with activity first
+        ioncore.activity_i(iter_act)
+    end
+
+    -- The ones that have been focused in their lifetime
+    ioncore.focushistory_i(iter_foc)
+
+    -- And then the rest
+    ioncore.clientwin_i(iter_foc)
+
+    return entries
+end
+ioncore.defmenu("alttab", alt_tab)
+
+
+
 defbindings("WMPlex", {
                   bdoc("Close current object.")
                 , kpress(META.."C", "_:rqclose_propagate(_sub)")

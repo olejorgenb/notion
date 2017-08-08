@@ -104,14 +104,17 @@ WMenu *mod_menu_do_grabmenu(WMPlex *mplex, ExtlFn handler, ExtlTab tab,
     if(menu==NULL)
         return NULL;
 
-    menu->alt_tab_mode=extl_table_is_bool_set(param, "preview");
+    bool alt_tab_mode=extl_table_is_bool_set(param, "preview");
+    menu->alt_tab_mode=alt_tab_mode;
     menu->gm_kcb=kcb;
     menu->gm_state=state;
 
     ioncore_grab_establish((WRegion*)menu, grabmenu_handler,
                            grabkilled_handler, 0);
 
-    menu_select_nth(menu, menu->selected_entry);
+    if (alt_tab_mode)
+        menu_select_nth(menu, 1);
+
 
     return menu;
 }
