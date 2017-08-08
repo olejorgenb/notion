@@ -442,11 +442,24 @@ function WTiling.nth_page(tiling, n)
     local stop = tiling:last_page()
     local next = tiling:first_page()
 
+    if n == 0 then
+        return stop
+    end
+
     while n > 1 and next ~= stop do
         next = tiling:nextto(next, "right")
         n = n-1
     end
     return next
+end
+
+function switch_nth(frame, nth)
+    local tiling = tiling_of(frame)
+    if tiling and frame:mx_count() == 1 then
+        tiling:nth_page(nth + 1):goto_focus()
+    else
+        frame:switch_nth(nth)
+    end
 end
 
 -- Returns the page which is considered First
@@ -988,15 +1001,6 @@ defbindings("WTiling", {
               , kpress(META.."comma", "_:prev_page(_sub):paper_goto()")
               , kpress(META.."Home", "_:first_page():snap_left():original_goto()")
               , kpress(META.."End", "_:last_page():snap_right():original_goto()")
-              , kpress(META.."1", "_:nth_page(1):goto_focus()")
-              , kpress(META.."2", "_:nth_page(2):goto_focus()")
-              , kpress(META.."3", "_:nth_page(3):goto_focus()")
-              , kpress(META.."4", "_:nth_page(4):goto_focus()")
-              , kpress(META.."5", "_:nth_page(5):goto_focus()")
-              , kpress(META.."6", "_:nth_page(6):goto_focus()")
-              , kpress(META.."7", "_:nth_page(7):goto_focus()")
-              , kpress(META.."8", "_:nth_page(8):goto_focus()")
-              , kpress(META.."9", "_:nth_page(9):goto_focus()")
               , kpress(META.."0", "_:last_page():snap_right():goto_focus()")
 
               , kpress(META.."L", "_sub:snap_other():original_goto()")
@@ -1038,5 +1042,17 @@ defbindings("WFrame.toplevel", {
                 , mclick("Button1@tab", "_:paper_goto() _:p_switch_tab()")
                 -- terminal
                 , kpress(ALTMETA.."F2", "ioncore.exec_on(_, XTERM or 'xterm')")
-})
 
+                -- tabs/pages
+                , bdoc("Switch to n:th object within the frame.")
+                , kpress(META.."0", "switch_nth(_, -1)")
+                , kpress(META.."1", "switch_nth(_, 0)")
+                , kpress(META.."2", "switch_nth(_, 1)")
+                , kpress(META.."3", "switch_nth(_, 2)")
+                , kpress(META.."4", "switch_nth(_, 3)")
+                , kpress(META.."5", "switch_nth(_, 4)")
+                , kpress(META.."6", "switch_nth(_, 5)")
+                , kpress(META.."7", "switch_nth(_, 6)")
+                , kpress(META.."8", "switch_nth(_, 7)")
+                , kpress(META.."9", "switch_nth(_, 8)")
+})
