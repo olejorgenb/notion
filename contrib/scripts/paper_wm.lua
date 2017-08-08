@@ -627,6 +627,25 @@ function WTiling.prev_page(tiling, frame)
     end
 end
 
+-- Sensitive to scratchpad
+function focus_next(frame)
+    local tiling = tiling_of(frame)
+    if is_scratchpad(frame) then
+        frame:switch_next()
+    else
+        tiling:next_page(frame):goto_focus()
+    end
+end
+
+function focus_prev(frame)
+    local tiling = tiling_of(frame)
+    if is_scratchpad(frame) then
+        frame:switch_prev()
+    else
+        tiling:prev_page(frame):goto_focus()
+    end
+end
+
 -- Move the viewport (if needed) such that the frame /associated/ with `reg`
 -- is inside the viewport.
 -- A frame is /associated/ with `reg` by being the current frame of `reg` or
@@ -997,8 +1016,6 @@ defbindings("WTiling", {
                 -- Moving
                 kpress(META.."Page_Down", "_:next_page(_sub):paper_goto()")
               , kpress(META.."Page_Up", "_:prev_page(_sub):paper_goto()")
-              , kpress(META.."period", "_:next_page(_sub):paper_goto()")
-              , kpress(META.."comma", "_:prev_page(_sub):paper_goto()")
               , kpress(META.."Home", "_:first_page():snap_left():original_goto()")
               , kpress(META.."End", "_:last_page():snap_right():original_goto()")
               , kpress(META.."0", "_:last_page():snap_right():goto_focus()")
@@ -1055,4 +1072,8 @@ defbindings("WFrame.toplevel", {
                 , kpress(META.."7", "switch_nth(_, 6)")
                 , kpress(META.."8", "switch_nth(_, 7)")
                 , kpress(META.."9", "switch_nth(_, 8)")
+
+                -- Goto to next thing, either a tab or page
+                , kpress(META.."period", "focus_next(_)")
+                , kpress(META.."comma", "focus_prev(_)")
 })
