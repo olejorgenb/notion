@@ -31,7 +31,7 @@ EXTL_EXPORT
 WMenu *mod_menu_do_menu(WMPlex *mplex, ExtlFn handler, ExtlTab tab,
                         ExtlTab param)
 {
-    WMenuCreateParams fnp;
+    WMenuCreateParams fnp=MENUCREATEPARAM_INIT;
     WMPlexAttachParams par;
 
     fnp.handler=handler;
@@ -41,6 +41,8 @@ WMenu *mod_menu_do_menu(WMPlex *mplex, ExtlFn handler, ExtlTab tab,
     fnp.big_mode=extl_table_is_bool_set(param, "big");
     fnp.initial=0;
     extl_table_gets_i(param, "initial", &(fnp.initial));
+    extl_table_gets_i(param, "max_w", &(fnp.max_w));
+    extl_table_gets_i(param, "max_h", &(fnp.max_h));
     fnp.refg.x=0;
     fnp.refg.y=0;
     fnp.refg.w=0;
@@ -73,7 +75,7 @@ EXTL_EXPORT
 WMenu *mod_menu_do_pmenu(WWindow *where, ExtlFn handler, ExtlTab tab)
 {
     WScreen *scr;
-    WMenuCreateParams fnp;
+    WMenuCreateParams fnp=MENUCREATEPARAM_INIT;
     XEvent *ev=ioncore_current_pointer_event();
     WMenu *menu;
     WFitParams fp;

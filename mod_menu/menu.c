@@ -251,11 +251,22 @@ static void menu_calc_size(WMenu *menu, bool maxexact,
 
 void calc_size(WMenu *menu, int *w, int *h)
 {
+    int max_w, max_h;
     if(menu->pmenu_mode){
         menu_calc_size(menu, FALSE, INT_MAX, INT_MAX, w, h);
     }else{
+        if(menu->max_w > 0)
+            max_w=MINOF(menu->max_w, menu->last_fp.g.w);
+        else
+            max_w=menu->last_fp.g.w;
+
+        if(menu->max_h > 0)
+            max_h=MINOF(menu->max_h, menu->last_fp.g.h);
+        else
+            max_h=menu->last_fp.g.h;
+
         menu_calc_size(menu, !(menu->last_fp.mode&REGION_FIT_BOUNDS),
-                       menu->last_fp.g.w, menu->last_fp.g.h, w, h);
+                       max_w, max_h, w, h);
     }
 }
 
@@ -624,6 +635,8 @@ bool menu_init(WMenu *menu, WWindow *par, const WFitParams *fp,
     menu->first_entry=0;
     menu->submenu=NULL;
     menu->typeahead=NULL;
+    menu->max_w=params->max_w;
+    menu->max_h=params->max_h;
 
     menu->gm_kcb=0;
     menu->gm_state=0;
@@ -780,7 +793,7 @@ int get_sub_y_off(WMenu *menu, int n)
 static void show_sub(WMenu *menu, int n)
 {
     WFitParams fp;
-    WMenuCreateParams fnp;
+    WMenuCreateParams fnp=MENUCREATEPARAM_INIT;
     WMenu *submenu;
     WWindow *par;
 

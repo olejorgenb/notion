@@ -39,6 +39,7 @@ DECLCLASS(WMenu){
     int n_entries, selected_entry;
     int first_entry, vis_entries;
     int max_entry_w, entry_h, entry_spacing;
+    int max_w, max_h;
     WMenuEntry *entries;
 
     WMenu *submenu;
@@ -54,6 +55,8 @@ DECLCLASS(WMenu){
 };
 
 
+#define MENUCREATEPARAM_INIT {0, 0, 0, 0, 0, 0, {0,0,0,0}, 0,0}
+
 INTRSTRUCT(WMenuCreateParams);
 
 DECLSTRUCT(WMenuCreateParams){
@@ -63,7 +66,10 @@ DECLSTRUCT(WMenuCreateParams){
     bool submenu_mode;
     bool big_mode;
     int initial;
+    /* Used to position pmenus and submenues */
     WRectangle refg;
+    /* Atm. only used for non pmenus. 0 means unrestrained */
+    int max_w, max_h;
 };
 
 

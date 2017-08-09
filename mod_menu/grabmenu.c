@@ -59,7 +59,7 @@ EXTL_EXPORT
 WMenu *mod_menu_do_grabmenu(WMPlex *mplex, ExtlFn handler, ExtlTab tab,
                             ExtlTab param)
 {
-    WMenuCreateParams fnp;
+    WMenuCreateParams fnp=MENUCREATEPARAM_INIT;
     WMPlexAttachParams par;
     WMenu *menu;
     uint state, kcb;
@@ -88,11 +88,14 @@ WMenu *mod_menu_do_grabmenu(WMPlex *mplex, ExtlFn handler, ExtlTab tab,
     fnp.big_mode=extl_table_is_bool_set(param, "big");
     fnp.initial=0;
     extl_table_gets_i(param, "initial", &(fnp.initial));
+    extl_table_gets_i(param, "max_w", &(fnp.max_w));
+    extl_table_gets_i(param, "max_h", &(fnp.max_h));
 
     par.flags=(MPLEX_ATTACH_SWITCHTO|
                MPLEX_ATTACH_LEVEL|
                MPLEX_ATTACH_UNNUMBERED|
                MPLEX_ATTACH_SIZEPOLICY);
+
     if (FALSE==extl_table_gets_sizepolicy(param, "sizepolicy", &par.szplcy))
         par.szplcy=SIZEPOLICY_FULL_BOUNDS;
     par.level=STACKING_LEVEL_MODAL1+2;
