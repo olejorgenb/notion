@@ -455,7 +455,7 @@ end
 
 function switch_nth(frame, nth)
     local tiling = tiling_of(frame)
-    if tiling and frame:mx_count() == 1 then
+    if tiling and frame:mx_count() < 2 then
         tiling:nth_page(nth + 1):goto_focus()
     else
         frame:switch_nth(nth)
