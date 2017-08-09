@@ -978,8 +978,8 @@ end
 -- Utility for alt_tab menus
 function WRegion.in_scratchpad(reg)
     -- scratchpads are either frames or workspaces
-    local frame = frame_of(obj)
-    local ws = workspace_of(obj)
+    local frame = frame_of(reg)
+    local ws = workspace_of(reg)
     return (frame and is_scratchpad(frame)) or
            (ws and is_scratchpad(ws))
 end
