@@ -990,7 +990,7 @@ local function alt_tab()
     local entries={}
     local seen={}
     local iter_=addto(entries)
-
+    local current = ioncore.current()
     local start_in_scratchpad = is_scratchpad(frame_of(current)) or
                                 is_scratchpad(workspace_of(current))
 
@@ -1019,7 +1019,7 @@ local function alt_tab()
     end
 
     -- Add the current window to the top of the list
-    iter(ioncore.current())
+    iter(current)
 
     if do_act then
         -- Windows with activity first
