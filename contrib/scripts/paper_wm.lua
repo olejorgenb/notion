@@ -975,6 +975,15 @@ function WTiling.attach(tiling, reg, params)
     end
 end
 
+-- Utility for alt_tab menus
+function WRegion.in_scratchpad(reg)
+    -- scratchpads are either frames or workspaces
+    local frame = frame_of(obj)
+    local ws = workspace_of(obj)
+    return (frame and is_scratchpad(frame)) or
+           (ws and is_scratchpad(ws))
+end
+
 local function addto(list)
     return function(tgt, attr)
         local e=menuentry(tgt:name(), function() tgt:rqorder("front") tgt:goto_focus() end)
@@ -991,15 +1000,12 @@ local function alt_tab()
     local seen={}
     local iter_=addto(entries)
     local current = ioncore.current()
-    local start_in_scratchpad = is_scratchpad(frame_of(current)) or
-                                is_scratchpad(workspace_of(current))
+    local start_in_scratchpad = current:in_scratchpad()
 
     local function iter(obj, attr)
         if obj_is(obj, "WClientWin") then
-            local in_scratchpad = is_scratchpad(frame_of(obj)) or
-                                  is_scratchpad(workspace_of(obj))
             -- Ignore scratchpad if we didn't start there
-            if not start_in_scratchpad and in_scratchpad then
+            if not start_in_scratchpad and obj:in_scratchpad() then
                 return true
             end
             iter_(obj, attr)
