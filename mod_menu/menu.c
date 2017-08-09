@@ -955,7 +955,7 @@ static void menu_do_select_nth(WMenu *menu, int n)
         ok=extl_table_geti_t(menu->tab, n+1, &tab);
 
         if(ok)
-            extl_call(handler, "t", NULL, tab);
+            extl_call(handler, "tb", NULL, tab, TRUE);
 
         extl_unref_table(tab);
     }

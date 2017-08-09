@@ -19,12 +19,17 @@ decoration = {
   }
   , inactive = {
       background = "#212026"
-     , foreground  = { default = "#9aa28b", selected = "#eeeeee"}
-  , sp = {
-    background = "#1d4d7a"
-    , foreground  = { default = "grey", selected = "#ffffff"}
+      , foreground  = { default = "#9aa28b", selected = "#eeeeee" }
+      , sp = {
+          background = "#1d4d7a"
+          , foreground  = { default = "grey", selected = "#ffffff" }
+      }
   }
-}}
+  , preview = {
+      background = "#4E4B59"
+      , foreground  = { default = "grey", selected = "#ffffff" }
+  }
+}
 
 -- Base decoration
 de.defstyle("*", {
@@ -54,6 +59,12 @@ de.defstyle("frame-tiled", {
                 shadow_colour    = decoration.inactive.background,
                 background_colour = empty,
 
+                de.substyle("inactive-*-preview", {
+                                background_colour = decoration.preview.background,
+                                highlight_colour = decoration.preview.background,
+                                shadow_colour    = decoration.preview.background,
+                }),
+
                 de.substyle("active", {
                               background_colour = decoration.active.background,
                               highlight_colour = decoration.active.background,
@@ -78,6 +89,18 @@ de.defstyle("tab", {
     shadow_colour = decoration.inactive.foreground.default,
     highlight_colour = decoration.inactive.foreground.default,
     background_colour = decoration.inactive.background,
+
+    de.substyle("inactive-selected-preview", {
+                    background_colour = decoration.preview.background,
+                    shadow_colour = decoration.preview.foreground.selected,
+                    foreground_colour = decoration.preview.foreground.selected,
+    }),
+
+    de.substyle("inactive-preview", {
+                    background_colour = decoration.preview.background,
+                    shadow_colour = decoration.preview.foreground.default,
+                    foreground_colour = decoration.preview.foreground.default,
+    }),
 
     de.substyle("active", {
         background_colour = decoration.active.background,

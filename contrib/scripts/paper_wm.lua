@@ -984,9 +984,30 @@ function WRegion.in_scratchpad(reg)
            (ws and is_scratchpad(ws))
 end
 
+local last_previewed = nil
 local function addto(list)
     return function(tgt, attr)
-        local e=menuentry(tgt:name(), function() tgt:rqorder("front") tgt:goto_focus() end)
+        local e=menuentry(tgt:name(),
+                          -- reg and sub refers to where the menu is displayed
+                          function(reg, sub, is_preview)
+                              if last_previewed then
+                                  last_previewed:set_grattr("preview", "unset")
+                              end
+                              if is_preview then
+                                  local frame = frame_of(tgt)
+                                  if frame then
+                                      frame:set_grattr("preview", "set")
+                                      last_previewed = frame
+                                  end
+                              else
+                                  last_previewed = nil
+                              end
+
+                              tgt:rqorder("front")
+                              tgt:goto_focus()
+                          end
+        )
+
         e.attr=attr;
         table.insert(list, e)
         return true

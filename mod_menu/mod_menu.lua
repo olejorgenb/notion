@@ -36,7 +36,7 @@ local function menu_(reg, sub, menu_or_name, fn, check)
 
     menu=menudb.evalmenu(menu_or_name, reg, sub)
 
-    return fn(reg, function(e) e.func(reg, sub) end, menu)
+    return fn(reg, function(e, is_preview) e.func(reg, sub, is_preview) end, menu)
 end
 
 
