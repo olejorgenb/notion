@@ -1158,7 +1158,7 @@ defbindings("WScreen", {
               --- MRU lists/menus
               , kpress(META.."Tab", "mod_menu.grabmenu(_, _sub, 'alttab', {sizepolicy = 'center', big=true, preview=true, max_w=400, max_h=400})")
               , submap(META.."space", {
-                           kpress("Tab", "mod_menu.grabmenu(_, _sub, 'workspace-alt-tab', { sizepolicy = 'center', big=true, preview=true})")
+                           kpress("Tab", "mod_menu.grabmenu(_, _sub, 'workspace-alt-tab', { sizepolicy = 'center', big=true, preview=true, max_w=400, max_h=400})")
                            , kpress("N", "_:create_workspace()")
                       })
 
