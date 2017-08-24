@@ -978,6 +978,14 @@ function WTiling.attach(tiling, reg, params)
     end
 end
 
+function WRegion.attach_dispatch(reg)
+    local tiling = tiling_of(reg)
+    if is_paper_tiling(tiling) then
+        ioncore.tagged_attach(tiling)
+    end
+    ioncore.tagged_attach(reg)
+end
+
 -- Utility for alt_tab menus
 function WRegion.in_scratchpad(reg)
     -- scratchpads are either frames or workspaces
@@ -1235,4 +1243,7 @@ defbindings("WFrame.toplevel", {
                 -- Goto to next thing, either a tab or page
                 , kpress(META.."period", "focus_next(_)")
                 , kpress(META.."comma", "focus_prev(_)")
+
+                -- tag/attach
+                , kpress(META.."Shift+T", "_:attach_dispatch()")
 })
