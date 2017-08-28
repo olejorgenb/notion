@@ -614,6 +614,20 @@ function WTiling.move_page(tiling, frame, dir)
     return frame
 end
 
+function WRegion.move(reg, direction)
+    local tiling = tiling_of(reg)
+    local frame = frame_of(reg)
+    if is_paper_tiling(tiling) then
+        return tiling:move_page(frame, direction)
+    else
+        if direction == "right" then
+            return frame:inc_index(frame:current())
+        else
+            return frame:dec_index(frame:current())
+        end
+    end
+end
+
 function WTiling.next_page(tiling, frame)
     if frame == tiling:last_page() then
         return frame
@@ -1206,12 +1220,6 @@ defbindings("WTiling", {
               , kpress(META.."H", "_:paper_maximize(_sub):goto_focus()")
               , kpress(META.."Shift+H", "_:paper_expand_free(_sub):goto_focus()")
               , kpress(META.."R", "_:cycle_page_width(_sub):goto_focus()")
-              --- Page rearranging
-              , kpress(META.."Shift+period", "_:move_page(_sub, 'right'):paper_goto()")
-              , kpress(META.."Shift+comma", "_:move_page(_sub, 'left'):paper_goto()")
-              -- tag/attach
-              , kpress(META.."Shift+T", "ioncore.tagged_attach(_)")
-              -- execute lua with tiling context
 })
 
 defbindings("WFrame.toplevel", {
@@ -1246,4 +1254,8 @@ defbindings("WFrame.toplevel", {
 
                 -- tag/attach
                 , kpress(META.."Shift+T", "_:attach_dispatch()")
+
+                --- Page rearranging
+                , kpress(META.."Shift+period", "_:move('right'):goto_focus()")
+                , kpress(META.."Shift+comma", "_:move('left'):goto_focus()")
 })
