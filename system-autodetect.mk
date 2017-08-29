@@ -112,6 +112,20 @@ CAIRO_INCLUDES=$(shell $(PKG_CONFIG) --cflags cairo)
 # Be a bit lazy and include cairo all places x11 is used
 X11_LIBS += $(CAIRO_LIBS)
 X11_INCLUDES += $(CAIRO_INCLUDES)
+## Xft support
+##
+
+USE_XFT?=$(shell (pkg-config --exists xft && echo 1))
+
+ifeq ($(USE_XFT),1)
+    X11_INCLUDES += `pkg-config xft --cflags`
+    X11_LIBS += `pkg-config xft --libs`
+    DEFINES += -DHAVE_X11_XFT
+    DEFINES += -DHAVE_X11_BMF
+else
+    DEFINES += -DHAVE_X11_BMF
+endif
+
 
 ##
 ## Localisation

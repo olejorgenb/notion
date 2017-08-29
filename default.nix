@@ -1,5 +1,5 @@
 {
-  enableXft ? false, libXft ? null,
+  enableXft ? true, libXft ? null,
   patches ? [],
   stdenv, fetchurl,
   lua, gettext, groff,
@@ -26,8 +26,8 @@ stdenv.mkDerivation {
   preConfigure="make clean";
 
 
-  patches = patches ++ stdenv.lib.optional enableXft ./notion-xft_nixos.diff;
-  postPatch = "substituteInPlace system-autodetect.mk --replace '#PRELOAD_MODULES=1' 'PRELOAD_MODULES=1'";
+  # patches = patches ++ stdenv.lib.optional enableXft ./notion-xft_nixos.diff;
+  # postPatch = "substituteInPlace system-autodetect.mk --replace '#PRELOAD_MODULES=1' 'PRELOAD_MODULES=1'";
   buildInputs = [xlibsWrapper lua gettext groff
   which pkgconfig libXinerama libXrandr libX11 cairo] ++ stdenv.lib.optional enableXft libXft;
 
