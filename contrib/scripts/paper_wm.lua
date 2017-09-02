@@ -756,8 +756,9 @@ function WTiling.paper_maximize(tiling, frame)
         frame_aux.original_viewport_x = scroll_frame:screen_to_viewport(g.x)
 
         local gap = compute_gap(frame)
-        tiling:resize_right(frame, view_g.w - overlap.x - gap)
-        right(frame, g.x - scroll_frame:viewport_origin() - gap)
+        local target_width = view_g.w - gap*2
+
+        tiling:resize_right(frame, target_width)
     end
     return frame
 end
