@@ -723,7 +723,13 @@ function WTiling.resize_right_delta(tiling, frame, delta)
     return tiling:resize_right(frame, new_w)
 end
 
-function WTiling.resize_right(tiling, frame, new_w)
+-- NB: Rounds down to closest width increment unless 'exact' is true
+function WTiling.resize_right(tiling, frame, new_w, exact)
+    if not exact then
+        local inc_w = frame:size_hints().inc_w or 1
+        local inc_rounding = new_w % inc_w
+        new_w = new_w - inc_rounding
+    end
     local node = tiling:node_of(frame)
     if new_w > 5 then
         node:resize_right(new_w)
